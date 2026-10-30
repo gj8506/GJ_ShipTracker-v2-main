@@ -1,0 +1,92 @@
+﻿{
+  "project_info": {
+    "project_number": "1051323344116",
+    "project_id": "shiptracker-v2",
+    "storage_bucket": "shiptracker-v2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1051323344116:android:ab402b99c36a1ff04d6aa1",
+        "android_client_info": {
+          "package_name": "com.example.gjandasher_shiptracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1051323344116-gd1pvqa8cma6s457596eu6fvjfadb7qu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.gjandasher_shiptracker",
+            "certificate_hash": "6012faa7c253b4671a531b20aee80c39d54b0517"
+          }
+        },
+        {
+          "client_id": "1051323344116-jn0pksb1cnl92k1mqkd467idd77nif81.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.gjandasher_shiptracker",
+            "certificate_hash": "6dd193f411b78cae790da5d69cec4ae77ee493c8"
+          }
+        },
+        {
+          "client_id": "1051323344116-ffvoqqr66nsandtoe3pf0do35rvrc8nj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEY0ixfYzlYELqrJ2gUljO2N5QhytkO34"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1051323344116-ffvoqqr66nsandtoe3pf0do35rvrc8nj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1051323344116:android:2474a1ab8b812bf54d6aa1",
+        "android_client_info": {
+          "package_name": "com.gjandasher.digitalprinting"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1051323344116-gh28ktrhjcac652ofr83m60brug8or27.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gjandasher.digitalprinting",
+            "certificate_hash": "6012faa7c253b4671a531b20aee80c39d54b0517"
+          }
+        },
+        {
+          "client_id": "1051323344116-ffvoqqr66nsandtoe3pf0do35rvrc8nj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEY0ixfYzlYELqrJ2gUljO2N5QhytkO34"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1051323344116-ffvoqqr66nsandtoe3pf0do35rvrc8nj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
