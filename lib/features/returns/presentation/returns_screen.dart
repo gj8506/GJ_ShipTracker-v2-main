@@ -20,7 +20,8 @@ class ReturnsScreen extends ConsumerWidget {
 
   Color _getReturnStatusColor(String status) {
     final s = status.trim().toLowerCase();
-    if (s == 'approved' || s == AppConstants.returnStatusApproved.toLowerCase()) {
+    if (s == 'approved' ||
+        s == AppConstants.returnStatusApproved.toLowerCase()) {
       return AppColors.statusDelivered;
     } else if (s == 'replacement dispatched' ||
         s == AppConstants.returnStatusReplacementDispatched.toLowerCase() ||
@@ -40,7 +41,8 @@ class ReturnsScreen extends ConsumerWidget {
 
   IconData _getReturnStatusIcon(String status) {
     final s = status.trim().toLowerCase();
-    if (s == 'approved' || s == AppConstants.returnStatusApproved.toLowerCase()) {
+    if (s == 'approved' ||
+        s == AppConstants.returnStatusApproved.toLowerCase()) {
       return Icons.check_circle_outline_rounded;
     } else if (s == 'replacement dispatched' || s.contains('dispatched')) {
       return Icons.local_shipping_outlined;
@@ -59,7 +61,8 @@ class ReturnsScreen extends ConsumerWidget {
   }
 
   /// Full-Screen Interactive Photo Viewer Dialog (With Auto-Disposing PageController)
-  void _showImagePreviewDialog(BuildContext context, List<String> photoUrls, int initialIndex) {
+  void _showImagePreviewDialog(
+      BuildContext context, List<String> photoUrls, int initialIndex) {
     final pageController = PageController(initialPage: initialIndex);
 
     showDialog(
@@ -71,7 +74,8 @@ class ReturnsScreen extends ConsumerWidget {
         return StatefulBuilder(
           builder: (dialogCtx, setDialogState) => Dialog(
             backgroundColor: Colors.transparent,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+            insetPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
             child: Stack(
               children: [
                 // Image Carousel with Pinch-to-Zoom
@@ -108,17 +112,19 @@ class ReturnsScreen extends ConsumerWidget {
                             errorBuilder: (_, __, ___) => Container(
                               padding: const EdgeInsets.all(24),
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade900,
+                                color: AppColors.navyDark,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.broken_image_rounded, size: 48, color: Colors.white54),
+                                  Icon(Icons.broken_image_rounded,
+                                      size: 48, color: Colors.white54),
                                   SizedBox(height: 8),
                                   Text(
                                     'Failed to load image',
-                                    style: TextStyle(color: Colors.white70, fontSize: 13),
+                                    style: TextStyle(
+                                        color: Colors.white70, fontSize: 13),
                                   ),
                                 ],
                               ),
@@ -140,7 +146,8 @@ class ReturnsScreen extends ConsumerWidget {
                     children: [
                       if (photoUrls.length > 1)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: Colors.black54,
                             borderRadius: BorderRadius.circular(20),
@@ -156,7 +163,6 @@ class ReturnsScreen extends ConsumerWidget {
                         )
                       else
                         const SizedBox.shrink(),
-
                       IconButton(
                         style: IconButton.styleFrom(
                           backgroundColor: Colors.black54,
@@ -189,7 +195,8 @@ class ReturnsScreen extends ConsumerWidget {
     ).then((_) => pageController.dispose());
   }
 
-  void _showUpdateStatusDialog(BuildContext context, WidgetRef ref, ReturnModel item) {
+  void _showUpdateStatusDialog(
+      BuildContext context, WidgetRef ref, ReturnModel item) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -223,13 +230,7 @@ class ReturnsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text(
-          'Returns & Defect Manager',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.navyPrimary,
-        elevation: 0,
+        title: const Text('Returns & Defect Manager'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -247,19 +248,22 @@ class ReturnsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.navyPrimary,
-        foregroundColor: Colors.white,
-        elevation: 3,
-        icon: const Icon(Icons.add_photo_alternate_rounded),
-        label: const Text(
-          'Log Return Ticket',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-        ),
-        onPressed: () => _openCreateReturnScreen(context),
-      ),
       body: Column(
         children: [
+          // Primary action: kept inline (instead of a FAB) so it never
+          // collides with the global chatbot FAB.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => _openCreateReturnScreen(context),
+                icon: const Icon(Icons.add_photo_alternate_rounded, size: 20),
+                label: const Text('Log Return Ticket'),
+              ),
+            ),
+          ),
+
           // Top Counters
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -267,7 +271,8 @@ class ReturnsScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -278,7 +283,10 @@ class ReturnsScreen extends ConsumerWidget {
                       children: [
                         const Text(
                           'Pending Tickets',
-                          style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -286,7 +294,7 @@ class ReturnsScreen extends ConsumerWidget {
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFFE67E22),
+                            color: AppColors.statusPending,
                           ),
                         ),
                       ],
@@ -296,7 +304,8 @@ class ReturnsScreen extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -307,7 +316,10 @@ class ReturnsScreen extends ConsumerWidget {
                       children: [
                         const Text(
                           'Resolved / Closed',
-                          style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -315,7 +327,7 @@ class ReturnsScreen extends ConsumerWidget {
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF27AE60),
+                            color: AppColors.statusDelivered,
                           ),
                         ),
                       ],
@@ -330,14 +342,18 @@ class ReturnsScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: TextField(
-              onChanged: (val) => ref.read(returnSearchQueryProvider.notifier).state = val,
+              onChanged: (val) =>
+                  ref.read(returnSearchQueryProvider.notifier).state = val,
               decoration: InputDecoration(
                 hintText: 'Search tracking number, customer, defect...',
-                hintStyle: const TextStyle(fontSize: 14, color: Colors.grey),
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                hintStyle: const TextStyle(
+                    fontSize: 14, color: AppColors.textSecondary),
+                prefixIcon:
+                    const Icon(Icons.search, color: AppColors.textSecondary),
                 filled: true,
                 fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: const BorderSide(color: AppColors.borderLight),
@@ -359,16 +375,24 @@ class ReturnsScreen extends ConsumerWidget {
                 ChoiceChip(
                   label: const Text('All Defects'),
                   selected: selectedDefect == null,
-                  onSelected: (_) => ref.read(selectedDefectFilterProvider.notifier).state = null,
+                  onSelected: (_) => ref
+                      .read(selectedDefectFilterProvider.notifier)
+                      .state = null,
                   selectedColor: AppColors.navyPrimary,
                   labelStyle: TextStyle(
-                    color: selectedDefect == null ? Colors.white : AppColors.navyPrimary,
-                    fontWeight: selectedDefect == null ? FontWeight.bold : FontWeight.normal,
+                    color: selectedDefect == null
+                        ? Colors.white
+                        : AppColors.navyPrimary,
+                    fontWeight: selectedDefect == null
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                     fontSize: 12,
                   ),
                   backgroundColor: Colors.white,
                   side: BorderSide(
-                    color: selectedDefect == null ? AppColors.navyPrimary : AppColors.borderLight,
+                    color: selectedDefect == null
+                        ? AppColors.navyPrimary
+                        : AppColors.borderLight,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -379,17 +403,22 @@ class ReturnsScreen extends ConsumerWidget {
                     child: ChoiceChip(
                       label: Text(defect),
                       selected: isSelected,
-                      onSelected: (_) => ref.read(selectedDefectFilterProvider.notifier).state =
-                          isSelected ? null : defect,
+                      onSelected: (_) => ref
+                          .read(selectedDefectFilterProvider.notifier)
+                          .state = isSelected ? null : defect,
                       selectedColor: AppColors.navyPrimary,
                       labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : AppColors.navyPrimary,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color:
+                            isSelected ? Colors.white : AppColors.navyPrimary,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
                         fontSize: 12,
                       ),
                       backgroundColor: Colors.white,
                       side: BorderSide(
-                        color: isSelected ? AppColors.navyPrimary : AppColors.borderLight,
+                        color: isSelected
+                            ? AppColors.navyPrimary
+                            : AppColors.borderLight,
                       ),
                     ),
                   );
@@ -406,28 +435,34 @@ class ReturnsScreen extends ConsumerWidget {
               error: (err, _) => Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
-                  child: Text('Error loading returns: $err', style: const TextStyle(color: Colors.red)),
+                  child: Text('Error loading returns: $err',
+                      style: const TextStyle(color: AppColors.statusReturned)),
                 ),
               ),
               data: (_) {
                 if (filteredReturns.isEmpty) {
-                  return Center(
+                  return const Center(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                      padding: EdgeInsets.symmetric(horizontal: 32.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.inventory_2_outlined, size: 60, color: Colors.grey.shade400),
-                          const SizedBox(height: 12),
-                          const Text(
+                          Icon(Icons.inventory_2_outlined,
+                              size: 60, color: AppColors.textMuted),
+                          SizedBox(height: 12),
+                          Text(
                             'No return tickets found',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.grey),
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: AppColors.textSecondary),
                           ),
-                          const SizedBox(height: 6),
-                          const Text(
-                            'Tap "Log Return Ticket" below to record a defect or return.',
+                          SizedBox(height: 6),
+                          Text(
+                            'Tap "Log Return Ticket" above to record a defect or return.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 13, color: Colors.grey),
+                            style: TextStyle(
+                                fontSize: 13, color: AppColors.textSecondary),
                           ),
                         ],
                       ),
@@ -476,11 +511,14 @@ class ReturnsScreen extends ConsumerWidget {
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: statusColor.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: statusColor.withValues(alpha: 0.5)),
+                                  border: Border.all(
+                                      color:
+                                          statusColor.withValues(alpha: 0.5)),
                                 ),
                                 child: Text(
                                   item.status,
@@ -500,30 +538,34 @@ class ReturnsScreen extends ConsumerWidget {
                             children: [
                               if (item.platform.isNotEmpty) ...[
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: Colors.grey.shade100,
+                                    color: AppColors.surfaceMuted,
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     item.platform,
-                                    style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
+                                    style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.navyMuted),
                                   ),
                                 ),
                                 const SizedBox(width: 6),
                               ],
                               if (item.resolutionType.isNotEmpty)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue.shade50,
+                                    color: AppColors.statusInTransitContainer,
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     item.resolutionType,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 11,
-                                      color: Colors.blue.shade700,
+                                      color: AppColors.statusInTransit,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -536,12 +578,15 @@ class ReturnsScreen extends ConsumerWidget {
                           if (item.customerName.isNotEmpty) ...[
                             Row(
                               children: [
-                                const Icon(Icons.person_outline, size: 16, color: Colors.grey),
+                                const Icon(Icons.person_outline,
+                                    size: 16, color: AppColors.textSecondary),
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
                                     item.customerName,
-                                    style: const TextStyle(fontSize: 13, color: Colors.black87),
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        color: AppColors.textPrimary),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -552,21 +597,23 @@ class ReturnsScreen extends ConsumerWidget {
 
                           // Defect Reason Badge
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.red.shade50,
+                              color: AppColors.statusReturnedContainer,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.warning_amber_rounded, size: 14, color: Colors.red.shade700),
+                                const Icon(Icons.warning_amber_rounded,
+                                    size: 14, color: AppColors.dangerDeep),
                                 const SizedBox(width: 6),
                                 Flexible(
                                   child: Text(
                                     item.defectReason,
-                                    style: TextStyle(
-                                      color: Colors.red.shade700,
+                                    style: const TextStyle(
+                                      color: AppColors.dangerDeep,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 12,
                                     ),
@@ -578,21 +625,27 @@ class ReturnsScreen extends ConsumerWidget {
                           ),
 
                           // Notes
-                          if (item.notes != null && item.notes!.trim().isNotEmpty) ...[
+                          if (item.notes != null &&
+                              item.notes!.trim().isNotEmpty) ...[
                             const SizedBox(height: 8),
                             Text(
                               item.notes!,
-                              style: const TextStyle(fontSize: 13, color: Colors.black87),
+                              style: const TextStyle(
+                                  fontSize: 13, color: AppColors.textPrimary),
                             ),
                           ],
 
                           // Replacement Tracking #
                           if (item.replacementTrackingNumber != null &&
-                              item.replacementTrackingNumber!.trim().isNotEmpty) ...[
+                              item.replacementTrackingNumber!
+                                  .trim()
+                                  .isNotEmpty) ...[
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                const Icon(Icons.local_shipping_outlined, size: 14, color: AppColors.statusDispatched),
+                                const Icon(Icons.local_shipping_outlined,
+                                    size: 14,
+                                    color: AppColors.statusDispatched),
                                 const SizedBox(width: 6),
                                 Text(
                                   'Replacement: ${item.replacementTrackingNumber!}',
@@ -611,7 +664,8 @@ class ReturnsScreen extends ConsumerWidget {
                             const SizedBox(height: 10),
                             Row(
                               children: [
-                                const Icon(Icons.photo_library_outlined, size: 14, color: AppColors.navyPrimary),
+                                const Icon(Icons.photo_library_outlined,
+                                    size: 14, color: AppColors.navyPrimary),
                                 const SizedBox(width: 5),
                                 Text(
                                   'Photo Evidence (${item.photoUrls.length})',
@@ -624,7 +678,9 @@ class ReturnsScreen extends ConsumerWidget {
                                 const SizedBox(width: 6),
                                 const Text(
                                   '• Tap to preview',
-                                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary),
                                 ),
                               ],
                             ),
@@ -634,7 +690,8 @@ class ReturnsScreen extends ConsumerWidget {
                               child: ListView.separated(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: item.photoUrls.length,
-                                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(width: 8),
                                 itemBuilder: (context, photoIndex) {
                                   final photoUrl = item.photoUrls[photoIndex];
                                   return InkWell(
@@ -647,35 +704,47 @@ class ReturnsScreen extends ConsumerWidget {
                                     child: Stack(
                                       children: [
                                         ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
                                           child: Image.network(
                                             photoUrl,
                                             width: 68,
                                             height: 68,
                                             fit: BoxFit.cover,
-                                            loadingBuilder: (context, child, progress) {
-                                              if (progress == null) return child;
+                                            loadingBuilder:
+                                                (context, child, progress) {
+                                              if (progress == null) {
+                                                return child;
+                                              }
                                               return Container(
                                                 width: 68,
                                                 height: 68,
-                                                color: Colors.grey.shade100,
+                                                color: AppColors.surfaceMuted,
                                                 child: const Center(
                                                   child: SizedBox(
                                                     width: 18,
                                                     height: 18,
-                                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                            strokeWidth: 2),
                                                   ),
                                                 ),
                                               );
                                             },
-                                            errorBuilder: (_, __, ___) => Container(
+                                            errorBuilder: (_, __, ___) =>
+                                                Container(
                                               width: 68,
                                               height: 68,
                                               decoration: BoxDecoration(
-                                                color: Colors.grey.shade200,
-                                                borderRadius: BorderRadius.circular(10),
+                                                color: AppColors.surfaceVariant,
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
                                               ),
-                                              child: const Icon(Icons.broken_image, size: 22, color: Colors.grey),
+                                              child: const Icon(
+                                                  Icons.broken_image,
+                                                  size: 22,
+                                                  color:
+                                                      AppColors.textSecondary),
                                             ),
                                           ),
                                         ),
@@ -685,7 +754,8 @@ class ReturnsScreen extends ConsumerWidget {
                                           child: Container(
                                             padding: const EdgeInsets.all(3),
                                             decoration: BoxDecoration(
-                                              color: Colors.black.withValues(alpha: 0.6),
+                                              color: Colors.black
+                                                  .withValues(alpha: 0.6),
                                               shape: BoxShape.circle,
                                             ),
                                             child: const Icon(
@@ -703,7 +773,8 @@ class ReturnsScreen extends ConsumerWidget {
                             ),
                           ],
 
-                          const Divider(height: 20, color: AppColors.borderLight),
+                          const Divider(
+                              height: 20, color: AppColors.borderLight),
 
                           // Bottom Row: Date & Update Status Button
                           Row(
@@ -711,20 +782,28 @@ class ReturnsScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 'Logged: ${item.createdAt.month}/${item.createdAt.day}/${item.createdAt.year} ${item.createdAt.hour.toString().padLeft(2, '0')}:${item.createdAt.minute.toString().padLeft(2, '0')}',
-                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary),
                               ),
                               TextButton.icon(
                                 style: TextButton.styleFrom(
                                   foregroundColor: AppColors.navyPrimary,
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 6),
                                   visualDensity: VisualDensity.compact,
                                 ),
-                                icon: const Icon(Icons.playlist_add_check_rounded, size: 18),
+                                icon: const Icon(
+                                    Icons.playlist_add_check_rounded,
+                                    size: 18),
                                 label: const Text(
                                   'Update Status',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13),
                                 ),
-                                onPressed: () => _showUpdateStatusDialog(context, ref, item),
+                                onPressed: () =>
+                                    _showUpdateStatusDialog(context, ref, item),
                               ),
                             ],
                           ),
@@ -758,7 +837,8 @@ class _UpdateStatusDialog extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<_UpdateStatusDialog> createState() => _UpdateStatusDialogState();
+  ConsumerState<_UpdateStatusDialog> createState() =>
+      _UpdateStatusDialogState();
 }
 
 class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
@@ -802,15 +882,18 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
 
     try {
       await ref.read(returnsRepositoryProvider).updateReturnStatus(
-        id: widget.item.id,
-        status: _selectedStatus,
-        replacementTrackingNumber: newTracking,
-        handledById: user?.uid,
-        handledByName: user?.displayName,
-      );
+            id: widget.item.id,
+            status: _selectedStatus,
+            replacementTrackingNumber: newTracking,
+            handledById: user?.uid,
+            handledByName: user?.displayName,
+          );
     } catch (_) {
       try {
-        await FirebaseFirestore.instance.collection('returns').doc(widget.item.id).update({
+        await FirebaseFirestore.instance
+            .collection('returns')
+            .doc(widget.item.id)
+            .update({
           'status': _selectedStatus,
           if (_selectedStatus == 'Replacement Dispatched' ||
               _selectedStatus == AppConstants.returnStatusReplacementDispatched)
@@ -833,7 +916,8 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
           content: Text('Status updated to "$_selectedStatus"'),
           backgroundColor: AppColors.navyPrimary,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -852,7 +936,8 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
               color: AppColors.navyPrimary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.rule_rounded, color: AppColors.navyPrimary, size: 22),
+            child: const Icon(Icons.rule_rounded,
+                color: AppColors.navyPrimary, size: 22),
           ),
           const SizedBox(width: 12),
           const Expanded(
@@ -872,18 +957,22 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
             children: [
               Text(
                 'Ticket: ${widget.item.trackingNumber}',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey),
+                style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary),
               ),
               const SizedBox(height: 6),
               const Text(
                 'Select new status:',
-                style: TextStyle(fontSize: 13, color: Colors.black87),
+                style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 12),
 
               // 5 Clean Status Option Cards
               ...widget.statusOptions.map((status) {
-                final isSelected = _selectedStatus.toLowerCase() == status.toLowerCase();
+                final isSelected =
+                    _selectedStatus.toLowerCase() == status.toLowerCase();
                 final color = widget.getStatusColor(status);
                 final icon = widget.getStatusIcon(status);
 
@@ -896,12 +985,15 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
                     },
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 11),
                       decoration: BoxDecoration(
-                        color: isSelected ? color.withValues(alpha: 0.12) : Colors.grey.shade50,
+                        color: isSelected
+                            ? color.withValues(alpha: 0.12)
+                            : AppColors.surfaceMuted,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isSelected ? color : Colors.grey.shade300,
+                          color: isSelected ? color : AppColors.borderLight,
                           width: isSelected ? 2 : 1,
                         ),
                       ),
@@ -914,15 +1006,20 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
                               status,
                               style: TextStyle(
                                 fontSize: 14,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                color: isSelected ? color : Colors.black87,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
+                                color:
+                                    isSelected ? color : AppColors.textPrimary,
                               ),
                             ),
                           ),
                           if (isSelected)
-                            Icon(Icons.check_circle_rounded, color: color, size: 20)
+                            Icon(Icons.check_circle_rounded,
+                                color: color, size: 20)
                           else
-                            Icon(Icons.radio_button_unchecked_rounded, color: Colors.grey.shade400, size: 20),
+                            const Icon(Icons.radio_button_unchecked_rounded,
+                                color: AppColors.textMuted, size: 20),
                         ],
                       ),
                     ),
@@ -932,7 +1029,8 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
 
               // Replacement Tracking input appears when 'Replacement Dispatched' is selected
               if (_selectedStatus == 'Replacement Dispatched' ||
-                  _selectedStatus == AppConstants.returnStatusReplacementDispatched) ...[
+                  _selectedStatus ==
+                      AppConstants.returnStatusReplacementDispatched) ...[
                 const SizedBox(height: 8),
                 TextField(
                   controller: _replacementTrackingCtrl,
@@ -941,9 +1039,12 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
                   decoration: InputDecoration(
                     labelText: 'New Replacement Tracking #',
                     hintText: 'e.g. SPX99887766',
-                    prefixIcon: const Icon(Icons.local_shipping_outlined, color: AppColors.navyPrimary, size: 20),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    prefixIcon: const Icon(Icons.local_shipping_outlined,
+                        color: AppColors.navyPrimary, size: 20),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
                   ),
                 ),
               ],
@@ -958,7 +1059,8 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
             Expanded(
               child: TextButton(
                 onPressed: _isSaving ? null : _handleCancel,
-                child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                child: const Text('Cancel',
+                    style: TextStyle(color: AppColors.textSecondary)),
               ),
             ),
             const SizedBox(width: 8),
@@ -968,7 +1070,8 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.navyPrimary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 onPressed: _isSaving ? null : _handleSaveStatus,
@@ -976,7 +1079,8 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
                       )
                     : const Text('Save Status'),
               ),

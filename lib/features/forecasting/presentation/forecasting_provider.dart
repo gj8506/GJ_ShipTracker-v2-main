@@ -7,21 +7,24 @@ import '../domain/forecasting_engine.dart';
 final selectedHorizonProvider =
     StateProvider<ForecastHorizon>((ref) => ForecastHorizon.threeMonths);
 
-final selectedPlatformProvider =
-    StateProvider<String>((ref) => 'All');
+final selectedPlatformProvider = StateProvider<String>((ref) => 'All');
 
 /// Aggregates sales from Firestore grouped by year, month, and platform
-final historicalSalesProvider = FutureProvider<List<MonthlyDataPoint>>((ref) async {
+final historicalSalesProvider =
+    FutureProvider<List<MonthlyDataPoint>>((ref) async {
   final snap = await FirebaseFirestore.instance
       .collection(AppConstants.collectionParcels)
       .where('status', isNotEqualTo: 'cancelled')
       .get();
 
-  final Map<String, ({double revenue, int count, String platform, int year, int month})> buckets = {};
+  final Map<String,
+          ({double revenue, int count, String platform, int year, int month})>
+      buckets = {};
 
   for (final doc in snap.docs) {
     final data = doc.data();
-    final rawDate = data['dateShipped'] ?? data['dispatchedAt'] ?? data['createdAt'];
+    final rawDate =
+        data['dateShipped'] ?? data['dispatchedAt'] ?? data['createdAt'];
 
     DateTime date = DateTime.now();
     if (rawDate is Timestamp) {
@@ -31,7 +34,8 @@ final historicalSalesProvider = FutureProvider<List<MonthlyDataPoint>>((ref) asy
     }
 
     final platform = (data['platform'] as String? ?? 'Direct / Walk-in').trim();
-    final amount = (data['amount'] as num? ?? data['totalPrice'] as num? ?? 0.0).toDouble();
+    final amount = (data['amount'] as num? ?? data['totalPrice'] as num? ?? 0.0)
+        .toDouble();
 
     final key = '${date.year}-${date.month}_$platform';
     final existing = buckets[key];
@@ -55,13 +59,15 @@ final historicalSalesProvider = FutureProvider<List<MonthlyDataPoint>>((ref) asy
     }
   }
 
-  return buckets.values.map((b) => MonthlyDataPoint(
-    year: b.year,
-    month: b.month,
-    revenue: b.revenue,
-    parcelCount: b.count,
-    platform: b.platform,
-  )).toList();
+  return buckets.values
+      .map((b) => MonthlyDataPoint(
+            year: b.year,
+            month: b.month,
+            revenue: b.revenue,
+            parcelCount: b.count,
+            platform: b.platform,
+          ))
+      .toList();
 });
 
 /// Computes the forecast result based on active filters
@@ -75,7 +81,10 @@ final forecastResultProvider = Provider<ForecastResult>((ref) {
   // Filter by platform if specific channel selected
   final filtered = platform == 'All'
       ? _combinePlatforms(rawHistory)
-      : rawHistory.where((p) => p.platform.toLowerCase().contains(platform.toLowerCase())).toList();
+      : rawHistory
+          .where(
+              (p) => p.platform.toLowerCase().contains(platform.toLowerCase()))
+          .toList();
 
   return ForecastingEngine.calculateForecast(
     history: filtered,
@@ -84,7 +93,8 @@ final forecastResultProvider = Provider<ForecastResult>((ref) {
 });
 
 List<MonthlyDataPoint> _combinePlatforms(List<MonthlyDataPoint> items) {
-  final Map<String, ({double revenue, int count, int year, int month})> grouped = {};
+  final Map<String, ({double revenue, int count, int year, int month})>
+      grouped = {};
   for (var i in items) {
     final key = '${i.year}-${i.month}';
     final existing = grouped[key];
@@ -105,11 +115,13 @@ List<MonthlyDataPoint> _combinePlatforms(List<MonthlyDataPoint> items) {
     }
   }
 
-  return grouped.values.map((g) => MonthlyDataPoint(
-    year: g.year,
-    month: g.month,
-    revenue: g.revenue,
-    parcelCount: g.count,
-    platform: 'All',
-  )).toList();
+  return grouped.values
+      .map((g) => MonthlyDataPoint(
+            year: g.year,
+            month: g.month,
+            revenue: g.revenue,
+            parcelCount: g.count,
+            platform: 'All',
+          ))
+      .toList();
 }

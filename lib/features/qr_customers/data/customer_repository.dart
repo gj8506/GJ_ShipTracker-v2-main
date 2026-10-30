@@ -14,7 +14,8 @@ class CustomerRepository {
   // Stream all customers
   Stream<List<CustomerModel>> getCustomersStream() {
     return _customersRef.orderBy('createdAt', descending: true).snapshots().map(
-          (snap) => snap.docs.map((doc) => CustomerModel.fromFirestore(doc)).toList(),
+          (snap) =>
+              snap.docs.map((doc) => CustomerModel.fromFirestore(doc)).toList(),
         );
   }
 

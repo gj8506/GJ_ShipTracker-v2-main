@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
@@ -166,13 +167,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           icon: Container(
             padding: const EdgeInsets.all(14),
             decoration: const BoxDecoration(
-              color: Color(0xFFFEF3C7),
+              color: AppColors.warningSurface,
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.hourglass_top_rounded,
               size: 36,
-              color: Color(0xFFB45309),
+              color: AppColors.warningStrong,
             ),
           ),
           title: const Text(
@@ -192,7 +193,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               height: 48,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563EB),
+                  backgroundColor: AppColors.navyPrimary,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -215,12 +216,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.navyPrimary),
+          icon: const Icon(Icons.arrow_back_rounded,
+              color: AppColors.navyPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -245,7 +248,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 const Text(
                   'Sign up to access tracking, orders, and\ndispatch',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.grey, height: 1.4),
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                      height: 1.4),
                 ),
                 const SizedBox(height: 24),
 
@@ -253,35 +259,50 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
+                    color: AppColors.surfaceMuted,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     children: [
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => setState(() => _selectedRole = AppConstants.roleCustomer),
+                          onTap: () => setState(
+                              () => _selectedRole = AppConstants.roleCustomer),
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
-                              color: _selectedRole == AppConstants.roleCustomer ? Colors.white : Colors.transparent,
+                              color: _selectedRole == AppConstants.roleCustomer
+                                  ? Colors.white
+                                  : Colors.transparent,
                               borderRadius: BorderRadius.circular(8),
-                              boxShadow: _selectedRole == AppConstants.roleCustomer
-                                  ? [const BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))]
-                                  : null,
+                              boxShadow:
+                                  _selectedRole == AppConstants.roleCustomer
+                                      ? [
+                                          const BoxShadow(
+                                              color: Colors.black12,
+                                              blurRadius: 4,
+                                              offset: Offset(0, 2))
+                                        ]
+                                      : null,
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.person_outline_rounded,
                                     size: 18,
-                                    color: _selectedRole == AppConstants.roleCustomer ? AppColors.navyPrimary : Colors.grey),
+                                    color: _selectedRole ==
+                                            AppConstants.roleCustomer
+                                        ? AppColors.navyPrimary
+                                        : AppColors.textSecondary),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Customer',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: _selectedRole == AppConstants.roleCustomer ? AppColors.navyPrimary : Colors.grey,
+                                    color: _selectedRole ==
+                                            AppConstants.roleCustomer
+                                        ? AppColors.navyPrimary
+                                        : AppColors.textSecondary,
                                   ),
                                 ),
                               ],
@@ -291,14 +312,22 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => setState(() => _selectedRole = AppConstants.roleStaff),
+                          onTap: () => setState(
+                              () => _selectedRole = AppConstants.roleStaff),
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
-                              color: _selectedRole == AppConstants.roleStaff ? Colors.white : Colors.transparent,
+                              color: _selectedRole == AppConstants.roleStaff
+                                  ? Colors.white
+                                  : Colors.transparent,
                               borderRadius: BorderRadius.circular(8),
                               boxShadow: _selectedRole == AppConstants.roleStaff
-                                  ? [const BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))]
+                                  ? [
+                                      const BoxShadow(
+                                          color: Colors.black12,
+                                          blurRadius: 4,
+                                          offset: Offset(0, 2))
+                                    ]
                                   : null,
                             ),
                             child: Row(
@@ -306,13 +335,19 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               children: [
                                 Icon(Icons.badge_outlined,
                                     size: 18,
-                                    color: _selectedRole == AppConstants.roleStaff ? AppColors.navyPrimary : Colors.grey),
+                                    color:
+                                        _selectedRole == AppConstants.roleStaff
+                                            ? AppColors.navyPrimary
+                                            : AppColors.textSecondary),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Staff / Internal',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: _selectedRole == AppConstants.roleStaff ? AppColors.navyPrimary : Colors.grey,
+                                    color:
+                                        _selectedRole == AppConstants.roleStaff
+                                            ? AppColors.navyPrimary
+                                            : AppColors.textSecondary,
                                   ),
                                 ),
                               ],
@@ -330,7 +365,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   controller: _nameCtrl,
                   hint: 'Full Name',
                   icon: Icons.person_outline_rounded,
-                  validator: (v) => v!.trim().isEmpty ? 'Enter your full name' : null,
+                  validator: (v) =>
+                      v!.trim().isEmpty ? 'Enter your full name' : null,
                 ),
                 const SizedBox(height: 16),
                 _buildTextField(
@@ -338,7 +374,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   hint: 'Email Address',
                   icon: Icons.mail_outline_rounded,
                   keyboardType: TextInputType.emailAddress,
-                  validator: (v) => !v!.contains('@') ? 'Enter a valid email' : null,
+                  validator: (v) =>
+                      !v!.contains('@') ? 'Enter a valid email' : null,
                 ),
                 const SizedBox(height: 16),
                 _buildTextField(
@@ -354,10 +391,17 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   icon: Icons.lock_outline_rounded,
                   obscureText: _obscurePassword,
                   suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: Colors.grey),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                        color: AppColors.textSecondary),
+                    onPressed: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
                   ),
-                  validator: (v) => v!.length < 6 ? 'Password must be at least 6 characters' : null,
+                  validator: (v) => v!.length < 6
+                      ? 'Password must be at least 6 characters'
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 _buildTextField(
@@ -366,10 +410,16 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   icon: Icons.lock_outline_rounded,
                   obscureText: _obscureConfirm,
                   suffixIcon: IconButton(
-                    icon: Icon(_obscureConfirm ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: Colors.grey),
-                    onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                    icon: Icon(
+                        _obscureConfirm
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                        color: AppColors.textSecondary),
+                    onPressed: () =>
+                        setState(() => _obscureConfirm = !_obscureConfirm),
                   ),
-                  validator: (v) => v != _passwordCtrl.text ? 'Passwords do not match' : null,
+                  validator: (v) =>
+                      v != _passwordCtrl.text ? 'Passwords do not match' : null,
                 ),
                 const SizedBox(height: 16),
 
@@ -389,8 +439,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       children: [
                         Checkbox(
                           value: _agreedToTerms,
-                          activeColor: const Color(0xFF3B82F6),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                          activeColor: AppColors.navyPrimary,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4)),
                           onChanged: (val) {
                             if (val == true) {
                               _showTermsAndPrivacyModal();
@@ -402,7 +453,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         const Expanded(
                           child: Text(
                             'I agree to the Terms of Service &\nPrivacy Policy',
-                            style: TextStyle(fontSize: 13, color: Colors.grey, height: 1.3),
+                            style: TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                                height: 1.3),
                           ),
                         ),
                       ],
@@ -416,31 +470,41 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   height: 54,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF3B82F6),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      backgroundColor: AppColors.navyPrimary,
+                      foregroundColor: AppColors.textOnPrimary,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
                     ),
                     onPressed: _isLoading ? null : _handleSignUp,
                     child: _isLoading
-                        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 2))
                         : Text(
                             'Sign Up as ${_selectedRole == AppConstants.roleCustomer ? 'Customer' : 'Staff'}',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                   ),
                 ),
                 const SizedBox(height: 24),
 
                 // Divider
-                Row(
+                const Row(
                   children: [
-                    Expanded(child: Divider(color: Colors.grey.shade300)),
-                    const Padding(
+                    Expanded(child: Divider(color: AppColors.borderLight)),
+                    Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('OR', style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w600)),
+                      child: Text('OR',
+                          style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600)),
                     ),
-                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                    Expanded(child: Divider(color: AppColors.borderLight)),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -454,12 +518,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     style: OutlinedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: AppColors.navyPrimary,
-                      side: BorderSide(color: Colors.grey.shade300),
+                      side: const BorderSide(color: AppColors.borderLight),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: _isLoading 
+                    child: _isLoading
                         ? const SizedBox(
                             height: 20,
                             width: 20,
@@ -473,7 +537,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: Colors.blue.shade100,
+                                    color: AppColors.borderCool,
                                     width: 1.5,
                                   ),
                                 ),
@@ -482,7 +546,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
-                                    color: Colors.blue,
+                                    color: AppColors.statusInTransit,
                                   ),
                                 ),
                               ),
@@ -523,23 +587,24 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       validator: validator,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-        prefixIcon: Icon(icon, color: Colors.grey.shade600),
+        hintStyle:
+            const TextStyle(color: AppColors.textSecondary, fontSize: 15),
+        prefixIcon: Icon(icon, color: AppColors.textTertiary),
         suffixIcon: suffixIcon,
         filled: true,
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: const BorderSide(color: AppColors.borderLight),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: const BorderSide(color: AppColors.borderLight),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+          borderSide: const BorderSide(color: AppColors.tealAccent, width: 1.6),
         ),
       ),
     );
@@ -563,14 +628,16 @@ class _TermsAndPrivacySheetState extends State<_TermsAndPrivacySheet> {
     super.initState();
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients && _scrollController.position.maxScrollExtent <= 0) {
+      if (_scrollController.hasClients &&
+          _scrollController.position.maxScrollExtent <= 0) {
         setState(() => _isBottomReached = true);
       }
     });
   }
 
   void _onScroll() {
-    if (_scrollController.offset >= _scrollController.position.maxScrollExtent - 20 &&
+    if (_scrollController.offset >=
+            _scrollController.position.maxScrollExtent - 20 &&
         !_scrollController.position.outOfRange) {
       if (!_isBottomReached) {
         setState(() => _isBottomReached = true);
@@ -594,7 +661,9 @@ class _TermsAndPrivacySheetState extends State<_TermsAndPrivacySheet> {
           Container(
             width: 40,
             height: 5,
-            decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(
+                color: AppColors.borderLight,
+                borderRadius: BorderRadius.circular(10)),
           ),
           const SizedBox(height: 16),
           const Padding(
@@ -602,7 +671,10 @@ class _TermsAndPrivacySheetState extends State<_TermsAndPrivacySheet> {
             child: Text(
               'Terms of Service & Data Privacy Act (RA 10173)',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.navyPrimary),
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.navyPrimary),
             ),
           ),
           const Divider(height: 32),
@@ -639,7 +711,8 @@ TERMS OF SERVICE
 3. Order cancellations must be made before the production stage begins.
 
 Scroll to the bottom to agree.''',
-                  style: TextStyle(fontSize: 14, color: Colors.black87, height: 1.6),
+                  style: TextStyle(
+                      fontSize: 14, color: AppColors.textPrimary, height: 1.6),
                 ),
               ),
             ),
@@ -648,22 +721,37 @@ Scroll to the bottom to agree.''',
             padding: const EdgeInsets.all(24.0),
             decoration: BoxDecoration(
               color: Colors.white,
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -4))],
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -4))
+              ],
             ),
             child: SizedBox(
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _isBottomReached ? const Color(0xFF3B82F6) : Colors.grey.shade300,
-                  foregroundColor: _isBottomReached ? Colors.white : Colors.grey.shade500,
+                  backgroundColor: _isBottomReached
+                      ? AppColors.navyPrimary
+                      : AppColors.surfaceVariant,
+                  foregroundColor: _isBottomReached
+                      ? AppColors.textOnPrimary
+                      : AppColors.textMuted,
                   elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: _isBottomReached ? () => Navigator.of(context).pop(true) : null,
+                onPressed: _isBottomReached
+                    ? () => Navigator.of(context).pop(true)
+                    : null,
                 child: Text(
-                  _isBottomReached ? 'I Agree to the Terms & Privacy Policy' : 'Scroll to the bottom to agree',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  _isBottomReached
+                      ? 'I Agree to the Terms & Privacy Policy'
+                      : 'Scroll to the bottom to agree',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ),
             ),

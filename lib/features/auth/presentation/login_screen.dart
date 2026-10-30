@@ -127,7 +127,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               .get();
 
           if (querySnap.docs.isNotEmpty) {
-            resolvedEmail = querySnap.docs.first.data()['email'] as String? ?? rawInput;
+            resolvedEmail =
+                querySnap.docs.first.data()['email'] as String? ?? rawInput;
           } else {
             final altQuery = await FirebaseFirestore.instance
                 .collection(AppConstants.collectionUsers)
@@ -136,9 +137,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 .get();
 
             if (altQuery.docs.isNotEmpty) {
-              resolvedEmail = altQuery.docs.first.data()['email'] as String? ?? rawInput;
+              resolvedEmail =
+                  altQuery.docs.first.data()['email'] as String? ?? rawInput;
             } else {
-              throw Exception('No account found with username "$rawInput". Please sign in with your email address.');
+              throw Exception(
+                  'No account found with username "$rawInput". Please sign in with your email address.');
             }
           }
         } on FirebaseException catch (e) {
@@ -173,10 +176,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             break;
           case 'wrong-password':
           case 'invalid-credential':
-            msg = 'Incorrect email or password. Please verify your credentials.';
+            msg =
+                'Incorrect email or password. Please verify your credentials.';
             break;
           case 'too-many-requests':
-            msg = 'Too many failed attempts. Please wait a few minutes before trying again.';
+            msg =
+                'Too many failed attempts. Please wait a few minutes before trying again.';
             break;
           case 'user-disabled':
             msg = 'This account has been disabled. Contact your administrator.';
@@ -188,7 +193,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        final message = e.toString().replaceAll('Exception: ', '').replaceAll('FirebaseAuthException: ', '');
+        final message = e
+            .toString()
+            .replaceAll('Exception: ', '')
+            .replaceAll('FirebaseAuthException: ', '');
         _showErrorSnackBar(message);
       }
     } finally {
@@ -244,7 +252,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     showDialog(
       context: context,
       builder: (ctx) => _ForgotPasswordDialog(
-        initialEmail: _identifierCtrl.text.contains('@') ? _identifierCtrl.text.trim() : '',
+        initialEmail: _identifierCtrl.text.contains('@')
+            ? _identifierCtrl.text.trim()
+            : '',
       ),
     );
   }
@@ -261,329 +271,367 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const AppLogo(
-                    size: 96,
-                    circular: true,
-                    borderColor: AppColors.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    AppConstants.appName,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 460),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const AppLogo(
+                      size: 92,
+                      circular: true,
+                      borderColor: AppColors.primary,
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    AppConstants.appSubtitle,
-                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 16),
+                    const Text(
+                      AppConstants.appName,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      AppConstants.appSubtitle,
+                      style: TextStyle(
+                          fontSize: 13, color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 24),
 
-                  // Portal Mode Switcher: Staff vs Customer
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: InkWell(
-                            onTap: () => setState(() => _isCustomerPortal = false),
-                            borderRadius: BorderRadius.circular(9),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 9),
-                              decoration: BoxDecoration(
-                                color: !_isCustomerPortal ? Colors.white : Colors.transparent,
-                                borderRadius: BorderRadius.circular(9),
-                                boxShadow: !_isCustomerPortal
-                                    ? [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.06),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        )
-                                      ]
-                                    : null,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.badge_outlined,
-                                    size: 16,
-                                    color: !_isCustomerPortal
-                                        ? const Color(0xFF0F172A)
-                                        : const Color(0xFF64748B),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Staff Portal',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: !_isCustomerPortal ? FontWeight.bold : FontWeight.w500,
+                    // Portal Mode Switcher: Staff vs Customer
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceMuted,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.borderLight),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () =>
+                                  setState(() => _isCustomerPortal = false),
+                              borderRadius: BorderRadius.circular(9),
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 9),
+                                decoration: BoxDecoration(
+                                  color: !_isCustomerPortal
+                                      ? Colors.white
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(9),
+                                  boxShadow: !_isCustomerPortal
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.black
+                                                .withValues(alpha: 0.06),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          )
+                                        ]
+                                      : null,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.badge_outlined,
+                                      size: 16,
                                       color: !_isCustomerPortal
-                                          ? const Color(0xFF0F172A)
-                                          : const Color(0xFF64748B),
+                                          ? AppColors.navyPrimary
+                                          : AppColors.textSecondary,
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Staff Portal',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: !_isCustomerPortal
+                                            ? FontWeight.bold
+                                            : FontWeight.w500,
+                                        color: !_isCustomerPortal
+                                            ? AppColors.navyPrimary
+                                            : AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          child: InkWell(
-                            onTap: () => setState(() => _isCustomerPortal = true),
-                            borderRadius: BorderRadius.circular(9),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 9),
-                              decoration: BoxDecoration(
-                                color: _isCustomerPortal ? Colors.white : Colors.transparent,
-                                borderRadius: BorderRadius.circular(9),
-                                boxShadow: _isCustomerPortal
-                                    ? [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.06),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        )
-                                      ]
-                                    : null,
+                          Expanded(
+                            child: InkWell(
+                              onTap: () =>
+                                  setState(() => _isCustomerPortal = true),
+                              borderRadius: BorderRadius.circular(9),
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 9),
+                                decoration: BoxDecoration(
+                                  color: _isCustomerPortal
+                                      ? Colors.white
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(9),
+                                  boxShadow: _isCustomerPortal
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.black
+                                                .withValues(alpha: 0.06),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          )
+                                        ]
+                                      : null,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.person_pin_outlined,
+                                      size: 16,
+                                      color: _isCustomerPortal
+                                          ? AppColors.navyPrimary
+                                          : AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Customer Portal',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: _isCustomerPortal
+                                            ? FontWeight.bold
+                                            : FontWeight.w500,
+                                        color: _isCustomerPortal
+                                            ? AppColors.navyPrimary
+                                            : AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              child: Row(
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // 1. Email or Username Input
+                    TextFormField(
+                      controller: _identifierCtrl,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        labelText: _isCustomerPortal
+                            ? 'Customer Email'
+                            : 'Email or Username',
+                        hintText: _isCustomerPortal
+                            ? 'Enter your customer email'
+                            : 'Enter your email or username',
+                        prefixIcon: const Icon(Icons.person_outline),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return _isCustomerPortal
+                              ? 'Please enter your email'
+                              : 'Please enter your email or username';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 2. Password Input
+                    TextFormField(
+                      controller: _passwordCtrl,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      validator: (val) {
+                        if (val == null || val.isEmpty) {
+                          return 'Please enter your password';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 8),
+
+                    // 3. Forgot Password Link
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: _showForgotPasswordDialog,
+                        child: const Text(
+                          'Forgot Password?',
+                          style: TextStyle(
+                            color: AppColors.tealDark,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 4. Sign In Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _handleLogin,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.navyPrimary,
+                          foregroundColor: AppColors.textOnPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 22,
+                                width: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                _isCustomerPortal
+                                    ? 'Sign In as Customer'
+                                    : 'Sign In',
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // 5. Divider
+                    const Row(
+                      children: [
+                        Expanded(child: Divider(color: AppColors.borderSubtle)),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Text(
+                            'Or continue with',
+                            style: TextStyle(
+                                fontSize: 12, color: AppColors.textSecondary),
+                          ),
+                        ),
+                        Expanded(child: Divider(color: AppColors.borderSubtle)),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    // 6. Continue with Google Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: OutlinedButton(
+                        onPressed:
+                            _isGoogleLoading ? null : _handleGoogleSignIn,
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppColors.borderLight),
+                          foregroundColor: AppColors.navyPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: _isGoogleLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    Icons.person_pin_outlined,
-                                    size: 16,
-                                    color: _isCustomerPortal
-                                        ? const Color(0xFF2563EB)
-                                        : const Color(0xFF64748B),
+                                  Container(
+                                    padding: const EdgeInsets.all(3),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: AppColors.borderCool,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'G',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                        color: AppColors.statusInTransit,
+                                      ),
+                                    ),
                                   ),
-                                  const SizedBox(width: 6),
+                                  const SizedBox(width: 12),
                                   Text(
-                                    'Customer Portal',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: _isCustomerPortal ? FontWeight.bold : FontWeight.w500,
-                                      color: _isCustomerPortal
-                                          ? const Color(0xFF2563EB)
-                                          : const Color(0xFF64748B),
+                                    _isCustomerPortal
+                                        ? 'Continue with Google'
+                                        : 'Continue with Google',
+                                    style: const TextStyle(
+                                      color: AppColors.textPrimary,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ],
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+
+                    // 7. Don't have an account? Sign Up
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Don't have an account? ",
+                          style: TextStyle(color: AppColors.textSecondary),
+                        ),
+                        InkWell(
+                          onTap: _navigateToSignUp,
+                          borderRadius: BorderRadius.circular(6),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6.0, vertical: 8.0),
+                            child: Text(
+                              'Sign Up',
+                              style: TextStyle(
+                                color: AppColors.tealDark,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
                               ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // 1. Email or Username Input
-                  TextFormField(
-                    controller: _identifierCtrl,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: _isCustomerPortal ? 'Customer Email' : 'Email or Username',
-                      hintText: _isCustomerPortal ? 'Enter your customer email' : 'Enter your email or username',
-                      prefixIcon: const Icon(Icons.person_outline),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    validator: (val) {
-                      if (val == null || val.trim().isEmpty) {
-                        return _isCustomerPortal ? 'Please enter your email' : 'Please enter your email or username';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 2. Password Input
-                  TextFormField(
-                    controller: _passwordCtrl,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                        ),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    validator: (val) {
-                      if (val == null || val.isEmpty) {
-                        return 'Please enter your password';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 8),
-
-                  // 3. Forgot Password Link
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: _showForgotPasswordDialog,
-                      child: const Text(
-                        'Forgot Password?',
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 4. Sign In Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isCustomerPortal ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 22,
-                              width: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white,
-                              ),
-                            )
-                          : Text(
-                              _isCustomerPortal ? 'Sign In as Customer' : 'Sign In',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // 5. Divider
-                  const Row(
-                    children: [
-                      Expanded(child: Divider(color: Colors.black12)),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12.0),
-                        child: Text(
-                          'Or continue with',
-                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                        ),
-                      ),
-                      Expanded(child: Divider(color: Colors.black12)),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // 6. Continue with Google Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: OutlinedButton(
-                      onPressed: _isGoogleLoading ? null : _handleGoogleSignIn,
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.black12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: _isGoogleLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(3),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.blue.shade100,
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'G',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  _isCustomerPortal ? 'Continue with Google' : 'Continue with Google',
-                                  style: const TextStyle(
-                                    color: AppColors.textPrimary,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-
-                  // 7. Don't have an account? Sign Up
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "Don't have an account? ",
-                        style: TextStyle(color: AppColors.textSecondary),
-                      ),
-                      InkWell(
-                        onTap: _navigateToSignUp,
-                        borderRadius: BorderRadius.circular(6),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 8.0),
-                          child: Text(
-                            'Sign Up',
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -599,7 +647,8 @@ class _ForgotPasswordDialog extends ConsumerStatefulWidget {
   const _ForgotPasswordDialog({required this.initialEmail});
 
   @override
-  ConsumerState<_ForgotPasswordDialog> createState() => _ForgotPasswordDialogState();
+  ConsumerState<_ForgotPasswordDialog> createState() =>
+      _ForgotPasswordDialogState();
 }
 
 class _ForgotPasswordDialogState extends ConsumerState<_ForgotPasswordDialog> {
@@ -635,7 +684,7 @@ class _ForgotPasswordDialogState extends ConsumerState<_ForgotPasswordDialog> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: Colors.green.shade700,
+            backgroundColor: AppColors.statusDelivered,
             content: Text('Password reset link sent to $email'),
           ),
         );

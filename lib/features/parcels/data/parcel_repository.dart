@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:developer' as developer;
 import '../../../core/constants/app_constants.dart';
 import '../domain/parcel_model.dart';
 
@@ -15,11 +16,10 @@ class ParcelRepository {
 
   // Real-time stream of all parcels (newest first)
   Stream<List<ParcelModel>> getParcelsStream() {
-    return _parcelsCol
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => ParcelModel.fromFirestore(doc)).toList());
+    return _parcelsCol.orderBy('createdAt', descending: true).snapshots().map(
+        (snapshot) => snapshot.docs
+            .map((doc) => ParcelModel.fromFirestore(doc))
+            .toList());
   }
 
   // Real-time stream of a single parcel by ID
@@ -58,22 +58,25 @@ class ParcelRepository {
     if (status == AppConstants.statusDispatched) {
       updateData['dispatchedAt'] = FieldValue.serverTimestamp();
       if (dispatchedById != null) updateData['dispatchedById'] = dispatchedById;
-      if (dispatchedByName != null) updateData['dispatchedByName'] = dispatchedByName;
+      if (dispatchedByName != null) {
+        updateData['dispatchedByName'] = dispatchedByName;
+      }
     }
 
     await _parcelsCol.doc(id).update(updateData);
-    
+
     // TRIGGER NOTIFICATION AFTER SUCCESSFUL STATUS UPDATE
     _triggerOrderStatusNotification(id, status);
   }
 
   // --- INTERNAL HELPER FOR CLOUDFLARE WEBHOOK ---
-  Future<void> _triggerOrderStatusNotification(String parcelId, String newStatus) async {
+  Future<void> _triggerOrderStatusNotification(
+      String parcelId, String newStatus) async {
     try {
       // 1. Fetch the parcel to get customer ID and tracking number
       final parcelDoc = await _parcelsCol.doc(parcelId).get();
       if (!parcelDoc.exists) return;
-      
+
       final data = parcelDoc.data() as Map<String, dynamic>?;
       if (data == null) return;
 
@@ -82,13 +85,15 @@ class ParcelRepository {
 
       if (customerId != null && customerId.toString().isNotEmpty) {
         // 2. Fetch the customer's FCM token from the users collection
-        final userDoc = await _firestore.collection('users').doc(customerId).get();
+        final userDoc =
+            await _firestore.collection('users').doc(customerId).get();
         final fcmToken = userDoc.data()?['fcmToken'] as String?;
 
         if (fcmToken != null) {
           // 3. Send the webhook
           await http.post(
-            Uri.parse('https://shiptracker-fcm.artlorence-hveridiano.workers.dev/'),
+            Uri.parse(
+                'https://shiptracker-fcm.artlorence-hveridiano.workers.dev/'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'token': fcmToken,
@@ -99,7 +104,11 @@ class ParcelRepository {
         }
       }
     } catch (e) {
-      print('Failed to send order status push notification: $e');
+      developer.log(
+        'Failed to send order status push notification',
+        name: 'parcel_repository',
+        error: e,
+      );
     }
   }
 }

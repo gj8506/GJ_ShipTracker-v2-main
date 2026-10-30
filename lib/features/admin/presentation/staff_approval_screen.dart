@@ -40,7 +40,7 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
           ),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF16A34A),
+              backgroundColor: AppColors.statusDelivered,
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
@@ -66,13 +66,13 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
       if (result.emailSent) {
         _showMessage(
           '${staff.fullName} approved. Approval email sent to ${staff.email}.',
-          color: const Color(0xFF16A34A),
+          color: AppColors.statusDelivered,
         );
       } else {
         _showMessage(
           '${staff.fullName} approved, but the email could not be sent. '
           'Check the email worker configuration.',
-          color: const Color(0xFFEA580C),
+          color: AppColors.warningOrange,
           action: SnackBarAction(
             label: 'Retry email',
             textColor: Colors.white,
@@ -102,7 +102,7 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
     if (result.emailSent) {
       _showMessage(
         'Approval email re-sent to ${staff.email}.',
-        color: const Color(0xFF16A34A),
+        color: AppColors.statusDelivered,
       );
     } else {
       _showMessage(
@@ -238,9 +238,6 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
         backgroundColor: AppColors.backgroundLight,
         appBar: AppBar(
           title: const Text('Staff Approvals'),
-          backgroundColor: AppColors.surfaceWhite,
-          foregroundColor: AppColors.navyPrimary,
-          elevation: 0,
         ),
         body: const Center(
           child: Padding(
@@ -259,13 +256,7 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text(
-          'Staff Approvals',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: AppColors.surfaceWhite,
-        foregroundColor: AppColors.navyPrimary,
-        elevation: 0,
+        title: const Text('Staff Approvals'),
       ),
       body: pendingAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -292,15 +283,15 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFF7ED),
+                      color: AppColors.warningSurface,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFFFED7AA)),
+                      border: Border.all(color: AppColors.warningBorder),
                     ),
                     child: const Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Icon(Icons.mark_email_unread_outlined,
-                            color: Color(0xFFC2410C)),
+                            color: AppColors.warningStrong),
                         SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -309,7 +300,7 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
                             'to send the approval email automatically.',
                             style: TextStyle(
                               fontSize: 13,
-                              color: Color(0xFF9A3412),
+                              color: AppColors.warningDeep,
                               height: 1.35,
                             ),
                           ),
@@ -322,14 +313,14 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF6FF),
+                    color: AppColors.tealContainer,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFBFDBFE)),
+                    border: Border.all(color: AppColors.tealBorder),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.info_outline_rounded,
-                          color: Color(0xFF2563EB)),
+                          color: AppColors.infoBlue),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -338,7 +329,7 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
                           'Approving sends an email to the staff member.',
                           style: const TextStyle(
                             fontSize: 13,
-                            color: Color(0xFF1E3A8A),
+                            color: AppColors.navySecondary,
                             height: 1.35,
                           ),
                         ),
@@ -401,11 +392,11 @@ class _StaffCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: const Color(0xFFFEF3C7),
+                backgroundColor: AppColors.warningSurface,
                 child: Text(
                   initials,
                   style: const TextStyle(
-                    color: Color(0xFFB45309),
+                    color: AppColors.warningStrong,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -436,16 +427,16 @@ class _StaffCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFF7ED),
+                        color: AppColors.warningSurface,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFFFED7AA)),
+                        border: Border.all(color: AppColors.warningBorder),
                       ),
                       child: Text(
                         'PENDING • ${staff.role.toUpperCase()}',
                         style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFC2410C),
+                          color: AppColors.warningStrong,
                           letterSpacing: 0.4,
                         ),
                       ),
@@ -474,7 +465,7 @@ class _StaffCard extends StatelessWidget {
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.errorRed,
-                    side: const BorderSide(color: Color(0xFFFCA5A5)),
+                    side: const BorderSide(color: AppColors.dangerBorder),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -488,7 +479,7 @@ class _StaffCard extends StatelessWidget {
               Expanded(
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF16A34A),
+                    backgroundColor: AppColors.statusDelivered,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -554,13 +545,13 @@ class _EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
-                color: Color(0xFFDCFCE7),
+                color: AppColors.statusDeliveredContainer,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.verified_user_outlined,
                 size: 44,
-                color: Color(0xFF16A34A),
+                color: AppColors.statusDelivered,
               ),
             ),
             const SizedBox(height: 18),

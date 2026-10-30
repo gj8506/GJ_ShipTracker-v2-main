@@ -10,8 +10,8 @@ class AnalyticsRepository {
   // Platform Color Palette
   static const Color colorShopee = Color(0xFFEE4D2D);
   static const Color colorLazada = Color(0xFF0F146D);
-  static const Color colorTikTok = Color(0xFF00F2FE);
-  static const Color colorDirect = Color(0xFF10B981);
+  static const Color colorTikTok = Color(0xFF6FD0F5);
+  static const Color colorDirect = Color(0xFF1E7A46);
 
   static Color getPlatformColor(String platform) {
     switch (platform.trim().toLowerCase()) {
@@ -42,11 +42,11 @@ class AnalyticsRepository {
     required AnalyticsInterval interval,
   }) async {
     final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month - interval.monthCount, now.day);
+    final startDate =
+        DateTime(now.year, now.month - interval.monthCount, now.day);
 
-    final snapshot = await _firestore
-        .collection(AppConstants.collectionParcels)
-        .get();
+    final snapshot =
+        await _firestore.collection(AppConstants.collectionParcels).get();
 
     double totalSales = 0.0;
     int parcelsCount = 0;
@@ -69,7 +69,8 @@ class AnalyticsRepository {
     final Map<String, double> styleAmountMap = {};
 
     // Generate buckets according to selected interval granularity
-    final List<TimeBucketData> rawBuckets = _createBuckets(interval, startDate, now);
+    final List<TimeBucketData> rawBuckets =
+        _createBuckets(interval, startDate, now);
     final List<Map<String, dynamic>> validOrders = [];
 
     for (final doc in snapshot.docs) {
@@ -80,12 +81,15 @@ class AnalyticsRepository {
       final status = (data['status'] ?? '').toString().trim().toLowerCase();
       final isReturned = status.contains('return');
 
-      final rawAmount = data['amount'] ?? data['totalAmount'] ?? data['price'] ?? 0;
+      final rawAmount =
+          data['amount'] ?? data['totalAmount'] ?? data['price'] ?? 0;
       final amount = (rawAmount is num) ? rawAmount.toDouble() : 0.0;
 
       final rawPlatform = (data['platform'] ?? 'Direct').toString().trim();
       final platform = _canonicalPlatform(rawPlatform);
-      final style = (data['style'] ?? data['plateStyle'] ?? 'Standard Embossed').toString().trim();
+      final style = (data['style'] ?? data['plateStyle'] ?? 'Standard Embossed')
+          .toString()
+          .trim();
 
       if (isReturned) {
         returnsCount++;
@@ -94,7 +98,8 @@ class AnalyticsRepository {
         totalSales += amount;
         parcelsCount++;
 
-        platformAmountMap[platform] = (platformAmountMap[platform] ?? 0.0) + amount;
+        platformAmountMap[platform] =
+            (platformAmountMap[platform] ?? 0.0) + amount;
         platformCountMap[platform] = (platformCountMap[platform] ?? 0) + 1;
 
         styleCountMap[style] = (styleCountMap[style] ?? 0) + 1;
@@ -123,14 +128,15 @@ class AnalyticsRepository {
     }
 
     // Plate Style Breakdown
-    final List<PlateStyleBreakdown> plateStyles = styleCountMap.entries.map((e) {
+    final List<PlateStyleBreakdown> plateStyles =
+        styleCountMap.entries.map((e) {
       return PlateStyleBreakdown(
         style: e.key,
         count: e.value,
         amount: styleAmountMap[e.key] ?? 0.0,
       );
     }).toList()
-      ..sort((a, b) => b.count.compareTo(a.count));
+          ..sort((a, b) => b.count.compareTo(a.count));
 
     final totalOrdersEvaluated = parcelsCount + returnsCount;
     final returnRate = totalOrdersEvaluated > 0
@@ -186,8 +192,18 @@ class AnalyticsRepository {
     } else {
       final months = interval == AnalyticsInterval.sixMonths ? 6 : 12;
       const monthNames = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
       ];
       for (int i = 0; i < months; i++) {
         final d = DateTime(start.year, start.month + i, 1);
@@ -219,8 +235,18 @@ class AnalyticsRepository {
 
       double sales = 0.0;
       int count = 0;
-      final Map<String, double> pSales = {'Shopee': 0, 'Lazada': 0, 'TikTok': 0, 'Direct': 0};
-      final Map<String, int> pCount = {'Shopee': 0, 'Lazada': 0, 'TikTok': 0, 'Direct': 0};
+      final Map<String, double> pSales = {
+        'Shopee': 0,
+        'Lazada': 0,
+        'TikTok': 0,
+        'Direct': 0
+      };
+      final Map<String, int> pCount = {
+        'Shopee': 0,
+        'Lazada': 0,
+        'TikTok': 0,
+        'Direct': 0
+      };
 
       for (final o in orders) {
         final oDate = o['date'] as DateTime;
@@ -228,10 +254,13 @@ class AnalyticsRepository {
         final oPlat = o['platform'] as String;
 
         bool belongs = false;
-        if (interval == AnalyticsInterval.sixMonths || interval == AnalyticsInterval.twelveMonths) {
-          belongs = oDate.year == current.date.year && oDate.month == current.date.month;
+        if (interval == AnalyticsInterval.sixMonths ||
+            interval == AnalyticsInterval.twelveMonths) {
+          belongs = oDate.year == current.date.year &&
+              oDate.month == current.date.month;
         } else {
-          belongs = (oDate.isAfter(current.date) || oDate.isAtSameMomentAs(current.date)) &&
+          belongs = (oDate.isAfter(current.date) ||
+                  oDate.isAtSameMomentAs(current.date)) &&
               oDate.isBefore(nextDate);
         }
 
@@ -272,9 +301,11 @@ class AnalyticsRepository {
 
     // Generate 50 realistic parcels across past 12 months
     for (int i = 0; i < 50; i++) {
-      final docRef = _firestore.collection(AppConstants.collectionParcels).doc();
+      final docRef =
+          _firestore.collection(AppConstants.collectionParcels).doc();
       final daysAgo = random.nextInt(360);
-      final orderDate = now.subtract(Duration(days: daysAgo, hours: random.nextInt(24)));
+      final orderDate =
+          now.subtract(Duration(days: daysAgo, hours: random.nextInt(24)));
       final platform = platforms[random.nextInt(platforms.length)];
       final style = plateStyles[random.nextInt(plateStyles.length)];
       final price = 350.0 + (random.nextInt(10) * 50.0); // ₱350 to ₱800

@@ -12,7 +12,8 @@ class ParcelModel {
   final String? items; // e.g. "Custom Plate: ABC 1234 (Black, Embossed)"
   final double amount;
   final String courier; // SPX Express, J&T, Flash, Ninja Van
-  final String status; // Pending, Dispatched, In Transit, Delivered, Returned, Cancelled
+  final String
+      status; // Pending, Dispatched, In Transit, Delivered, Returned, Cancelled
   final String? notes;
   final String? dispatchedById;
   final String? dispatchedByName;
@@ -78,7 +79,8 @@ class ParcelModel {
       'notes': notes,
       'dispatchedById': dispatchedById,
       'dispatchedByName': dispatchedByName,
-      'dispatchedAt': dispatchedAt != null ? Timestamp.fromDate(dispatchedAt!) : null,
+      'dispatchedAt':
+          dispatchedAt != null ? Timestamp.fromDate(dispatchedAt!) : null,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': FieldValue.serverTimestamp(),
     };

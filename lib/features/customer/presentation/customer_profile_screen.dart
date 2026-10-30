@@ -9,17 +9,18 @@ class CustomerProfileScreen extends ConsumerStatefulWidget {
   const CustomerProfileScreen({super.key});
 
   @override
-  ConsumerState<CustomerProfileScreen> createState() => _CustomerProfileScreenState();
+  ConsumerState<CustomerProfileScreen> createState() =>
+      _CustomerProfileScreenState();
 }
 
 class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
-  
   void _showEditNameDialog(String currentName) {
     final ctrl = TextEditingController(text: currentName);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Edit Display Name', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        title: const Text('Edit Display Name',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         content: TextField(
           controller: ctrl,
           textCapitalization: TextCapitalization.words,
@@ -31,13 +32,18 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            child: const Text('Cancel',
+                style: TextStyle(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.navyPrimary, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.navyPrimary,
+                foregroundColor: Colors.white),
             onPressed: () async {
               if (ctrl.text.trim().isNotEmpty) {
-                await ref.read(authRepositoryProvider).updateProfile(displayName: ctrl.text.trim());
+                await ref
+                    .read(authRepositoryProvider)
+                    .updateProfile(displayName: ctrl.text.trim());
                 if (ctx.mounted) Navigator.pop(ctx);
               }
             },
@@ -52,7 +58,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent, 
+      backgroundColor: Colors.transparent,
       builder: (ctx) => const _PrivacyPolicySheet(),
     );
   }
@@ -63,18 +69,19 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text('My Profile', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.navyPrimary,
-        elevation: 0,
+        title: const Text(
+          'My Profile',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+        ),
       ),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Error loading profile: $err')),
         data: (profile) {
-          final displayName = profile?.fullName ?? user?.displayName ?? 'Customer';
+          final displayName =
+              profile?.fullName ?? user?.displayName ?? 'Customer';
           final email = profile?.email ?? user?.email ?? '';
 
           return ListView(
@@ -83,8 +90,8 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  color: AppColors.surfaceWhite,
+                  borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: AppColors.borderLight),
                 ),
                 child: Column(
@@ -97,83 +104,114 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
                     const SizedBox(height: 16),
                     Text(
                       displayName,
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navyPrimary),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.navyPrimary,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       email,
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: AppColors.tealContainer,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Text(
                         'CUSTOMER ACCOUNT',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.tealDark),
+                        style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.tealDark),
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-
               const Padding(
                 padding: EdgeInsets.only(left: 8, bottom: 8),
-                child: Text('ACCOUNT SETTINGS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                child: Text(
+                  'ACCOUNT SETTINGS',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textMuted,
+                    letterSpacing: 0.4,
+                  ),
+                ),
               ),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  color: AppColors.surfaceWhite,
+                  borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: AppColors.borderLight),
                 ),
                 child: Column(
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.edit_outlined, color: AppColors.navyPrimary),
-                      title: const Text('Edit Display Name', style: TextStyle(fontWeight: FontWeight.w600)),
-                      trailing: const Icon(Icons.chevron_right_rounded, color: Colors.grey),
+                      leading: const Icon(Icons.edit_outlined,
+                          color: AppColors.navyPrimary),
+                      title: const Text('Edit Display Name',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      trailing: const Icon(Icons.chevron_right_rounded,
+                          color: AppColors.textMuted),
                       onTap: () => _showEditNameDialog(displayName),
                     ),
                     const Divider(height: 1),
                     ListTile(
-                      leading: const Icon(Icons.privacy_tip_outlined, color: AppColors.navyPrimary),
-                      title: const Text('Privacy Policy & Terms', style: TextStyle(fontWeight: FontWeight.w600)),
-                      trailing: const Icon(Icons.chevron_right_rounded, color: Colors.grey),
+                      leading: const Icon(Icons.privacy_tip_outlined,
+                          color: AppColors.navyPrimary),
+                      title: const Text('Privacy Policy & Terms',
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      trailing: const Icon(Icons.chevron_right_rounded,
+                          color: AppColors.textMuted),
                       onTap: _showPrivacyPolicy,
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-
               SizedBox(
                 height: 52,
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.redAccent,
-                    side: const BorderSide(color: Colors.redAccent),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    foregroundColor: AppColors.statusReturned,
+                    side: const BorderSide(color: AppColors.statusReturned),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
                   ),
                   icon: const Icon(Icons.logout_rounded),
-                  label: const Text('Sign Out', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  label: const Text('Sign Out',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                   onPressed: () async {
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (ctx) => AlertDialog(
                         title: const Text('Sign Out'),
-                        content: const Text('Are you sure you want to sign out?'),
+                        content:
+                            const Text('Are you sure you want to sign out?'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(ctx, false),
-                            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                            child: const Text('Cancel',
+                                style:
+                                    TextStyle(color: AppColors.textSecondary)),
                           ),
                           ElevatedButton(
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.statusReturned,
+                                foregroundColor: Colors.white),
                             onPressed: () => Navigator.pop(ctx, true),
                             child: const Text('Sign Out'),
                           ),
@@ -202,7 +240,7 @@ class _PrivacyPolicySheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    
+
     return Container(
       height: screenHeight * 0.85,
       decoration: const BoxDecoration(
@@ -215,7 +253,9 @@ class _PrivacyPolicySheet extends StatelessWidget {
           Container(
             width: 40,
             height: 5,
-            decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(
+                color: AppColors.borderLight,
+                borderRadius: BorderRadius.circular(10)),
           ),
           const SizedBox(height: 16),
           const Padding(
@@ -223,7 +263,10 @@ class _PrivacyPolicySheet extends StatelessWidget {
             child: Text(
               'Terms of Service & Data Privacy Act (RA 10173)',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.navyPrimary),
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.navyPrimary),
             ),
           ),
           const Divider(height: 32),
@@ -254,12 +297,14 @@ TERMS OF SERVICE
 1. Custom plates are novelty/temporary replacements. You hold GJandAsher harmless from legal liabilities arising from improper use on public roads.
 2. Estimated prices may adjust based on final courier fees.
 3. Order cancellations must be made before the production stage begins.''',
-                style: TextStyle(fontSize: 14, color: Colors.black87, height: 1.6),
+                style: TextStyle(
+                    fontSize: 14, color: AppColors.textPrimary, height: 1.6),
               ),
             ),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom + 24),
+            padding: EdgeInsets.fromLTRB(
+                24, 16, 24, MediaQuery.of(context).padding.bottom + 24),
             child: SizedBox(
               width: double.infinity,
               height: 52,
@@ -267,10 +312,13 @@ TERMS OF SERVICE
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.navyPrimary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                child: const Text('Close',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
               ),
             ),
           ),

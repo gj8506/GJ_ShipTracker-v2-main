@@ -40,18 +40,15 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     final isTyping = ref.watch(isTypingProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: const Row(
           children: [
-            Icon(Icons.smart_toy_rounded, color: AppColors.tealDark),
+            Icon(Icons.smart_toy_rounded, color: AppColors.navyPrimary),
             SizedBox(width: 8),
-            Text('Assistant', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            Text('Assistant'),
           ],
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.navyPrimary,
-        elevation: 1,
       ),
       body: Column(
         children: [
@@ -84,34 +81,49 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
 
   Widget _buildMessageBubble(msg, BuildContext context) {
     final isBot = !msg.isUser;
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
-        crossAxisAlignment: isBot ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+        crossAxisAlignment:
+            isBot ? CrossAxisAlignment.start : CrossAxisAlignment.end,
         children: [
           Container(
             padding: const EdgeInsets.all(14),
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+            constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.75),
             decoration: BoxDecoration(
-              color: isBot ? Colors.white : AppColors.navyPrimary,
+              color: isBot ? AppColors.surfaceWhite : AppColors.navyPrimary,
               borderRadius: BorderRadius.only(
                 topLeft: const Radius.circular(16),
                 topRight: const Radius.circular(16),
                 bottomLeft: Radius.circular(isBot ? 0 : 16),
                 bottomRight: Radius.circular(isBot ? 16 : 0),
               ),
-              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
+              border: isBot ? Border.all(color: AppColors.borderSubtle) : null,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.navyPrimary.withValues(alpha: 0.06),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Text(
               msg.text,
-              style: TextStyle(color: isBot ? Colors.black87 : Colors.white, fontSize: 14, height: 1.4),
+              style: TextStyle(
+                  color:
+                      isBot ? AppColors.textPrimary : AppColors.textOnPrimary,
+                  fontSize: 14,
+                  height: 1.4),
             ),
           ),
           if (msg.actionRoute != null && msg.actionLabel != null) ...[
             const SizedBox(height: 8),
             ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.tealContainer, foregroundColor: AppColors.tealDark),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.tealContainer,
+                  foregroundColor: AppColors.tealDark),
               onPressed: () {
                 Navigator.pop(context); // Close chat
                 context.push(msg.actionRoute!); // Deep link
@@ -126,8 +138,10 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
               spacing: 8,
               children: msg.quickReplies!.map<Widget>((reply) {
                 return ActionChip(
-                  label: Text(reply, style: const TextStyle(fontSize: 12, color: AppColors.navyPrimary)),
-                  backgroundColor: Colors.indigo.shade50,
+                  label: Text(reply,
+                      style: const TextStyle(
+                          fontSize: 12, color: AppColors.navyPrimary)),
+                  backgroundColor: AppColors.tealContainer,
                   side: BorderSide.none,
                   onPressed: () => _handleSend(reply),
                 );
@@ -143,8 +157,8 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -2))],
+        color: AppColors.surfaceWhite,
+        border: Border(top: BorderSide(color: AppColors.borderLight)),
       ),
       child: SafeArea(
         child: Row(
@@ -156,10 +170,13 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                 onSubmitted: _handleSend,
                 decoration: InputDecoration(
                   hintText: 'Ask the assistant...',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide.none),
                   filled: true,
-                  fillColor: const Color(0xFFF1F5F9),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  fillColor: AppColors.surfaceMuted,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 ),
               ),
             ),
@@ -167,7 +184,8 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
             CircleAvatar(
               backgroundColor: AppColors.navyPrimary,
               child: IconButton(
-                icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                icon: const Icon(Icons.send_rounded,
+                    color: Colors.white, size: 20),
                 onPressed: () => _handleSend(_textController.text),
               ),
             ),

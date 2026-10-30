@@ -21,7 +21,8 @@ class CloudinaryImageStorageService implements ImageStorageService {
 
   @override
   Future<String> uploadImage(File file, {String? folder}) async {
-    final uri = Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
+    final uri =
+        Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
 
     final request = http.MultipartRequest('POST', uri)
       ..fields['upload_preset'] = uploadPreset;
@@ -39,12 +40,14 @@ class CloudinaryImageStorageService implements ImageStorageService {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       return data['secure_url'] as String;
     } else {
-      throw Exception('Image upload failed (${response.statusCode}): ${response.body}');
+      throw Exception(
+          'Image upload failed (${response.statusCode}): ${response.body}');
     }
   }
 
   @override
-  Future<List<String>> uploadMultipleImages(List<File> files, {String? folder}) async {
+  Future<List<String>> uploadMultipleImages(List<File> files,
+      {String? folder}) async {
     final urls = <String>[];
     for (final file in files) {
       final url = await uploadImage(file, folder: folder);

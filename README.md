@@ -49,6 +49,20 @@ built-in reset email.
 > Inbox placement cannot be guaranteed by code. A verified sending domain with
 > SPF, DKIM, and DMARC is the standard way to maximize deliverability.
 
+## Merged branch
+
+This branch combines:
+
+- the Art repository's `backup/staff-approval-updated` branch (staff
+  registration approval, transactional email worker, public privacy/terms/
+  account-deletion pages, auth hardening, and the Android package rebrand), and
+- the GJ repository's `ui-logo-blue-restyle` branch (logo-blue visual system,
+  refreshed screens, and device/layout fixes).
+
+The Android application ID is `com.gjandasher.digitalprinting` and the launcher
+uses the adaptive icon set. Firebase configuration in
+`android/app/google-services.json` matches that package.
+
 ## Development
 
 ```powershell
@@ -57,3 +71,18 @@ flutter analyze
 flutter test
 flutter run
 ```
+
+### VS Code
+
+1. Install the **Flutter** and **Dart** extensions (VS Code will also suggest
+   them from `.vscode/extensions.json`).
+2. Open this project folder in VS Code.
+3. Select an Android emulator/device from the status bar, then press `F5` and
+   choose **GJandAsher (Debug)**.
+4. Use **Terminal → Run Task** for `Flutter: pub get`, `Flutter: analyze`,
+   `Flutter: test`, or `Flutter: build debug APK`.
+
+The checked-in `.vscode` files contain launch configurations, recommended
+extensions, formatting settings, and common Flutter tasks. They do not contain
+machine-specific SDK paths, so each developer can use their own Flutter
+installation.

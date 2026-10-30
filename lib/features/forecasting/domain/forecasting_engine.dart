@@ -48,7 +48,8 @@ class ForecastingEngine {
     }
 
     final denominator = (n * sumX2) - (sumX * sumX);
-    final slope = denominator != 0 ? ((n * sumXY) - (sumX * sumY)) / denominator : 0.0;
+    final slope =
+        denominator != 0 ? ((n * sumXY) - (sumX * sumY)) / denominator : 0.0;
     final intercept = (sumY - (slope * sumX)) / n;
 
     // 4. Calculate historical baseline for parcels

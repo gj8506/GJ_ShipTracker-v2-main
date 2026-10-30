@@ -10,7 +10,8 @@ class OrderRequestModel {
   final String vehicleType;
   final String deliveryAddress;
   final String notes;
-  final String status; // 'pending', 'approved', 'in_production', 'dispatched', 'delivered', 'cancelled'
+  final String
+      status; // 'pending', 'approved', 'in_production', 'dispatched', 'delivered', 'cancelled'
   final double price;
   final String trackingNumber;
   final DateTime createdAt;
@@ -72,18 +73,28 @@ class OrderRequestModel {
     return OrderRequestModel(
       id: doc.id,
       customerId: data['customerId'] as String? ?? '',
-      customerName: data['customerName'] as String? ?? data['recipientName'] as String? ?? 'Valued Customer',
-      customerPhone: data['customerPhone'] as String? ?? data['phone'] as String? ?? '',
-      plateText: data['plateText'] as String? ?? data['plateNumber'] as String? ?? 'ABC 1234',
-      plateStyle: data['plateStyle'] as String? ?? data['style'] as String? ?? 'Standard Embossed',
+      customerName: data['customerName'] as String? ??
+          data['recipientName'] as String? ??
+          'Valued Customer',
+      customerPhone:
+          data['customerPhone'] as String? ?? data['phone'] as String? ?? '',
+      plateText: data['plateText'] as String? ??
+          data['plateNumber'] as String? ??
+          'ABC 1234',
+      plateStyle: data['plateStyle'] as String? ??
+          data['style'] as String? ??
+          'Standard Embossed',
       vehicleType: data['vehicleType'] as String? ?? 'Sedan / SUV',
-      deliveryAddress: data['deliveryAddress'] as String? ?? data['recipientAddress'] as String? ?? '',
+      deliveryAddress: data['deliveryAddress'] as String? ??
+          data['recipientAddress'] as String? ??
+          '',
       notes: data['notes'] as String? ?? '',
       status: data['status'] as String? ?? 'pending',
       price: (data['price'] as num?)?.toDouble() ?? 0.0,
       trackingNumber: data['trackingNumber'] as String? ?? '',
       createdAt: parseDate(data['createdAt']),
-      updatedAt: data['updatedAt'] != null ? parseDate(data['updatedAt']) : null,
+      updatedAt:
+          data['updatedAt'] != null ? parseDate(data['updatedAt']) : null,
     );
   }
 

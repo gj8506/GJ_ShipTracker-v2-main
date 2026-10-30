@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class SyncBadge extends StatelessWidget {
   final bool hasPendingWrites;
@@ -13,17 +14,23 @@ class SyncBadge extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_upload_outlined, color: Colors.orange, size: 14),
+            Icon(Icons.cloud_upload_outlined,
+                color: AppColors.statusPending, size: 14),
             SizedBox(width: 4),
-            Text('Pending Sync', style: TextStyle(fontSize: 10, color: Colors.orange, fontWeight: FontWeight.bold)),
+            Text('Pending Sync',
+                style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.statusPending,
+                    fontWeight: FontWeight.bold)),
           ],
         ),
       );
     }
-    
+
     return const Tooltip(
       message: 'Synced to Cloud',
-      child: Icon(Icons.cloud_done_outlined, color: Colors.green, size: 16),
+      child: Icon(Icons.cloud_done_outlined,
+          color: AppColors.statusDelivered, size: 16),
     );
   }
 }

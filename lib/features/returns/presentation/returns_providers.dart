@@ -18,13 +18,15 @@ final returnsStreamProvider = StreamProvider<List<ReturnModel>>((ref) {
 });
 
 // Stream of single return ticket by ID
-final singleReturnStreamProvider = StreamProvider.family<ReturnModel?, String>((ref, id) {
+final singleReturnStreamProvider =
+    StreamProvider.family<ReturnModel?, String>((ref, id) {
   return ref.watch(returnsRepositoryProvider).getReturnByIdStream(id);
 });
 
 // Search and filter states
 final returnSearchQueryProvider = StateProvider<String>((ref) => '');
-final selectedReturnStatusFilterProvider = StateProvider<String?>((ref) => null);
+final selectedReturnStatusFilterProvider =
+    StateProvider<String?>((ref) => null);
 final selectedDefectFilterProvider = StateProvider<String?>((ref) => null);
 
 // Filtered returns list
@@ -41,7 +43,8 @@ final filteredReturnsProvider = Provider<List<ReturnModel>>((ref) {
         (item.customPlateDetails ?? '').toLowerCase().contains(query);
 
     final matchesStatus = statusFilter == null || item.status == statusFilter;
-    final matchesDefect = defectFilter == null || item.defectReason == defectFilter;
+    final matchesDefect =
+        defectFilter == null || item.defectReason == defectFilter;
 
     return matchesQuery && matchesStatus && matchesDefect;
   }).toList();

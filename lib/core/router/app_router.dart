@@ -63,7 +63,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       final isAuthLoading = authState.isLoading;
       final isProfileLoading = isUserLoggedIn &&
-          (userProfile.isLoading || (!userProfile.hasValue && !userProfile.hasError));
+          (userProfile.isLoading ||
+              (!userProfile.hasValue && !userProfile.hasError));
 
       if (isAuthLoading || isProfileLoading) {
         return null;
@@ -111,8 +112,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       final rawRole = userProfile.value!.role.trim().toLowerCase();
-      final isAdmin = rawRole == 'admin' || rawRole == AppConstants.roleAdmin.toLowerCase();
-      final isStaff = rawRole == 'staff' || rawRole == AppConstants.roleStaff.toLowerCase();
+      final isAdmin =
+          rawRole == 'admin' || rawRole == AppConstants.roleAdmin.toLowerCase();
+      final isStaff =
+          rawRole == 'staff' || rawRole == AppConstants.roleStaff.toLowerCase();
       final isCustomer = !isAdmin && !isStaff;
 
       // Staff registration approvals are owner/admin-only.
@@ -272,8 +275,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         path: ':id',
                         builder: (context, state) {
                           final id = state.pathParameters['id']!;
-                          final subject = state.extra as String? ?? 'Support Request';
-                          return ChatThreadScreen(threadId: id, subject: subject);
+                          final subject =
+                              state.extra as String? ?? 'Support Request';
+                          return ChatThreadScreen(
+                              threadId: id, subject: subject);
                         },
                       ),
                     ],

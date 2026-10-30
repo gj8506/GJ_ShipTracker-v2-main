@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
+import '../theme/app_colors.dart';
 
 class AppLogo extends StatelessWidget {
   final double size;
@@ -26,11 +27,11 @@ class AppLogo extends StatelessWidget {
         return Container(
           width: size,
           height: size,
-          color: Colors.grey.shade200,
+          color: AppColors.surfaceVariant,
           child: Icon(
             Icons.broken_image,
             size: size * 0.45,
-            color: Colors.grey,
+            color: AppColors.textSecondary,
           ),
         );
       },

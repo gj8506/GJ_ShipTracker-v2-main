@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../auth/presentation/auth_providers.dart';
 import 'customer_portal_providers.dart';
 
@@ -22,43 +23,57 @@ class CustomerHomeScreen extends ConsumerWidget {
     final activeCount = ref.watch(customerActiveOrdersCountProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.5,
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.indigo.shade50,
+                color: AppColors.surfaceWhite,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.verified_outlined, color: Colors.indigo, size: 20),
+              child: const Icon(
+                Icons.verified_outlined,
+                color: AppColors.navyPrimary,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  userProfile?.displayName ?? 'Customer Portal',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F172A),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    userProfile?.displayName ?? 'Customer Portal',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.navyDark,
+                    ),
                   ),
-                ),
-                const Text(
-                  'Custom License Plate Service',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-                ),
-              ],
+                  const Text(
+                    'Custom License Plate Service',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.navySecondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline, color: Color(0xFF64748B)),
+            icon: const Icon(
+              Icons.help_outline,
+              color: AppColors.textSecondary,
+            ),
             onPressed: onNavigateToSupport,
           ),
           const SizedBox(width: 8),
@@ -75,15 +90,15 @@ class CustomerHomeScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                  colors: [AppColors.navySecondary, AppColors.navyPrimary],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 15,
+                    color: AppColors.navyPrimary.withValues(alpha: 0.18),
+                    blurRadius: 18,
                     offset: const Offset(0, 8),
                   ),
                 ],
@@ -95,22 +110,24 @@ class CustomerHomeScreen extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.indigo.shade500,
+                          color: AppColors.logoBlue,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Text(
                           'FAST TRACK FABRICATION',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.navyDark,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.8,
                           ),
                         ),
                       ),
-                      const Icon(Icons.directions_car_filled, color: Colors.white70, size: 28),
+                      const Icon(Icons.directions_car_filled,
+                          color: Colors.white70, size: 28),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -123,21 +140,32 @@ class CustomerHomeScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
+                  Text(
                     'High-grade embossed aluminum, tamper-resistant hologram, LTO-compliant styling.',
-                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.72),
+                      fontSize: 13,
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.indigoAccent,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      backgroundColor: AppColors.surfaceWhite,
+                      foregroundColor: AppColors.navyPrimary,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     onPressed: onNavigateToRequest,
                     icon: const Icon(Icons.add_shopping_cart, size: 18),
-                    label: const Text('Start Order Request', style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: const Text(
+                      'Start Order Request',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
                   ),
                 ],
               ),
@@ -148,7 +176,11 @@ class CustomerHomeScreen extends ConsumerWidget {
             // Order Status Overview Cards
             const Text(
               'Order Status Overview',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 12),
             Row(
@@ -157,8 +189,8 @@ class CustomerHomeScreen extends ConsumerWidget {
                   child: _buildMetricCard(
                     title: 'Active Orders',
                     count: '$activeCount',
-                    color: Colors.blue.shade700,
-                    bgColor: Colors.blue.shade50,
+                    color: AppColors.statusInTransit,
+                    bgColor: AppColors.statusInTransitContainer,
                     icon: Icons.hourglass_top_rounded,
                     onTap: onNavigateToOrders,
                   ),
@@ -168,15 +200,16 @@ class CustomerHomeScreen extends ConsumerWidget {
                   child: ordersAsync.maybeWhen(
                     data: (orders) {
                       final delivered = orders.where((o) {
-                        final status = (o['status'] as String?)?.toLowerCase() ?? '';
+                        final status =
+                            (o['status'] as String?)?.toLowerCase() ?? '';
                         return status == 'delivered';
                       }).length;
-                      
+
                       return _buildMetricCard(
                         title: 'Delivered',
                         count: '$delivered',
-                        color: Colors.green.shade700,
-                        bgColor: Colors.green.shade50,
+                        color: AppColors.statusDelivered,
+                        bgColor: AppColors.statusDeliveredContainer,
                         icon: Icons.check_circle_outline,
                         onTap: onNavigateToOrders,
                       );
@@ -184,8 +217,8 @@ class CustomerHomeScreen extends ConsumerWidget {
                     orElse: () => _buildMetricCard(
                       title: 'Delivered',
                       count: '0',
-                      color: Colors.green.shade700,
-                      bgColor: Colors.green.shade50,
+                      color: AppColors.statusDelivered,
+                      bgColor: AppColors.statusDeliveredContainer,
                       icon: Icons.check_circle_outline,
                       onTap: onNavigateToOrders,
                     ),
@@ -202,11 +235,18 @@ class CustomerHomeScreen extends ConsumerWidget {
               children: [
                 const Text(
                   'Recent Plate Requests',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 TextButton(
                   onPressed: onNavigateToOrders,
-                  child: const Text('View All', style: TextStyle(color: Colors.indigo)),
+                  child: const Text(
+                    'View All',
+                    style: TextStyle(color: AppColors.tealDark),
+                  ),
                 ),
               ],
             ),
@@ -222,10 +262,13 @@ class CustomerHomeScreen extends ConsumerWidget {
               error: (err, _) => Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: AppColors.statusReturnedContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text('Unable to load orders: $err', style: const TextStyle(color: Colors.red)),
+                child: Text(
+                  'Unable to load orders: $err',
+                  style: const TextStyle(color: AppColors.statusReturned),
+                ),
               ),
               data: (orders) {
                 if (orders.isEmpty) {
@@ -233,23 +276,33 @@ class CustomerHomeScreen extends ConsumerWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      color: AppColors.surfaceWhite,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.borderLight),
                     ),
-                    child: Column(
+                    child: const Column(
                       children: [
-                        Icon(Icons.inbox_outlined, size: 48, color: Colors.grey.shade400),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'No Plate Orders Yet',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF334155)),
+                        Icon(
+                          Icons.inbox_outlined,
+                          size: 48,
+                          color: AppColors.textMuted,
                         ),
-                        const SizedBox(height: 4),
-                        const Text(
+                        SizedBox(height: 12),
+                        Text(
+                          'No Plate Orders Yet',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
                           'Submit your first custom plate order to track status and dispatch here.',
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ],
                     ),
@@ -259,24 +312,27 @@ class CustomerHomeScreen extends ConsumerWidget {
                 final recentOrders = orders.take(3).toList();
                 return Column(
                   children: recentOrders.map((order) {
-                    final orderStatus = order['status']?.toString() ?? 'PENDING';
-                    
+                    final orderStatus =
+                        order['status']?.toString() ?? 'PENDING';
+
                     return Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        color: AppColors.surfaceWhite,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppColors.borderLight),
                       ),
                       child: Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9),
+                              color: AppColors.surfaceMuted,
                               borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: const Color(0xFFCBD5E1), width: 1.5),
+                              border: Border.all(
+                                  color: AppColors.borderStrong, width: 1.5),
                             ),
                             child: Text(
                               order['plateNumber']?.toString() ?? 'N/A',
@@ -293,22 +349,30 @@ class CustomerHomeScreen extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  order['plateStyle']?.toString() ?? 'Custom Plate',
-                                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                  order['plateStyle']?.toString() ??
+                                      'Custom Plate',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13),
                                 ),
                                 Text(
-                                  order['deliveryAddress']?.toString() ?? 'No Address',
+                                  order['deliveryAddress']?.toString() ??
+                                      'No Address',
                                   maxLines: 1,
-                                  overflow: TextOverflow.ellipsis, 
-                                  style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary),
                                 ),
                               ],
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: _getStatusColor(orderStatus).withValues(alpha: 0.12),
+                              color: _getStatusColor(orderStatus)
+                                  .withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -347,9 +411,9 @@ class CustomerHomeScreen extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          color: AppColors.surfaceWhite,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.borderLight),
         ),
         child: Row(
           children: [
@@ -368,13 +432,17 @@ class CustomerHomeScreen extends ConsumerWidget {
                 children: [
                   Text(
                     count,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: color),
                   ),
                   Text(
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                    style: const TextStyle(
+                        fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -388,18 +456,18 @@ class CustomerHomeScreen extends ConsumerWidget {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
-        return Colors.orange;
+        return AppColors.statusPending;
       case 'approved':
       case 'in_production':
-        return Colors.blue;
+        return AppColors.statusProcessing;
       case 'dispatched':
-        return Colors.purple;
+        return AppColors.statusReplacementDispatched;
       case 'delivered':
-        return Colors.green;
+        return AppColors.statusDelivered;
       case 'cancelled':
-        return Colors.red;
+        return AppColors.statusReturned;
       default:
-        return Colors.grey;
+        return AppColors.statusCancelled;
     }
   }
 }

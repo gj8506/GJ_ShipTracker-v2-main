@@ -8,10 +8,12 @@ class AdminExcelExportDialog extends ConsumerStatefulWidget {
   const AdminExcelExportDialog({super.key});
 
   @override
-  ConsumerState<AdminExcelExportDialog> createState() => _AdminExcelExportDialogState();
+  ConsumerState<AdminExcelExportDialog> createState() =>
+      _AdminExcelExportDialogState();
 }
 
-class _AdminExcelExportDialogState extends ConsumerState<AdminExcelExportDialog> {
+class _AdminExcelExportDialogState
+    extends ConsumerState<AdminExcelExportDialog> {
   int _selectedDays = 90; // Default 3 Months
   bool _isExporting = false;
   String? _errorMessage;
@@ -85,10 +87,11 @@ class _AdminExcelExportDialogState extends ConsumerState<AdminExcelExportDialog>
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                      color: AppColors.statusDelivered.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.table_chart, color: Color(0xFF10B981), size: 24),
+                    child: const Icon(Icons.table_chart,
+                        color: AppColors.statusDelivered, size: 24),
                   ),
                   const SizedBox(width: 12),
                   const Expanded(
@@ -97,18 +100,21 @@ class _AdminExcelExportDialogState extends ConsumerState<AdminExcelExportDialog>
                       children: [
                         Text(
                           'Export Organized Excel',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         Text(
                           'Select time interval for your records',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
-                    onPressed: _isExporting ? null : () => Navigator.of(context).pop(),
+                    onPressed:
+                        _isExporting ? null : () => Navigator.of(context).pop(),
                   ),
                 ],
               ),
@@ -131,10 +137,14 @@ class _AdminExcelExportDialogState extends ConsumerState<AdminExcelExportDialog>
                   return ChoiceChip(
                     label: Text(label),
                     selected: isSelected,
-                    selectedColor: const Color(0xFF10B981).withValues(alpha: 0.15),
+                    selectedColor:
+                        AppColors.statusDelivered.withValues(alpha: 0.15),
                     labelStyle: TextStyle(
-                      color: isSelected ? const Color(0xFF10B981) : Colors.black87,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected
+                          ? AppColors.statusDelivered
+                          : AppColors.textPrimary,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                     onSelected: _isExporting
                         ? null
@@ -151,7 +161,8 @@ class _AdminExcelExportDialogState extends ConsumerState<AdminExcelExportDialog>
                 const SizedBox(height: 12),
                 Text(
                   _errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                  style: const TextStyle(
+                      color: AppColors.statusReturned, fontSize: 12),
                 ),
               ],
 
@@ -162,25 +173,30 @@ class _AdminExcelExportDialogState extends ConsumerState<AdminExcelExportDialog>
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: _isExporting ? null : () => Navigator.of(context).pop(),
+                    onPressed:
+                        _isExporting ? null : () => Navigator.of(context).pop(),
                     child: const Text('Cancel'),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF10B981),
+                      backgroundColor: AppColors.statusDelivered,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
                     ),
                     onPressed: _isExporting ? null : _handleExport,
                     icon: _isExporting
                         ? const SizedBox(
                             width: 16,
                             height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white),
                           )
                         : const Icon(Icons.file_download_outlined, size: 18),
-                    label: Text(_isExporting ? 'Generating...' : 'Export & Share .XLSX'),
+                    label: Text(_isExporting
+                        ? 'Generating...'
+                        : 'Export & Share .XLSX'),
                   ),
                 ],
               ),

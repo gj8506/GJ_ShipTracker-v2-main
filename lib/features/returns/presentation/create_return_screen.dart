@@ -85,7 +85,8 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Permission error: ${e.message ?? e.code}. Please enable Camera/Storage permissions in Settings.'),
+            content: Text(
+                'Permission error: ${e.message ?? e.code}. Please enable Camera/Storage permissions in Settings.'),
             backgroundColor: AppColors.statusReturned,
           ),
         );
@@ -137,7 +138,8 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
         buffer.writeln(userNotes);
       }
       if (_selectedImage != null) {
-        buffer.writeln('[Photo Attached: ${_selectedImage!.path.split('/').last}]');
+        buffer.writeln(
+            '[Photo Attached: ${_selectedImage!.path.split('/').last}]');
       }
 
       final combinedNotes = buffer.toString().trim();
@@ -150,7 +152,9 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
         'platform': _selectedPlatform,
         'resolutionType': _selectedResolution,
         'customerName': _customerNameController.text.trim(),
-        'contactNumber': _contactController.text.trim().isEmpty ? null : _contactController.text.trim(),
+        'contactNumber': _contactController.text.trim().isEmpty
+            ? null
+            : _contactController.text.trim(),
         'notes': combinedNotes.isEmpty ? null : combinedNotes,
         'status': AppConstants.returnStatusPending,
         'createdAt': FieldValue.serverTimestamp(),
@@ -162,7 +166,8 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Return ticket for "$trackingNum" logged successfully!'),
+            content:
+                Text('Return ticket for "$trackingNum" logged successfully!'),
             backgroundColor: AppColors.statusDelivered,
           ),
         );
@@ -186,15 +191,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          'Log Return / Defect Ticket',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.navyPrimary,
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Log Return / Defect Ticket')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -210,8 +207,10 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                   decoration: InputDecoration(
                     labelText: 'Original Tracking Number *',
                     hintText: 'e.g. SPX123456789PH',
-                    prefixIcon: const Icon(Icons.qr_code, color: AppColors.navyPrimary),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    prefixIcon:
+                        const Icon(Icons.qr_code, color: AppColors.navyPrimary),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
@@ -232,17 +231,23 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Platform',
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 12),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                         items: _platforms.map((p) {
                           return DropdownMenuItem(
                             value: p,
-                            child: Text(p, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+                            child: Text(p,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 13)),
                           );
                         }).toList(),
                         onChanged: (val) {
-                          if (val != null) setState(() => _selectedPlatform = val);
+                          if (val != null) {
+                            setState(() => _selectedPlatform = val);
+                          }
                         },
                       ),
                     ),
@@ -254,17 +259,23 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Resolution',
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 12),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                         items: _resolutionTypes.map((r) {
                           return DropdownMenuItem(
                             value: r,
-                            child: Text(r, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+                            child: Text(r,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 13)),
                           );
                         }).toList(),
                         onChanged: (val) {
-                          if (val != null) setState(() => _selectedResolution = val);
+                          if (val != null) {
+                            setState(() => _selectedResolution = val);
+                          }
                         },
                       ),
                     ),
@@ -278,8 +289,10 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                   textCapitalization: TextCapitalization.words,
                   decoration: InputDecoration(
                     labelText: 'Customer / Buyer Name *',
-                    prefixIcon: const Icon(Icons.person_outline, color: AppColors.navyPrimary),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    prefixIcon: const Icon(Icons.person_outline,
+                        color: AppColors.navyPrimary),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
@@ -296,8 +309,10 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
                     labelText: 'Contact Number (Optional)',
-                    prefixIcon: const Icon(Icons.phone_outlined, color: AppColors.navyPrimary),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    prefixIcon: const Icon(Icons.phone_outlined,
+                        color: AppColors.navyPrimary),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -308,8 +323,10 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                   decoration: InputDecoration(
                     labelText: 'Motorcycle Plate Specifications',
                     hintText: 'e.g. White plate, embossed, 4x7 with bracket',
-                    prefixIcon: const Icon(Icons.two_wheeler_outlined, color: AppColors.navyPrimary),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    prefixIcon: const Icon(Icons.two_wheeler_outlined,
+                        color: AppColors.navyPrimary),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -320,8 +337,10 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: 'Defect Category *',
-                    prefixIcon: const Icon(Icons.warning_amber_rounded, color: AppColors.statusReturned),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    prefixIcon: const Icon(Icons.warning_amber_rounded,
+                        color: AppColors.statusReturned),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                   items: _defectReasons.map((c) {
                     return DropdownMenuItem(
@@ -330,7 +349,9 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                     );
                   }).toList(),
                   onChanged: (val) {
-                    if (val != null) setState(() => _selectedDefectReason = val);
+                    if (val != null) {
+                      setState(() => _selectedDefectReason = val);
+                    }
                   },
                 ),
                 const SizedBox(height: 16),
@@ -343,7 +364,8 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                     labelText: 'Defect Description / Notes',
                     hintText: 'Describe damage or defect details...',
                     alignLabelWithHint: true,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -354,14 +376,15 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300),
+                    border: Border.all(color: AppColors.borderLight),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Row(
                         children: [
-                          Icon(Icons.photo_library_outlined, size: 20, color: AppColors.navyPrimary),
+                          Icon(Icons.photo_library_outlined,
+                              size: 20, color: AppColors.navyPrimary),
                           SizedBox(width: 8),
                           Text(
                             'Photo Evidence',
@@ -395,7 +418,8 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: IconButton(
-                                  icon: const Icon(Icons.close, color: Colors.white, size: 20),
+                                  icon: const Icon(Icons.close,
+                                      color: Colors.white, size: 20),
                                   onPressed: _removeSelectedImage,
                                   tooltip: 'Remove photo',
                                 ),
@@ -412,15 +436,21 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                           Expanded(
                             child: OutlinedButton.icon(
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                side: BorderSide(color: Colors.grey.shade400),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                side: const BorderSide(
+                                    color: AppColors.textMuted),
                               ),
                               onPressed: () => _pickImage(ImageSource.camera),
-                              icon: const Icon(Icons.camera_alt_outlined, color: AppColors.navyPrimary),
+                              icon: const Icon(Icons.camera_alt_outlined,
+                                  color: AppColors.navyPrimary),
                               label: const Text(
                                 'Camera',
-                                style: TextStyle(color: AppColors.navyPrimary, fontWeight: FontWeight.w600),
+                                style: TextStyle(
+                                    color: AppColors.navyPrimary,
+                                    fontWeight: FontWeight.w600),
                               ),
                             ),
                           ),
@@ -428,15 +458,21 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                           Expanded(
                             child: OutlinedButton.icon(
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                side: BorderSide(color: Colors.grey.shade400),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                side: const BorderSide(
+                                    color: AppColors.textMuted),
                               ),
                               onPressed: () => _pickImage(ImageSource.gallery),
-                              icon: const Icon(Icons.photo_outlined, color: AppColors.navyPrimary),
+                              icon: const Icon(Icons.photo_outlined,
+                                  color: AppColors.navyPrimary),
                               label: const Text(
                                 'Gallery',
-                                style: TextStyle(color: AppColors.navyPrimary, fontWeight: FontWeight.w600),
+                                style: TextStyle(
+                                    color: AppColors.navyPrimary,
+                                    fontWeight: FontWeight.w600),
                               ),
                             ),
                           ),
@@ -453,18 +489,21 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                     backgroundColor: AppColors.navyPrimary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
                   ),
                   onPressed: _isLoading ? null : _submitReturnTicket,
                   child: _isLoading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
                         )
                       : const Text(
                           'Submit Return Ticket',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                 ),
                 const SizedBox(height: 20),

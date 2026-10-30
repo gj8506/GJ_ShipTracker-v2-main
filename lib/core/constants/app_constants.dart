@@ -110,7 +110,8 @@ class AppConstants {
   // Return Statuses
   static const String returnStatusPending = 'Pending Review';
   static const String returnStatusApproved = 'Approved';
-  static const String returnStatusReplacementDispatched = 'Replacement Dispatched';
+  static const String returnStatusReplacementDispatched =
+      'Replacement Dispatched';
   static const String returnStatusRefunded = 'Refunded';
   static const String returnStatusRejected = 'Rejected';
 

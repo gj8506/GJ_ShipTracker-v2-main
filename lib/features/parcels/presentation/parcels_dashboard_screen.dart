@@ -32,23 +32,26 @@ class ParcelsDashboardScreen extends ConsumerWidget {
 
     // Compute live parcel counts per platform
     final allParcels = allParcelsAsync.value ?? [];
-    final shopeeCount =
-        allParcels.where((p) => p.platform == AppConstants.platformShopee).length;
-    final lazadaCount =
-        allParcels.where((p) => p.platform == AppConstants.platformLazada).length;
-    final tikTokCount =
-        allParcels.where((p) => p.platform == AppConstants.platformTikTok).length;
+    final shopeeCount = allParcels
+        .where((p) => p.platform == AppConstants.platformShopee)
+        .length;
+    final lazadaCount = allParcels
+        .where((p) => p.platform == AppConstants.platformLazada)
+        .length;
+    final tikTokCount = allParcels
+        .where((p) => p.platform == AppConstants.platformTikTok)
+        .length;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text('Parcels Dashboard', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.navyPrimary,
-        elevation: 0,
+        title: const Text(
+          'Parcels Dashboard',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_box_outlined, color: AppColors.navyPrimary),
+            icon: const Icon(Icons.add_box_outlined),
             onPressed: () => context.go('/dispatch'),
             tooltip: 'Dispatch New Parcel',
           ),
@@ -58,7 +61,8 @@ class ParcelsDashboardScreen extends ConsumerWidget {
         children: [
           // 1. Live Platform Summary Header Cards
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: Row(
               children: [
                 Expanded(
@@ -99,10 +103,11 @@ class ParcelsDashboardScreen extends ConsumerWidget {
                   ref.read(searchQueryProvider.notifier).state = val,
               decoration: InputDecoration(
                 hintText: 'Search tracking number, customer, courier...',
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                prefixIcon: const Icon(Icons.search),
                 filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                fillColor: AppColors.surfaceWhite,
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: AppColors.borderLight),
@@ -124,11 +129,14 @@ class ParcelsDashboardScreen extends ConsumerWidget {
               children: [
                 _buildFilterChip(ref, 'All', selectedPlatform),
                 const SizedBox(width: 8),
-                _buildFilterChip(ref, AppConstants.platformShopee, selectedPlatform),
+                _buildFilterChip(
+                    ref, AppConstants.platformShopee, selectedPlatform),
                 const SizedBox(width: 8),
-                _buildFilterChip(ref, AppConstants.platformLazada, selectedPlatform),
+                _buildFilterChip(
+                    ref, AppConstants.platformLazada, selectedPlatform),
                 const SizedBox(width: 8),
-                _buildFilterChip(ref, AppConstants.platformTikTok, selectedPlatform),
+                _buildFilterChip(
+                    ref, AppConstants.platformTikTok, selectedPlatform),
               ],
             ),
           ),
@@ -139,15 +147,22 @@ class ParcelsDashboardScreen extends ConsumerWidget {
             child: allParcelsAsync.when(
               data: (_) {
                 if (filteredParcels.isEmpty) {
-                  return Center(
+                  return const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey[400]),
-                        const SizedBox(height: 12),
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          size: 64,
+                          color: AppColors.textMuted,
+                        ),
+                        SizedBox(height: 12),
                         Text(
                           'No parcels match your filters',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 16,
+                          ),
                         ),
                       ],
                     ),
@@ -155,7 +170,8 @@ class ParcelsDashboardScreen extends ConsumerWidget {
                 }
 
                 return ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
                   itemCount: filteredParcels.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
@@ -171,7 +187,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
                   child: Text(
                     'Error loading parcels: $err',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.red),
+                    style: const TextStyle(color: AppColors.errorRed),
                   ),
                 ),
               ),
@@ -191,26 +207,43 @@ class ParcelsDashboardScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: titleColor,
-            ),
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: titleColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  title,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: titleColor,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             count,
             style: const TextStyle(
               fontSize: 15,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w700,
               color: AppColors.navyPrimary,
             ),
           ),
@@ -219,8 +252,10 @@ class ParcelsDashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildFilterChip(WidgetRef ref, String label, String? currentSelected) {
-    final isSelected = (label == 'All' && currentSelected == null) || (currentSelected == label);
+  Widget _buildFilterChip(
+      WidgetRef ref, String label, String? currentSelected) {
+    final isSelected = (label == 'All' && currentSelected == null) ||
+        (currentSelected == label);
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
@@ -230,11 +265,11 @@ class ParcelsDashboardScreen extends ConsumerWidget {
       },
       selectedColor: AppColors.navyPrimary,
       labelStyle: TextStyle(
-        color: isSelected ? Colors.white : AppColors.navyPrimary,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        color: isSelected ? AppColors.textOnPrimary : AppColors.navyPrimary,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
         fontSize: 13,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surfaceWhite,
       side: BorderSide(
         color: isSelected ? AppColors.navyPrimary : AppColors.borderLight,
       ),
@@ -266,12 +301,13 @@ class ParcelsDashboardScreen extends ConsumerWidget {
                     parcel.trackingNumber,
                     style: const TextStyle(
                       fontSize: 15,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
                       color: AppColors.navyPrimary,
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
@@ -296,14 +332,14 @@ class ParcelsDashboardScreen extends ConsumerWidget {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   Text(
                     '₱${parcel.amount.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 15,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
                       color: AppColors.navyPrimary,
                     ),
                   ),
@@ -314,7 +350,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
                 '${parcel.platform} • ${parcel.courier}',
                 style: const TextStyle(
                   fontSize: 12,
-                  color: Colors.grey,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],

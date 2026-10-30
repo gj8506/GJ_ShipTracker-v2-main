@@ -21,7 +21,7 @@ class ProfileScreen extends ConsumerWidget {
         ),
         content: const Text(
           'Are you sure you want to sign out?',
-          style: TextStyle(fontSize: 15, color: Colors.black87),
+          style: TextStyle(fontSize: 15, color: AppColors.textPrimary),
         ),
         actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         actions: [
@@ -34,7 +34,10 @@ class ProfileScreen extends ConsumerWidget {
                   onPressed: () => Navigator.pop(ctx, false),
                   child: const Text(
                     'Cancel',
-                    style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600, fontSize: 14),
+                    style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14),
                   ),
                 ),
               ),
@@ -43,10 +46,12 @@ class ProfileScreen extends ConsumerWidget {
                 height: 48,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEF5350), // Soft red matching design
+                    backgroundColor:
+                        AppColors.statusReturned, // Soft red matching design
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: () => Navigator.pop(ctx, true),
                   child: const Text(
@@ -89,7 +94,8 @@ class ProfileScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Edit Profile',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -128,7 +134,9 @@ class ProfileScreen extends ConsumerWidget {
                 await ref.read(authRepositoryProvider).updateProfile(
                       uid: uid,
                       displayName: nameCtrl.text.trim(),
-                      phoneNumber: phoneCtrl.text.trim().isNotEmpty ? phoneCtrl.text.trim() : null,
+                      phoneNumber: phoneCtrl.text.trim().isNotEmpty
+                          ? phoneCtrl.text.trim()
+                          : null,
                     );
                 if (ctx.mounted) Navigator.of(ctx).pop();
               } catch (e) {
@@ -153,13 +161,14 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text('My Profile', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: AppColors.surfaceWhite,
-        foregroundColor: AppColors.navyPrimary, // FIXED: Sets the text and icon color to dark navy
-        elevation: 0,
+        title: const Text(
+          'My Profile',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout_rounded, color: AppColors.statusReturned),
+            icon: const Icon(Icons.logout_rounded,
+                color: AppColors.statusReturned),
             tooltip: 'Sign Out',
             onPressed: () => _handleSignOut(context, ref),
           ),
@@ -173,7 +182,8 @@ class ProfileScreen extends ConsumerWidget {
             return const Center(child: Text('No user profile found'));
           }
 
-          final roleColor = profile.isAdmin ? AppColors.shopeeOrange : AppColors.tealDark;
+          final roleColor =
+              profile.isAdmin ? AppColors.navyPrimary : AppColors.tealDark;
           final pendingStaffCount =
               profile.isAdmin ? ref.watch(pendingStaffCountProvider) : 0;
 
@@ -185,7 +195,7 @@ class ProfileScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: AppColors.surfaceWhite,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: AppColors.borderLight),
                 ),
                 child: Column(
@@ -201,11 +211,19 @@ class ProfileScreen extends ConsumerWidget {
                       children: [
                         Text(
                           profile.displayName,
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                         const SizedBox(width: 6),
                         IconButton(
-                          icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.tealDark),
+                          icon: const Icon(
+                            Icons.edit_outlined,
+                            size: 18,
+                            color: AppColors.tealDark,
+                          ),
                           onPressed: () {
                             _showEditProfileDialog(
                               context,
@@ -220,14 +238,18 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     Text(
                       profile.email,
-                      style: const TextStyle(fontSize: 14, color: AppColors.navyMuted),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     // Role Badge
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: roleColor.withOpacity(0.12),
+                        color: roleColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -247,37 +269,48 @@ class ProfileScreen extends ConsumerWidget {
               // Module 4 & 11 Quick Actions: Customers, Scanner, and Inbox
               const Text(
                 'Customer & Support Management',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.navyMuted),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textMuted,
+                  letterSpacing: 0.4,
+                ),
               ),
               const SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
                   color: AppColors.surfaceWhite,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.borderLight),
                 ),
                 child: Column(
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.qr_code_2_rounded, color: AppColors.tealDark),
+                      leading: const Icon(Icons.qr_code_2_rounded,
+                          color: AppColors.tealDark),
                       title: const Text('Customer & Reseller QR Directory'),
-                      subtitle: const Text('Manage repeat customers and custom QR codes'),
+                      subtitle: const Text(
+                          'Manage repeat customers and custom QR codes'),
                       trailing: const Icon(Icons.chevron_right_rounded),
                       onTap: () => context.push('/profile/customers'),
                     ),
                     const Divider(height: 1, color: AppColors.borderLight),
                     ListTile(
-                      leading: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.shopeeOrange),
+                      leading: const Icon(Icons.qr_code_scanner_rounded,
+                          color: AppColors.shopeeOrange),
                       title: const Text('Scan Reseller QR Code'),
-                      subtitle: const Text('Instant autofill for outbound dispatches'),
+                      subtitle: const Text(
+                          'Instant autofill for outbound dispatches'),
                       trailing: const Icon(Icons.chevron_right_rounded),
                       onTap: () => context.push('/profile/reseller-scanner'),
                     ),
                     const Divider(height: 1, color: AppColors.borderLight),
                     ListTile(
-                      leading: const Icon(Icons.support_agent_rounded, color: Colors.blue),
+                      leading: const Icon(Icons.support_agent_rounded,
+                          color: AppColors.statusInTransit),
                       title: const Text('Customer Support Inbox'),
-                      subtitle: const Text('Handle defect reports and inquiries'),
+                      subtitle:
+                          const Text('Handle defect reports and inquiries'),
                       trailing: const Icon(Icons.chevron_right_rounded),
                       onTap: () => context.push('/profile/support-inbox'),
                     ),
@@ -306,7 +339,7 @@ class ProfileScreen extends ConsumerWidget {
                   child: ListTile(
                     leading: const Icon(
                       Icons.admin_panel_settings_rounded,
-                      color: AppColors.shopeeOrange,
+                      color: AppColors.warningStrong,
                     ),
                     title: const Text(
                       'Staff Registration Approvals',
@@ -328,7 +361,7 @@ class ProfileScreen extends ConsumerWidget {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.shopeeOrange,
+                              color: AppColors.warningStrong,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -353,19 +386,27 @@ class ProfileScreen extends ConsumerWidget {
               // System & Legal Section
               const Text(
                 'App & Compliance',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.navyMuted),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textMuted,
+                  letterSpacing: 0.4,
+                ),
               ),
               const SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
                   color: AppColors.surfaceWhite,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.borderLight),
                 ),
                 child: ListTile(
-                  leading: const Icon(Icons.privacy_tip_outlined, color: AppColors.navyPrimary),
-                  title: const Text('Privacy Policy & Terms', style: TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: const Text('Data Privacy Act (RA 10173) & shop terms'),
+                  leading: const Icon(Icons.privacy_tip_outlined,
+                      color: AppColors.navyPrimary),
+                  title: const Text('Privacy Policy & Terms',
+                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle:
+                      const Text('Data Privacy Act (RA 10173) & shop terms'),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _showPrivacyPolicy(context),
                 ),
@@ -377,9 +418,11 @@ class ProfileScreen extends ConsumerWidget {
                 height: 52,
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFEF5350),
-                    side: const BorderSide(color: Color(0xFFEF9A9A), width: 1.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    foregroundColor: AppColors.statusReturned,
+                    side: const BorderSide(
+                        color: AppColors.dangerBorder, width: 1.5),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
                   ),
                   icon: const Icon(Icons.logout_rounded),
                   label: const Text(
@@ -418,7 +461,9 @@ class _PrivacyPolicySheet extends StatelessWidget {
           Container(
             width: 40,
             height: 5,
-            decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(
+                color: AppColors.borderLight,
+                borderRadius: BorderRadius.circular(10)),
           ),
           const SizedBox(height: 16),
           const Padding(
@@ -426,7 +471,10 @@ class _PrivacyPolicySheet extends StatelessWidget {
             child: Text(
               'Terms of Service & Data Privacy Act (RA 10173)',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.navyPrimary),
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.navyPrimary),
             ),
           ),
           const Divider(height: 32),
@@ -448,12 +496,14 @@ All dispatch actions, status updates, and returns logged are stamped with staff 
 
 4. USER RIGHTS
 Data subjects retain all rights guaranteed under RA 10173, including access, correction, and account deletion requests via administration.''',
-                style: TextStyle(fontSize: 14, color: Colors.black87, height: 1.6),
+                style: TextStyle(
+                    fontSize: 14, color: AppColors.textPrimary, height: 1.6),
               ),
             ),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom + 24),
+            padding: EdgeInsets.fromLTRB(
+                24, 16, 24, MediaQuery.of(context).padding.bottom + 24),
             child: SizedBox(
               width: double.infinity,
               height: 52,
@@ -461,10 +511,13 @@ Data subjects retain all rights guaranteed under RA 10173, including access, cor
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.navyPrimary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                child: const Text('Close',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
               ),
             ),
           ),

@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'core/theme/app_colors.dart';
 import 'firebase_options.dart';
 import 'app.dart';
 
@@ -11,7 +12,7 @@ import 'app.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  print("Handled background message: ${message.messageId}");
+  debugPrint('Handled background message: ${message.messageId}');
 }
 
 // Global scaffold messenger key for foreground snackbars
@@ -20,7 +21,7 @@ final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -57,7 +58,7 @@ void main() async {
   // Register foreground handler
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     if (message.notification != null) {
-      ScaffoldMessengerState? messenger = scaffoldMessengerKey.currentState;
+      final messenger = scaffoldMessengerKey.currentState;
       if (messenger != null) {
         messenger.showSnackBar(
           SnackBar(
@@ -65,13 +66,13 @@ void main() async {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(message.notification!.title ?? 'New Alert', 
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(message.notification!.title ?? 'New Alert',
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 Text(message.notification!.body ?? ''),
               ],
             ),
             behavior: SnackBarBehavior.floating,
-            backgroundColor: const Color(0xFF1E293B),
+            backgroundColor: AppColors.navySecondary,
             duration: const Duration(seconds: 4),
           ),
         );

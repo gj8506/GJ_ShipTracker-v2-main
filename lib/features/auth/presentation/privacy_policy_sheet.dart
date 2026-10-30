@@ -30,7 +30,7 @@ class PrivacyPolicySheet extends StatelessWidget {
               width: 48,
               height: 5,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: AppColors.borderLight,
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
@@ -38,7 +38,8 @@ class PrivacyPolicySheet extends StatelessWidget {
           const SizedBox(height: 18),
           const Row(
             children: [
-              Icon(Icons.security_rounded, color: AppColors.tealAccent, size: 28),
+              Icon(Icons.security_rounded,
+                  color: AppColors.tealAccent, size: 28),
               SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -55,7 +56,10 @@ class PrivacyPolicySheet extends StatelessWidget {
           const SizedBox(height: 6),
           const Text(
             'In compliance with Republic Act No. 10173 (Data Privacy Act of 2012)',
-            style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500),
+            style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500),
           ),
           const Divider(height: 24),
           Expanded(
@@ -90,9 +94,11 @@ class PrivacyPolicySheet extends StatelessWidget {
               backgroundColor: AppColors.navyPrimary,
               foregroundColor: Colors.white,
               minimumSize: const Size.fromHeight(48),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('I Understand & Agree', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text('I Understand & Agree',
+                style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -105,9 +111,15 @@ class PrivacyPolicySheet extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.navyPrimary)),
+          Text(title,
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: AppColors.navyPrimary)),
           const SizedBox(height: 4),
-          Text(content, style: const TextStyle(fontSize: 13, height: 1.45, color: Colors.black87)),
+          Text(content,
+              style: const TextStyle(
+                  fontSize: 13, height: 1.45, color: AppColors.textPrimary)),
         ],
       ),
     );

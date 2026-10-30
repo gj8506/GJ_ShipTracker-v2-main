@@ -2,7 +2,8 @@
 // CONFIDENCE LEVEL ENUM (Matches Unit Test)
 // -------------------------------------------------------------
 enum ConfidenceLevel {
-  low('Low Confidence', 'High variance or insufficient historical observations'),
+  low('Low Confidence',
+      'High variance or insufficient historical observations'),
   moderate('Moderate Confidence', 'Stable historical trend'),
   high('High Confidence', 'Strong statistical fit (R² > 0.70)');
 

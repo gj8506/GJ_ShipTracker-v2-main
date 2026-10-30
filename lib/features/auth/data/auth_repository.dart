@@ -31,7 +31,7 @@ class AuthRepository {
   Future<UserCredential?> signInWithGoogle() async {
     // FORCE ACCOUNT PICKER: Clear the cached Google session first
     await _googleSignIn.signOut();
-    
+
     // 1. Trigger the Google Authentication flow
     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
     if (googleUser == null) {
@@ -109,7 +109,8 @@ class AuthRepository {
       status: isStaffRole
           ? AppConstants.accountStatusPending
           : AppConstants.accountStatusActive,
-      phoneNumber: (phoneNumber ?? '').trim().isEmpty ? null : phoneNumber!.trim(),
+      phoneNumber:
+          (phoneNumber ?? '').trim().isEmpty ? null : phoneNumber!.trim(),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -130,9 +131,7 @@ class AuthRepository {
         createdAt: DateTime.now(),
       );
 
-      await _firestore
-          .collection('customers')
-          .add(newCustomer.toFirestore());
+      await _firestore.collection('customers').add(newCustomer.toFirestore());
     }
   }
 
@@ -223,9 +222,7 @@ class AuthRepository {
           createdAt: DateTime.now(),
         );
 
-        await _firestore
-            .collection('customers')
-            .add(newCustomer.toFirestore());
+        await _firestore.collection('customers').add(newCustomer.toFirestore());
       }
     }
 
@@ -253,11 +250,9 @@ class AuthRepository {
 
   // Quick helper to ensure or switch role for testing
   Future<void> setUserRole(String uid, String newRole) async {
-    await _firestore
-        .collection(AppConstants.collectionUsers)
-        .doc(uid)
-        .set({'role': newRole, 'updatedAt': FieldValue.serverTimestamp()},
-            SetOptions(merge: true));
+    await _firestore.collection(AppConstants.collectionUsers).doc(uid).set(
+        {'role': newRole, 'updatedAt': FieldValue.serverTimestamp()},
+        SetOptions(merge: true));
   }
 
   // Update Profile

@@ -14,7 +14,8 @@ final parcelsStreamProvider = StreamProvider<List<ParcelModel>>((ref) {
 });
 
 // Stream of single parcel by ID
-final singleParcelStreamProvider = StreamProvider.family<ParcelModel?, String>((ref, id) {
+final singleParcelStreamProvider =
+    StreamProvider.family<ParcelModel?, String>((ref, id) {
   return ref.watch(parcelRepositoryProvider).getParcelByIdStream(id);
 });
 
@@ -40,7 +41,8 @@ final filteredParcelsProvider = Provider<List<ParcelModel>>((ref) {
         (parcel.items ?? '').toLowerCase().contains(query);
 
     final matchesStatus = statusFilter == null || parcel.status == statusFilter;
-    final matchesPlatform = platformFilter == null || parcel.platform == platformFilter;
+    final matchesPlatform =
+        platformFilter == null || parcel.platform == platformFilter;
 
     return matchesQuery && matchesStatus && matchesPlatform;
   }).toList();
