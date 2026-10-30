@@ -47,7 +47,7 @@ class CustomerQrDialog extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: customer.type == 'reseller'
                             ? AppColors.tealAccent
-                            : Colors.grey,
+                            : AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -99,7 +99,8 @@ class CustomerQrDialog extends StatelessWidget {
               customer.contactNumber.isNotEmpty
                   ? customer.contactNumber
                   : 'No contact provided',
-              style: const TextStyle(fontSize: 13, color: Colors.grey),
+              style:
+                  const TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 6),
             Container(

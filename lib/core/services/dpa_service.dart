@@ -22,7 +22,8 @@ class DpaService {
   Future<void> acceptPolicy() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_kPrefDpaAcceptedKey, kDpaPolicyVersion);
-    await prefs.setString(_kPrefDpaTimestampKey, DateTime.now().toIso8601String());
+    await prefs.setString(
+        _kPrefDpaTimestampKey, DateTime.now().toIso8601String());
   }
 
   Future<void> resetPolicy() async {

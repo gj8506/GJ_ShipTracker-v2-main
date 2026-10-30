@@ -35,29 +35,30 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
+    return const Scaffold(
+      backgroundColor: AppColors.backgroundLight,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const AppLogo(
+            AppLogo(
               size: 130,
               circular: true,
-              borderColor: AppColors.primary,
+              borderColor: AppColors.navyPrimary,
             ),
-            const SizedBox(height: 24),
-            const Text(
+            SizedBox(height: 24),
+            Text(
               AppConstants.appName,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+                color: AppColors.navyPrimary,
+                letterSpacing: -0.3,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: 8),
+            Text(
               AppConstants.appSubtitle,
               style: TextStyle(
                 fontSize: 14,
@@ -65,13 +66,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 letterSpacing: 0.5,
               ),
             ),
-            const SizedBox(height: 48),
+            SizedBox(height: 48),
             SizedBox(
               width: 32,
               height: 32,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                color: AppColors.primary.withValues(alpha: 0.7),
+                color: AppColors.logoBlue,
               ),
             ),
           ],

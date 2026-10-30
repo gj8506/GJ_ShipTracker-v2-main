@@ -15,7 +15,8 @@ class ChatThreadScreen extends ConsumerStatefulWidget {
   final String threadId;
   final String subject;
 
-  const ChatThreadScreen({super.key, required this.threadId, required this.subject});
+  const ChatThreadScreen(
+      {super.key, required this.threadId, required this.subject});
 
   @override
   ConsumerState<ChatThreadScreen> createState() => _ChatThreadScreenState();
@@ -32,7 +33,9 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
     super.initState();
     _isAdmin = ref.read(userProfileProvider).value?.role == 'admin';
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(supportChatRepositoryProvider).markAsRead(widget.threadId, _isAdmin);
+      ref
+          .read(supportChatRepositoryProvider)
+          .markAsRead(widget.threadId, _isAdmin);
     });
   }
 
@@ -71,14 +74,17 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
       createdAt: DateTime.now(),
     );
 
-    await ref.read(supportChatRepositoryProvider).sendMessage(widget.threadId, msg, _isAdmin);
+    await ref
+        .read(supportChatRepositoryProvider)
+        .sendMessage(widget.threadId, msg, _isAdmin);
     _scrollToBottom();
   }
 
   Future<void> _pickAndUploadImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
-    
+    final pickedFile =
+        await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+
     if (pickedFile == null) return;
 
     setState(() => _isUploadingImage = true);
@@ -86,17 +92,19 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
     try {
       final storageService = ref.read(imageStorageServiceProvider);
       final url = await storageService.uploadImage(
-        File(pickedFile.path), 
+        File(pickedFile.path),
         folder: 'support_chats',
       );
-      
+
       if (url.isNotEmpty) {
         await _sendMessage(imageUrl: url);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Upload failed: $e'),
+              backgroundColor: AppColors.statusReturned),
         );
       }
     } finally {
@@ -119,8 +127,10 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
             child: CachedNetworkImage(
               imageUrl: url,
               fit: BoxFit.contain,
-              placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-              errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.white),
+              placeholder: (context, url) =>
+                  const Center(child: CircularProgressIndicator()),
+              errorWidget: (context, url, error) =>
+                  const Icon(Icons.error, color: Colors.white),
             ),
           ),
         ),
@@ -134,26 +144,34 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Support Chat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            Text(widget.subject, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            const Text('Support Chat',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+            Text(
+              widget.subject,
+              style:
+                  const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
           ],
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.navyPrimary,
-        elevation: 1,
         actions: [
           if (_isAdmin)
             TextButton(
               onPressed: () {
-                ref.read(supportChatRepositoryProvider).updateThreadStatus(widget.threadId, 'resolved');
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Marked as Resolved')));
+                ref
+                    .read(supportChatRepositoryProvider)
+                    .updateThreadStatus(widget.threadId, 'resolved');
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Marked as Resolved')));
               },
-              child: const Text('Resolve', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+              child: const Text('Resolve',
+                  style: TextStyle(
+                      color: AppColors.statusDelivered,
+                      fontWeight: FontWeight.bold)),
             ),
         ],
       ),
@@ -165,12 +183,16 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
               error: (err, _) => Center(child: Text('Error: $err')),
               data: (messages) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  ref.read(supportChatRepositoryProvider).markAsRead(widget.threadId, _isAdmin);
+                  ref
+                      .read(supportChatRepositoryProvider)
+                      .markAsRead(widget.threadId, _isAdmin);
                   _scrollToBottom();
                 });
 
                 if (messages.isEmpty) {
-                  return const Center(child: Text('No messages yet. Send a message to start.', style: TextStyle(color: Colors.grey)));
+                  return const Center(
+                      child: Text('No messages yet. Send a message to start.',
+                          style: TextStyle(color: AppColors.textSecondary)));
                 }
 
                 return ListView.builder(
@@ -182,28 +204,49 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                     final isMe = msg.senderUid == currentUid;
 
                     return Align(
-                      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                      alignment:
+                          isMe ? Alignment.centerRight : Alignment.centerLeft,
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 12),
-                        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+                        constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.75),
                         decoration: BoxDecoration(
-                          color: isMe ? AppColors.navyPrimary : Colors.white,
+                          color: isMe
+                              ? AppColors.navyPrimary
+                              : AppColors.surfaceWhite,
                           borderRadius: BorderRadius.only(
                             topLeft: const Radius.circular(16),
                             topRight: const Radius.circular(16),
                             bottomLeft: Radius.circular(isMe ? 16 : 0),
                             bottomRight: Radius.circular(isMe ? 0 : 16),
                           ),
-                          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
+                          border: isMe
+                              ? null
+                              : Border.all(color: AppColors.borderSubtle),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.navyPrimary.withValues(
+                                alpha: 0.06,
+                              ),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 10),
                         child: Column(
-                          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                          crossAxisAlignment: isMe
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
                           children: [
                             if (!isMe) ...[
                               Text(
                                 msg.senderRole.toUpperCase(),
-                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue.shade700),
+                                style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.statusInTransit),
                               ),
                               const SizedBox(height: 4),
                             ],
@@ -220,7 +263,8 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                                       fit: BoxFit.cover,
                                       placeholder: (_, __) => const SizedBox(
                                         height: 150,
-                                        child: Center(child: CircularProgressIndicator()),
+                                        child: Center(
+                                            child: CircularProgressIndicator()),
                                       ),
                                     ),
                                   ),
@@ -229,12 +273,20 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                             if (msg.text.isNotEmpty)
                               Text(
                                 msg.text,
-                                style: TextStyle(color: isMe ? Colors.white : Colors.black87, fontSize: 14),
+                                style: TextStyle(
+                                    color: isMe
+                                        ? AppColors.textOnPrimary
+                                        : AppColors.textPrimary,
+                                    fontSize: 14),
                               ),
                             const SizedBox(height: 4),
                             Text(
                               DateFormat('hh:mm a').format(msg.createdAt),
-                              style: TextStyle(color: isMe ? Colors.white70 : Colors.grey, fontSize: 10),
+                              style: TextStyle(
+                                  color: isMe
+                                      ? Colors.white70
+                                      : AppColors.textSecondary,
+                                  fontSize: 10),
                             ),
                           ],
                         ),
@@ -248,16 +300,26 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: const BoxDecoration(
-              color: Colors.white,
-              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -2))],
+              color: AppColors.surfaceWhite,
+              border: Border(top: BorderSide(color: AppColors.borderLight)),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: Offset(0, -2))
+              ],
             ),
             child: SafeArea(
               child: Row(
                 children: [
                   IconButton(
-                    icon: _isUploadingImage 
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.add_photo_alternate_outlined, color: AppColors.tealDark),
+                    icon: _isUploadingImage
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.add_photo_alternate_outlined,
+                            color: AppColors.tealDark),
                     onPressed: _isUploadingImage ? null : _pickAndUploadImage,
                   ),
                   Expanded(
@@ -267,10 +329,13 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                       onSubmitted: (_) => _sendMessage(),
                       decoration: InputDecoration(
                         hintText: 'Type a message...',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide.none),
                         filled: true,
-                        fillColor: const Color(0xFFF1F5F9),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        fillColor: AppColors.surfaceMuted,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 10),
                       ),
                     ),
                   ),
@@ -278,7 +343,8 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                   CircleAvatar(
                     backgroundColor: AppColors.navyPrimary,
                     child: IconButton(
-                      icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                      icon: const Icon(Icons.send_rounded,
+                          color: Colors.white, size: 20),
                       onPressed: () => _sendMessage(),
                     ),
                   ),

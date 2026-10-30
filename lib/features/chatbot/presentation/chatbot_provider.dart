@@ -5,8 +5,11 @@ import '../data/chatbot_knowledge.dart';
 
 final isTypingProvider = StateProvider<bool>((ref) => false);
 
-final chatbotControllerProvider = StateNotifierProvider.autoDispose<ChatbotNotifier, List<ChatMessage>>((ref) {
-  final role = ref.watch(userProfileProvider).value?.role.toLowerCase() ?? 'customer';
+final chatbotControllerProvider =
+    StateNotifierProvider.autoDispose<ChatbotNotifier, List<ChatMessage>>(
+        (ref) {
+  final role =
+      ref.watch(userProfileProvider).value?.role.toLowerCase() ?? 'customer';
   return ChatbotNotifier(ref, role);
 });
 
@@ -19,7 +22,7 @@ class ChatbotNotifier extends StateNotifier<List<ChatMessage>> {
   }
 
   void _sendWelcomeMessage() {
-    final defaultReplies = userRole == 'customer' 
+    final defaultReplies = userRole == 'customer'
         ? ['How to order?', 'Track my order', 'Report a defect']
         : ['How to dispatch?', 'Scan QR', 'View Analytics'];
 
@@ -57,12 +60,13 @@ class ChatbotNotifier extends StateNotifier<List<ChatMessage>> {
 
   void _processIntent(String input) {
     final lowerInput = input.toLowerCase();
-    
+
     ChatIntent? bestMatch;
     int maxMatches = 0;
 
     for (var intent in ChatbotKnowledge.intents) {
-      if (!intent.allowedRoles.contains(userRole) && !intent.allowedRoles.contains('admin')) {
+      if (!intent.allowedRoles.contains(userRole) &&
+          !intent.allowedRoles.contains('admin')) {
         continue; // Skip intents not allowed for this role
       }
 
@@ -84,9 +88,10 @@ class ChatbotNotifier extends StateNotifier<List<ChatMessage>> {
       text: bestMatch?.response ?? ChatbotKnowledge.fallbackResponse,
       isUser: false,
       timestamp: DateTime.now(),
-      quickReplies: bestMatch?.quickReplies ?? (userRole == 'customer' 
-          ? ['Order a plate', 'Track order'] 
-          : ['Dispatch', 'Scan QR']),
+      quickReplies: bestMatch?.quickReplies ??
+          (userRole == 'customer'
+              ? ['Order a plate', 'Track order']
+              : ['Dispatch', 'Scan QR']),
       actionLabel: bestMatch?.actionLabel,
       actionRoute: bestMatch?.actionRoute,
     );

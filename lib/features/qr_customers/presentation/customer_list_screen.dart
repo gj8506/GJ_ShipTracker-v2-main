@@ -9,7 +9,8 @@ import 'customer_qr_dialog.dart';
 class CustomerListScreen extends ConsumerWidget {
   const CustomerListScreen({super.key});
 
-  void _showAddEditCustomerDialog(BuildContext context, [CustomerModel? existing]) {
+  void _showAddEditCustomerDialog(BuildContext context,
+      [CustomerModel? existing]) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -21,22 +22,22 @@ class CustomerListScreen extends ConsumerWidget {
   Future<void> _syncOldCustomers(BuildContext context) async {
     try {
       final firestore = FirebaseFirestore.instance;
-      
+
       // 1. Get all users who have the customer role
       final usersSnap = await firestore
           .collection(AppConstants.collectionUsers)
           .where('role', isEqualTo: 'customer')
           .get();
-          
+
       // 2. Get all existing customers to avoid duplicates
       final customersSnap = await firestore.collection('customers').get();
-      
+
       // Map existing UIDs (FIXED: Removed unnecessary casts)
       final existingLinkedUids = customersSnap.docs
           .map((doc) => doc.data()['linkedUid'] as String?)
           .where((uid) => uid != null)
           .toSet();
-          
+
       // Map existing Names (FIXED: Removed unnecessary casts)
       final existingNames = customersSnap.docs
           .map((doc) => (doc.data()['name'] as String?)?.toLowerCase().trim())
@@ -52,12 +53,11 @@ class CustomerListScreen extends ConsumerWidget {
         final uid = data['uid'] as String?;
         final name = data['fullName'] ?? data['displayName'] ?? 'Customer';
         final normalizedName = name.toString().toLowerCase().trim();
-        
+
         // Only add if BOTH the UID and the Name are missing from the registry
-        if (uid != null && 
-            !existingLinkedUids.contains(uid) && 
+        if (uid != null &&
+            !existingLinkedUids.contains(uid) &&
             !existingNames.contains(normalizedName)) {
-            
           final newDoc = firestore.collection('customers').doc();
           batch.set(newDoc, {
             'name': name,
@@ -86,7 +86,7 @@ class CustomerListScreen extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('All customers are already synced.'),
-              backgroundColor: Colors.blueGrey,
+              backgroundColor: AppColors.statusCancelled,
             ),
           );
         }
@@ -108,9 +108,9 @@ class CustomerListScreen extends ConsumerWidget {
       case 'reseller':
         return AppColors.tealContainer;
       case 'repeat':
-        return const Color(0xFFEDE7F6); // Soft purple
+        return AppColors.purpleContainer; // Soft purple
       case 'wholesale':
-        return const Color(0xFFFFF3E0); // Soft amber
+        return AppColors.statusPendingContainer; // Soft amber
       default:
         return AppColors.borderLight;
     }
@@ -121,9 +121,9 @@ class CustomerListScreen extends ConsumerWidget {
       case 'reseller':
         return AppColors.tealDark;
       case 'repeat':
-        return const Color(0xFF5E35B1);
+        return AppColors.statusRefunded;
       case 'wholesale':
-        return const Color(0xFFE65100);
+        return AppColors.warningDeep;
       default:
         return AppColors.navyMuted;
     }
@@ -137,17 +137,11 @@ class CustomerListScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text(
-          'Customer Registry & QR',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.navyPrimary,
-        elevation: 0,
+        title: const Text('Customer Registry & QR'),
         actions: [
           IconButton(
             tooltip: 'Sync Missing Accounts',
-            icon: const Icon(Icons.sync_rounded, color: AppColors.tealDark),
+            icon: const Icon(Icons.sync_rounded, color: AppColors.navyPrimary),
             onPressed: () => _syncOldCustomers(context),
           ),
         ],
@@ -169,14 +163,18 @@ class CustomerListScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
-              onChanged: (val) => ref.read(customerSearchProvider.notifier).state = val,
+              onChanged: (val) =>
+                  ref.read(customerSearchProvider.notifier).state = val,
               decoration: InputDecoration(
                 hintText: 'Search by name, contact, shop...',
-                hintStyle: const TextStyle(fontSize: 14, color: Colors.grey),
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                hintStyle: const TextStyle(
+                    fontSize: 14, color: AppColors.textSecondary),
+                prefixIcon:
+                    const Icon(Icons.search, color: AppColors.textSecondary),
                 filled: true,
                 fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: const BorderSide(color: AppColors.borderLight),
@@ -198,7 +196,7 @@ class CustomerListScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(24.0),
                   child: Text(
                     'Error loading customers: $err',
-                    style: const TextStyle(color: Colors.red),
+                    style: const TextStyle(color: AppColors.statusReturned),
                   ),
                 ),
               ),
@@ -232,26 +230,30 @@ class CustomerListScreen extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Text(
+                          const Text(
                             'Add repeat buyers or motorcycle shop resellers to generate custom QR codes for quick dispatching.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 14,
                               height: 1.4,
-                              color: Colors.grey[600],
+                              color: AppColors.textTertiary,
                             ),
                           ),
                           const SizedBox(height: 20),
                           OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.navyPrimary,
-                              side: const BorderSide(color: AppColors.navyPrimary),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                              side: const BorderSide(
+                                  color: AppColors.navyPrimary),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18, vertical: 12),
                             ),
                             icon: const Icon(Icons.add),
                             label: const Text('Add First Customer'),
-                            onPressed: () => _showAddEditCustomerDialog(context),
+                            onPressed: () =>
+                                _showAddEditCustomerDialog(context),
                           ),
                         ],
                       ),
@@ -265,7 +267,8 @@ class CustomerListScreen extends ConsumerWidget {
                   separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final customer = filteredCustomers[index];
-                    final isReseller = customer.type.toLowerCase() == 'reseller';
+                    final isReseller =
+                        customer.type.toLowerCase() == 'reseller';
 
                     return Card(
                       elevation: 0,
@@ -284,8 +287,12 @@ class CustomerListScreen extends ConsumerWidget {
                                   ? AppColors.tealContainer
                                   : AppColors.borderLight,
                               child: Icon(
-                                isReseller ? Icons.storefront_rounded : Icons.person_rounded,
-                                color: isReseller ? AppColors.tealDark : AppColors.navyPrimary,
+                                isReseller
+                                    ? Icons.storefront_rounded
+                                    : Icons.person_rounded,
+                                color: isReseller
+                                    ? AppColors.tealDark
+                                    : AppColors.navyPrimary,
                                 size: 22,
                               ),
                             ),
@@ -309,17 +316,20 @@ class CustomerListScreen extends ConsumerWidget {
                                         ),
                                       ),
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 3),
                                         decoration: BoxDecoration(
                                           color: _getBadgeColor(customer.type),
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                         ),
                                         child: Text(
                                           customer.type.toUpperCase(),
                                           style: TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.bold,
-                                            color: _getBadgeTextColor(customer.type),
+                                            color: _getBadgeTextColor(
+                                                customer.type),
                                           ),
                                         ),
                                       ),
@@ -327,8 +337,12 @@ class CustomerListScreen extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    customer.contactNumber.isNotEmpty ? customer.contactNumber : 'No contact provided',
-                                    style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                                    customer.contactNumber.isNotEmpty
+                                        ? customer.contactNumber
+                                        : 'No contact provided',
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        color: AppColors.navyMuted),
                                   ),
                                   if (customer.address.isNotEmpty) ...[
                                     const SizedBox(height: 2),
@@ -336,7 +350,9 @@ class CustomerListScreen extends ConsumerWidget {
                                       customer.address,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                                      style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textMutedAlt),
                                     ),
                                   ],
                                 ],
@@ -346,21 +362,25 @@ class CustomerListScreen extends ConsumerWidget {
 
                             // QR Dialog Button
                             IconButton(
-                              icon: const Icon(Icons.qr_code_2_rounded, color: AppColors.tealDark, size: 26),
+                              icon: const Icon(Icons.qr_code_2_rounded,
+                                  color: AppColors.tealDark, size: 26),
                               tooltip: 'View QR Code',
                               onPressed: () {
                                 showDialog(
                                   context: context,
-                                  builder: (ctx) => CustomerQrDialog(customer: customer),
+                                  builder: (ctx) =>
+                                      CustomerQrDialog(customer: customer),
                                 );
                               },
                             ),
 
                             // Edit Button
                             IconButton(
-                              icon: const Icon(Icons.edit_outlined, color: Colors.grey, size: 20),
+                              icon: const Icon(Icons.edit_outlined,
+                                  color: AppColors.textSecondary, size: 20),
                               tooltip: 'Edit Customer',
-                              onPressed: () => _showAddEditCustomerDialog(context, customer),
+                              onPressed: () =>
+                                  _showAddEditCustomerDialog(context, customer),
                             ),
                           ],
                         ),
@@ -384,10 +404,12 @@ class _AddEditCustomerDialog extends ConsumerStatefulWidget {
   const _AddEditCustomerDialog({this.existing});
 
   @override
-  ConsumerState<_AddEditCustomerDialog> createState() => _AddEditCustomerDialogState();
+  ConsumerState<_AddEditCustomerDialog> createState() =>
+      _AddEditCustomerDialogState();
 }
 
-class _AddEditCustomerDialogState extends ConsumerState<_AddEditCustomerDialog> {
+class _AddEditCustomerDialogState
+    extends ConsumerState<_AddEditCustomerDialog> {
   late final TextEditingController _nameCtrl;
   late final TextEditingController _contactCtrl;
   late final TextEditingController _addressCtrl;
@@ -398,11 +420,14 @@ class _AddEditCustomerDialogState extends ConsumerState<_AddEditCustomerDialog> 
   void initState() {
     super.initState();
     _nameCtrl = TextEditingController(text: widget.existing?.name ?? '');
-    _contactCtrl = TextEditingController(text: widget.existing?.contactNumber ?? '');
+    _contactCtrl =
+        TextEditingController(text: widget.existing?.contactNumber ?? '');
     _addressCtrl = TextEditingController(text: widget.existing?.address ?? '');
 
     // Normalize type and ensure it matches one of the dropdown items
-    final rawType = (widget.existing?.type ?? AppConstants.customerTypeRegular).trim().toLowerCase();
+    final rawType = (widget.existing?.type ?? AppConstants.customerTypeRegular)
+        .trim()
+        .toLowerCase();
     const validTypes = ['regular', 'repeat', 'reseller', 'wholesale'];
     _selectedType = validTypes.contains(rawType) ? rawType : 'regular';
   }
@@ -423,7 +448,7 @@ class _AddEditCustomerDialogState extends ConsumerState<_AddEditCustomerDialog> 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please enter name and contact number'),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: AppColors.statusReturned,
         ),
       );
       return;
@@ -469,7 +494,7 @@ class _AddEditCustomerDialogState extends ConsumerState<_AddEditCustomerDialog> 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error saving customer: $e'),
-            backgroundColor: Colors.redAccent,
+            backgroundColor: AppColors.statusReturned,
           ),
         );
       }
@@ -497,7 +522,8 @@ class _AddEditCustomerDialogState extends ConsumerState<_AddEditCustomerDialog> 
               decoration: const InputDecoration(
                 labelText: 'Customer / Motor Shop Name *',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               ),
             ),
             const SizedBox(height: 12),
@@ -508,7 +534,8 @@ class _AddEditCustomerDialogState extends ConsumerState<_AddEditCustomerDialog> 
               decoration: const InputDecoration(
                 labelText: 'Contact Number *',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               ),
             ),
             const SizedBox(height: 12),
@@ -519,23 +546,30 @@ class _AddEditCustomerDialogState extends ConsumerState<_AddEditCustomerDialog> 
               decoration: const InputDecoration(
                 labelText: 'Delivery Address',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               ),
             ),
             const SizedBox(height: 14),
             DropdownButtonFormField<String>(
-              initialValue: _selectedType, // FIXED: Replaced 'value' with 'initialValue'
+              initialValue:
+                  _selectedType, // FIXED: Replaced 'value' with 'initialValue'
               isExpanded: true,
               decoration: const InputDecoration(
                 labelText: 'Customer Category',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               ),
               items: const [
-                DropdownMenuItem(value: 'regular', child: Text('Regular Customer')),
-                DropdownMenuItem(value: 'repeat', child: Text('Repeat Customer')),
-                DropdownMenuItem(value: 'reseller', child: Text('Reseller / Moto Shop')),
-                DropdownMenuItem(value: 'wholesale', child: Text('Wholesale Buyer')),
+                DropdownMenuItem(
+                    value: 'regular', child: Text('Regular Customer')),
+                DropdownMenuItem(
+                    value: 'repeat', child: Text('Repeat Customer')),
+                DropdownMenuItem(
+                    value: 'reseller', child: Text('Reseller / Moto Shop')),
+                DropdownMenuItem(
+                    value: 'wholesale', child: Text('Wholesale Buyer')),
               ],
               onChanged: _isSaving
                   ? null
@@ -549,13 +583,15 @@ class _AddEditCustomerDialogState extends ConsumerState<_AddEditCustomerDialog> 
       actions: [
         TextButton(
           onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          child: const Text('Cancel',
+              style: TextStyle(color: AppColors.textSecondary)),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.navyPrimary,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           onPressed: _isSaving ? null : _saveCustomer,
           child: _isSaving

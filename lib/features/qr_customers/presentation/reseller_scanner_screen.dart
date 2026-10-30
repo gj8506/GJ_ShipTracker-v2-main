@@ -10,7 +10,8 @@ class ResellerScannerScreen extends ConsumerStatefulWidget {
   const ResellerScannerScreen({super.key});
 
   @override
-  ConsumerState<ResellerScannerScreen> createState() => _ResellerScannerScreenState();
+  ConsumerState<ResellerScannerScreen> createState() =>
+      _ResellerScannerScreenState();
 }
 
 class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
@@ -37,8 +38,9 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Invalid QR! Only official GJandAsher customer QR codes are accepted.'),
-            backgroundColor: Colors.redAccent,
+            content: Text(
+                'Invalid QR! Only official GJandAsher customer QR codes are accepted.'),
+            backgroundColor: AppColors.statusReturned,
             duration: Duration(seconds: 2),
           ),
         );
@@ -70,9 +72,9 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
     // 2. Fetch Pending Custom Plate Orders (Robust Search)
     Map<String, dynamic>? pendingOrder;
     String? pendingOrderId;
-    
+
     QuerySnapshot orderSnap;
-    
+
     // First try searching by exact User ID, fallback to searching by Customer Name
     if (customer.linkedUid != null && customer.linkedUid!.isNotEmpty) {
       orderSnap = await FirebaseFirestore.instance
@@ -98,7 +100,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
         final aTime = aData?['createdAt'] as Timestamp?;
         final bTime = bData?['createdAt'] as Timestamp?;
         if (aTime == null || bTime == null) return 0;
-        return bTime.compareTo(aTime); 
+        return bTime.compareTo(aTime);
       });
       pendingOrderId = pendingDocs.first.id;
       pendingOrder = pendingDocs.first.data() as Map<String, dynamic>;
@@ -106,12 +108,13 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
 
     if (mounted) {
       await _scannerController.stop();
-      _showConfirmationSheet(customer, lastParcel, pendingOrder, pendingOrderId);
+      _showConfirmationSheet(
+          customer, lastParcel, pendingOrder, pendingOrderId);
     }
   }
 
   void _showConfirmationSheet(
-    CustomerModel customer, 
+    CustomerModel customer,
     ParcelModel? lastParcel,
     Map<String, dynamic>? pendingOrder,
     String? pendingOrderId,
@@ -139,12 +142,12 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: AppColors.tealAccent.withValues(alpha: 0.15),
+                        color: AppColors.logoBlue.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.verified_rounded,
-                        color: AppColors.tealAccent,
+                        color: AppColors.logoBlue,
                         size: 26,
                       ),
                     ),
@@ -169,7 +172,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                         ],
@@ -183,16 +186,21 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.phone_outlined, size: 18, color: Colors.grey),
+                    const Icon(Icons.phone_outlined,
+                        size: 18, color: AppColors.textSecondary),
                     const SizedBox(width: 8),
                     const Text(
                       'Contact: ',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      style:
+                          TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                     ),
                     Expanded(
                       child: Text(
-                        customer.contactNumber.isNotEmpty ? customer.contactNumber : 'None',
-                        style: const TextStyle(fontSize: 13, color: Colors.black87),
+                        customer.contactNumber.isNotEmpty
+                            ? customer.contactNumber
+                            : 'None',
+                        style: const TextStyle(
+                            fontSize: 13, color: AppColors.textPrimary),
                       ),
                     ),
                   ],
@@ -201,16 +209,19 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.location_on_outlined, size: 18, color: Colors.grey),
+                    const Icon(Icons.location_on_outlined,
+                        size: 18, color: AppColors.textSecondary),
                     const SizedBox(width: 8),
                     const Text(
                       'Address: ',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      style:
+                          TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                     ),
                     Expanded(
                       child: Text(
                         customer.address.isNotEmpty ? customer.address : 'None',
-                        style: const TextStyle(fontSize: 13, color: Colors.black87),
+                        style: const TextStyle(
+                            fontSize: 13, color: AppColors.textPrimary),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -218,29 +229,29 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-
                 if (pendingOrder != null)
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF0FDF4),
+                      color: AppColors.statusDeliveredContainer,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFF86EFAC)),
+                      border: Border.all(color: AppColors.successBorder),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.inventory_2_rounded, size: 18, color: Color(0xFF166534)),
+                            Icon(Icons.inventory_2_rounded,
+                                size: 18, color: AppColors.statusDelivered),
                             SizedBox(width: 6),
                             Text(
                               'Pending Plate Order Detected',
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF166534),
+                                color: AppColors.statusDelivered,
                               ),
                             ),
                           ],
@@ -248,7 +259,8 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                         const SizedBox(height: 6),
                         Text(
                           'Plate: ${pendingOrder['plateNumber'] ?? 'N/A'}\nSpecs: ${pendingOrder['plateSpecs'] ?? 'N/A'}',
-                          style: const TextStyle(fontSize: 12, color: Color(0xFF14532D)),
+                          style: const TextStyle(
+                              fontSize: 12, color: AppColors.successDeep),
                         ),
                       ],
                     ),
@@ -258,27 +270,29 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
+                      color: AppColors.backgroundLight,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      border: Border.all(color: AppColors.borderLight),
                     ),
                     child: const Row(
                       children: [
-                        Icon(Icons.info_outline_rounded, size: 18, color: Color(0xFF64748B)),
+                        Icon(Icons.info_outline_rounded,
+                            size: 18, color: AppColors.textSecondary),
                         SizedBox(width: 8),
                         Text(
                           'No pending custom plate orders.',
-                          style: TextStyle(fontSize: 12, color: Color(0xFF475569)),
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.navyMuted),
                         ),
                       ],
                     ),
                   ),
-
                 if (lastParcel != null) ...[
                   const SizedBox(height: 10),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
                       color: AppColors.tealContainer,
                       borderRadius: BorderRadius.circular(12),
@@ -320,7 +334,8 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          side: const BorderSide(color: Colors.grey),
+                          side:
+                              const BorderSide(color: AppColors.textSecondary),
                         ),
                         onPressed: () {
                           Navigator.pop(ctx);
@@ -346,7 +361,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                           ),
                         ),
                         onPressed: () {
-                          Navigator.pop(ctx); 
+                          Navigator.pop(ctx);
                           Navigator.pop(context, {
                             'customer': customer,
                             'lastParcel': lastParcel,
@@ -384,7 +399,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
             tooltip: 'Toggle Flashlight',
             icon: Icon(
               _torchEnabled ? Icons.flash_on_rounded : Icons.flash_off_rounded,
-              color: _torchEnabled ? Colors.amberAccent : Colors.white,
+              color: _torchEnabled ? AppColors.statusPending : Colors.white,
             ),
             onPressed: () {
               _scannerController.toggleTorch();
@@ -417,11 +432,11 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                   width: 250,
                   height: 250,
                   decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.tealAccent, width: 3),
+                    border: Border.all(color: AppColors.logoBlue, width: 3),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.tealAccent.withValues(alpha: 0.15),
+                        color: AppColors.logoBlue.withValues(alpha: 0.15),
                         blurRadius: 16,
                         spreadRadius: 2,
                       ),
@@ -430,7 +445,8 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                 ),
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.black54,
                     borderRadius: BorderRadius.circular(20),
@@ -453,24 +469,30 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
             right: 16,
             child: SafeArea(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: const [
-                    BoxShadow(color: Colors.black38, blurRadius: 10, offset: Offset(0, 4)),
+                    BoxShadow(
+                        color: Colors.black38,
+                        blurRadius: 10,
+                        offset: Offset(0, 4)),
                   ],
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.qr_code_rounded, color: Colors.grey, size: 20),
+                    const Icon(Icons.qr_code_rounded,
+                        color: AppColors.textSecondary, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: TextField(
                         controller: _manualSearchCtrl,
                         decoration: const InputDecoration(
                           hintText: 'Enter code manually (e.g. GJAS1:...)...',
-                          hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
+                          hintStyle: TextStyle(
+                              fontSize: 13, color: AppColors.textSecondary),
                           border: InputBorder.none,
                         ),
                         onSubmitted: (value) {
@@ -481,7 +503,8 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.arrow_forward_rounded, color: AppColors.navyPrimary),
+                      icon: const Icon(Icons.arrow_forward_rounded,
+                          color: AppColors.navyPrimary),
                       onPressed: () {
                         if (_manualSearchCtrl.text.trim().isNotEmpty) {
                           _handleBarcode(_manualSearchCtrl.text.trim());

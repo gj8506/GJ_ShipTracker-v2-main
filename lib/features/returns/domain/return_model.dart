@@ -7,11 +7,13 @@ class ReturnModel {
   final String platform; // Shopee, Lazada, TikTok Shop
   final String customerName;
   final String? contactNumber;
-  final String defectReason; // Wrong Plate Number, Bent/Damaged, Printing Defect, etc.
+  final String
+      defectReason; // Wrong Plate Number, Bent/Damaged, Printing Defect, etc.
   final String? customPlateDetails; // e.g., "Plate: ABC 1234 (Black, Embossed)"
   final String? notes;
   final List<String> photoUrls; // Cloudinary photo URLs
-  final String status; // Pending Review, Approved, Replacement Dispatched, Refunded, Rejected
+  final String
+      status; // Pending Review, Approved, Replacement Dispatched, Refunded, Rejected
   final String resolutionType; // Replacement or Refund
   final String? replacementTrackingNumber;
   final String? handledById;
@@ -46,7 +48,8 @@ class ReturnModel {
       platform: data['platform'] as String? ?? AppConstants.platformShopee,
       customerName: data['customerName'] as String? ?? 'Customer',
       contactNumber: data['contactNumber'] as String?,
-      defectReason: data['defectReason'] as String? ?? AppConstants.defectDamaged,
+      defectReason:
+          data['defectReason'] as String? ?? AppConstants.defectDamaged,
       customPlateDetails: data['customPlateDetails'] as String?,
       notes: data['notes'] as String?,
       photoUrls: List<String>.from(data['photoUrls'] as List<dynamic>? ?? []),
@@ -101,7 +104,8 @@ class ReturnModel {
       photoUrls: photoUrls ?? this.photoUrls,
       status: status ?? this.status,
       resolutionType: resolutionType ?? this.resolutionType,
-      replacementTrackingNumber: replacementTrackingNumber ?? this.replacementTrackingNumber,
+      replacementTrackingNumber:
+          replacementTrackingNumber ?? this.replacementTrackingNumber,
       handledById: handledById ?? this.handledById,
       handledByName: handledByName ?? this.handledByName,
       createdAt: createdAt,

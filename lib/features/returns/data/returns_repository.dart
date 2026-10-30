@@ -13,11 +13,10 @@ class ReturnsRepository {
 
   // Real-time stream of all returns ordered by newest first
   Stream<List<ReturnModel>> getReturnsStream() {
-    return _returnsCol
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => ReturnModel.fromFirestore(doc)).toList());
+    return _returnsCol.orderBy('createdAt', descending: true).snapshots().map(
+        (snapshot) => snapshot.docs
+            .map((doc) => ReturnModel.fromFirestore(doc))
+            .toList());
   }
 
   // Get a single return ticket by ID
@@ -58,8 +57,10 @@ class ReturnsRepository {
     if (resolutionType != null) {
       updateData['resolutionType'] = resolutionType;
     }
-    if (replacementTrackingNumber != null && replacementTrackingNumber.isNotEmpty) {
-      updateData['replacementTrackingNumber'] = replacementTrackingNumber.trim();
+    if (replacementTrackingNumber != null &&
+        replacementTrackingNumber.isNotEmpty) {
+      updateData['replacementTrackingNumber'] =
+          replacementTrackingNumber.trim();
     }
     if (handledById != null) updateData['handledById'] = handledById;
     if (handledByName != null) updateData['handledByName'] = handledByName;

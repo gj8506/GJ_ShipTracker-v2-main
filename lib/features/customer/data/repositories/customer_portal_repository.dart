@@ -22,7 +22,8 @@ class CustomerPortalRepository {
   }
 
   /// Real-time stream of orders for the active customer
-  Stream<List<OrderRequestModel>> watchCustomerOrderRequests(String customerId) {
+  Stream<List<OrderRequestModel>> watchCustomerOrderRequests(
+      String customerId) {
     if (customerId.isEmpty) {
       return Stream.value([]);
     }

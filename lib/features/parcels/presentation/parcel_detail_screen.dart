@@ -30,7 +30,8 @@ class ParcelDetailScreen extends ConsumerWidget {
     }
   }
 
-  void _showStatusBottomSheet(BuildContext context, WidgetRef ref, ParcelModel parcel) {
+  void _showStatusBottomSheet(
+      BuildContext context, WidgetRef ref, ParcelModel parcel) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -52,7 +53,7 @@ class ParcelDetailScreen extends ConsumerWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: AppColors.borderLight,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -84,12 +85,15 @@ class ParcelDetailScreen extends ConsumerWidget {
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isSelected ? statusColor : AppColors.borderLight,
+                            color: isSelected
+                                ? statusColor
+                                : AppColors.borderLight,
                             width: isSelected ? 1.5 : 1,
                           ),
                         ),
                         child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 2),
                           leading: Container(
                             width: 14,
                             height: 14,
@@ -102,21 +106,28 @@ class ParcelDetailScreen extends ConsumerWidget {
                             status,
                             style: TextStyle(
                               fontSize: 15,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                              color: isSelected ? statusColor : AppColors.navyPrimary,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? statusColor
+                                  : AppColors.navyPrimary,
                             ),
                           ),
                           trailing: isSelected
-                              ? Icon(Icons.check_circle_rounded, color: statusColor, size: 20)
+                              ? Icon(Icons.check_circle_rounded,
+                                  color: statusColor, size: 20)
                               : null,
                           onTap: () async {
                             final user = ref.read(userProfileProvider).value;
-                            await ref.read(parcelRepositoryProvider).updateParcelStatus(
-                              parcel.id,
-                              status,
-                              dispatchedById: user?.uid,
-                              dispatchedByName: user?.displayName,
-                            );
+                            await ref
+                                .read(parcelRepositoryProvider)
+                                .updateParcelStatus(
+                                  parcel.id,
+                                  status,
+                                  dispatchedById: user?.uid,
+                                  dispatchedByName: user?.displayName,
+                                );
                             if (ctx.mounted) Navigator.of(ctx).pop();
                           },
                         ),
@@ -138,18 +149,14 @@ class ParcelDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      appBar: AppBar(
-        title: const Text('Parcel Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.navyPrimary,
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Parcel Details')),
       body: parcelAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
-            child: Text('Error loading parcel: $err', style: const TextStyle(color: Colors.red)),
+            child: Text('Error loading parcel: $err',
+                style: const TextStyle(color: AppColors.statusReturned)),
           ),
         ),
         data: (parcel) {
@@ -158,7 +165,8 @@ class ParcelDetailScreen extends ConsumerWidget {
           }
 
           final statusColor = _getStatusColor(parcel.status);
-          final formattedDate = DateFormat('MMM dd, yyyy • hh:mm a').format(parcel.createdAt);
+          final formattedDate =
+              DateFormat('MMM dd, yyyy • hh:mm a').format(parcel.createdAt);
 
           return ListView(
             padding: const EdgeInsets.all(16.0),
@@ -183,11 +191,12 @@ class ParcelDetailScreen extends ConsumerWidget {
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1.1,
-                            color: Colors.grey,
+                            color: AppColors.textSecondary,
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: statusColor.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(20),
@@ -204,7 +213,9 @@ class ParcelDetailScreen extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    const Text('Tracking Number', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                    const Text('Tracking Number',
+                        style: TextStyle(
+                            fontSize: 13, color: AppColors.textSecondary)),
                     const SizedBox(height: 4),
                     Row(
                       children: [
@@ -220,11 +231,14 @@ class ParcelDetailScreen extends ConsumerWidget {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.copy_rounded, size: 20, color: AppColors.tealDark),
+                          icon: const Icon(Icons.copy_rounded,
+                              size: 20, color: AppColors.tealDark),
                           onPressed: () {
-                            Clipboard.setData(ClipboardData(text: parcel.trackingNumber));
+                            Clipboard.setData(
+                                ClipboardData(text: parcel.trackingNumber));
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Tracking number copied!')),
+                              const SnackBar(
+                                  content: Text('Tracking number copied!')),
                             );
                           },
                         ),
@@ -234,10 +248,15 @@ class ParcelDetailScreen extends ConsumerWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Courier', style: TextStyle(fontSize: 14, color: Colors.grey)),
+                        const Text('Courier',
+                            style: TextStyle(
+                                fontSize: 14, color: AppColors.textSecondary)),
                         Text(
                           parcel.courier,
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.navyPrimary),
+                          style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.navyPrimary),
                         ),
                       ],
                     ),
@@ -259,30 +278,44 @@ class ParcelDetailScreen extends ConsumerWidget {
                   children: [
                     const Text(
                       'Customer & Delivery Information',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.navyPrimary),
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.navyPrimary),
                     ),
                     const SizedBox(height: 14),
-                    _buildInfoRow(Icons.person_outline_rounded, 'Recipient', parcel.customerName),
-                    if (parcel.contactNumber != null && parcel.contactNumber!.isNotEmpty) ...[
+                    _buildInfoRow(Icons.person_outline_rounded, 'Recipient',
+                        parcel.customerName),
+                    if (parcel.contactNumber != null &&
+                        parcel.contactNumber!.isNotEmpty) ...[
                       const SizedBox(height: 10),
-                      _buildInfoRow(Icons.phone_outlined, 'Contact', parcel.contactNumber!),
+                      _buildInfoRow(Icons.phone_outlined, 'Contact',
+                          parcel.contactNumber!),
                     ],
-                    if (parcel.address != null && parcel.address!.isNotEmpty) ...[
+                    if (parcel.address != null &&
+                        parcel.address!.isNotEmpty) ...[
                       const SizedBox(height: 10),
-                      _buildInfoRow(Icons.location_on_outlined, 'Address', parcel.address!),
+                      _buildInfoRow(Icons.location_on_outlined, 'Address',
+                          parcel.address!),
                     ],
                     if (parcel.items != null && parcel.items!.isNotEmpty) ...[
                       const SizedBox(height: 10),
-                      _buildInfoRow(Icons.two_wheeler_rounded, 'Custom Plates', parcel.items!),
+                      _buildInfoRow(Icons.two_wheeler_rounded, 'Custom Plates',
+                          parcel.items!),
                     ],
                     const Divider(height: 24, color: AppColors.borderLight),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Declared Amount', style: TextStyle(fontSize: 14, color: Colors.grey)),
+                        const Text('Declared Amount',
+                            style: TextStyle(
+                                fontSize: 14, color: AppColors.textSecondary)),
                         Text(
                           '₱${parcel.amount.toStringAsFixed(2)}',
-                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.tealDark),
+                          style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.tealDark),
                         ),
                       ],
                     ),
@@ -304,17 +337,23 @@ class ParcelDetailScreen extends ConsumerWidget {
                   children: [
                     const Text(
                       'Timeline & Dispatch Details',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.navyPrimary),
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.navyPrimary),
                     ),
                     const SizedBox(height: 12),
-                    _buildInfoRow(Icons.calendar_today_outlined, 'Created Date', formattedDate),
+                    _buildInfoRow(Icons.calendar_today_outlined, 'Created Date',
+                        formattedDate),
                     if (parcel.dispatchedByName != null) ...[
                       const SizedBox(height: 10),
-                      _buildInfoRow(Icons.badge_outlined, 'Dispatched By', parcel.dispatchedByName!),
+                      _buildInfoRow(Icons.badge_outlined, 'Dispatched By',
+                          parcel.dispatchedByName!),
                     ],
                     if (parcel.notes != null && parcel.notes!.isNotEmpty) ...[
                       const SizedBox(height: 10),
-                      _buildInfoRow(Icons.note_alt_outlined, 'Notes', parcel.notes!),
+                      _buildInfoRow(
+                          Icons.note_alt_outlined, 'Notes', parcel.notes!),
                     ],
                   ],
                 ),
@@ -328,7 +367,8 @@ class ParcelDetailScreen extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.navyPrimary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
                     elevation: 0,
                   ),
                   icon: const Icon(Icons.sync_rounded),
@@ -350,19 +390,22 @@ class ParcelDetailScreen extends ConsumerWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: Colors.grey[600]),
+        Icon(icon, size: 18, color: AppColors.textTertiary),
         const SizedBox(width: 10),
         SizedBox(
           width: 90,
           child: Text(
             label,
-            style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+            style: const TextStyle(fontSize: 13, color: AppColors.textTertiary),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.navyPrimary),
+            style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.navyPrimary),
           ),
         ),
       ],

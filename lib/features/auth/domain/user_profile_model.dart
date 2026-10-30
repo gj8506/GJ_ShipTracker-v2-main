@@ -22,8 +22,10 @@ class UserProfileModel {
   });
 
   // Role Checks (Fixes profile_screen.dart Ln 103)
-  bool get isAdmin => role.toLowerCase() == 'admin' || role == AppConstants.roleAdmin;
-  bool get isStaff => role.toLowerCase() == 'staff' || role == AppConstants.roleStaff;
+  bool get isAdmin =>
+      role.toLowerCase() == 'admin' || role == AppConstants.roleAdmin;
+  bool get isStaff =>
+      role.toLowerCase() == 'staff' || role == AppConstants.roleStaff;
 
   // Convenience alias for displayName
   String get displayName => fullName;
@@ -32,7 +34,8 @@ class UserProfileModel {
     return UserProfileModel(
       uid: map['uid'] as String? ?? '',
       email: map['email'] as String? ?? '',
-      fullName: (map['fullName'] ?? map['displayName'] ?? map['name'] ?? '') as String,
+      fullName: (map['fullName'] ?? map['displayName'] ?? map['name'] ?? '')
+          as String,
       role: map['role'] as String? ?? 'Staff',
       phoneNumber: map['phoneNumber'] as String?,
       photoUrl: map['photoUrl'] as String?,

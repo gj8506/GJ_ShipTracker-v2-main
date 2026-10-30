@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/connectivity_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/offline_banner.dart';
 import '../../auth/presentation/auth_providers.dart';
@@ -20,6 +21,8 @@ class MainNavigationShell extends ConsumerWidget {
     final userProfileAsync = ref.watch(userProfileProvider);
     final role = userProfileAsync.value?.role ?? AppConstants.roleStaff;
     final isAdmin = role == AppConstants.roleAdmin;
+    final isOffline = ref.watch(isOfflineProvider);
+    final media = MediaQuery.of(context);
 
     // Define navigation destinations based on role
     final destinations = <NavigationDestination>[
@@ -52,30 +55,43 @@ class MainNavigationShell extends ConsumerWidget {
     ];
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
       body: Column(
         children: [
-          const SafeArea(bottom: false, child: OfflineBanner()),
-          Expanded(child: navigationShell),
+          const OfflineBanner(),
+          Expanded(
+            child: MediaQuery(
+              // The banner already covers the status bar while offline, so
+              // drop the top inset to avoid a second empty header band.
+              data: isOffline ? media.removePadding(removeTop: true) : media,
+              child: navigationShell,
+            ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.tealDark,
-        child: const Icon(Icons.smart_toy_rounded, color: Colors.white),
+        backgroundColor: AppColors.navyPrimary,
+        foregroundColor: AppColors.textOnPrimary,
+        tooltip: 'Open support assistant',
+        child: const Icon(Icons.smart_toy_rounded),
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatbotScreen()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const ChatbotScreen()));
         },
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
+          color: AppColors.chromeBlue,
           border: Border(
-            top: BorderSide(color: AppColors.borderLight, width: 1),
+            top: BorderSide(color: AppColors.borderStrong, width: 1),
           ),
         ),
         child: NavigationBar(
-          backgroundColor: AppColors.surfaceWhite,
-          indicatorColor: AppColors.tealContainer,
+          backgroundColor: AppColors.chromeBlue,
+          indicatorColor: AppColors.navyPrimary.withValues(alpha: 0.14),
           elevation: 0,
-          selectedIndex: _calculateSelectedIndex(navigationShell.currentIndex, isAdmin),
+          selectedIndex:
+              _calculateSelectedIndex(navigationShell.currentIndex, isAdmin),
           onDestinationSelected: (index) {
             _onTap(index, isAdmin);
           },

@@ -22,12 +22,14 @@ class ExcelExportService {
     // Filter parcels by time range
     final cutoffDate = DateTime.now().subtract(Duration(days: intervalDays));
     final filteredParcels = parcels.where((p) {
-      final orderDate = _parseDate(p['orderDate'] ?? p['createdAt'] ?? p['date']);
+      final orderDate =
+          _parseDate(p['orderDate'] ?? p['createdAt'] ?? p['date']);
       return orderDate == null || orderDate.isAfter(cutoffDate);
     }).toList();
 
     // Formatter helpers
-    final currencyFormatter = NumberFormat.currency(symbol: '₱ ', decimalDigits: 2);
+    final currencyFormatter =
+        NumberFormat.currency(symbol: '₱ ', decimalDigits: 2);
     final dateFormatter = DateFormat('yyyy-MM-dd HH:mm');
 
     // Header styling
@@ -82,12 +84,15 @@ class ExcelExportService {
       // Append header row
       sheet.appendRow(headers.map((h) => TextCellValue(h)).toList());
       for (var col = 0; col < headers.length; col++) {
-        sheet.cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: 0)).cellStyle = headerStyle;
+        sheet
+            .cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: 0))
+            .cellStyle = headerStyle;
       }
 
       // Filter parcels for this platform
       final platformParcels = filteredParcels.where((p) {
-        final plat = (p['platform'] ?? p['salesChannel'] ?? '').toString().toLowerCase();
+        final plat =
+            (p['platform'] ?? p['salesChannel'] ?? '').toString().toLowerCase();
         return plat.contains(platform.toLowerCase());
       }).toList();
 
@@ -95,15 +100,20 @@ class ExcelExportService {
       double platformTotalRevenue = 0.0;
 
       for (final p in platformParcels) {
-        final rawDate = _parseDate(p['orderDate'] ?? p['createdAt'] ?? p['date']);
+        final rawDate =
+            _parseDate(p['orderDate'] ?? p['createdAt'] ?? p['date']);
         final dateStr = rawDate != null ? dateFormatter.format(rawDate) : 'N/A';
-        final tracking = (p['trackingNumber'] ?? p['tracking'] ?? 'N/A').toString();
+        final tracking =
+            (p['trackingNumber'] ?? p['tracking'] ?? 'N/A').toString();
         final courier = (p['courier'] ?? 'Standard').toString();
         final customer = (p['customerName'] ?? p['buyer'] ?? 'N/A').toString();
         final plateText = (p['plateText'] ?? p['customText'] ?? '-').toString();
         final style = (p['style'] ?? p['plateStyle'] ?? '-').toString();
         final qty = int.tryParse(p['quantity']?.toString() ?? '1') ?? 1;
-        final amount = double.tryParse(p['totalAmount']?.toString() ?? p['amount']?.toString() ?? '0') ?? 0.0;
+        final amount = double.tryParse(p['totalAmount']?.toString() ??
+                p['amount']?.toString() ??
+                '0') ??
+            0.0;
         final status = (p['status'] ?? 'Pending').toString();
 
         platformTotalQty += qty;
@@ -137,7 +147,10 @@ class ExcelExportService {
       ]);
 
       for (var col = 0; col < headers.length; col++) {
-        sheet.cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: totalRowIndex)).cellStyle = totalRowStyle;
+        sheet
+            .cell(CellIndex.indexByColumnRow(
+                columnIndex: col, rowIndex: totalRowIndex))
+            .cellStyle = totalRowStyle;
       }
 
       // Set readable column widths (estimate in characters)
@@ -159,15 +172,23 @@ class ExcelExportService {
     final summarySheet = excel[summarySheetName];
 
     // Title Banner
-    summarySheet.appendRow([TextCellValue('SHIPTRACKER - CONSOLIDATED AUDIT & REVENUE REPORT')]);
-    summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 0)).cellStyle = headerStyle;
-    summarySheet.appendRow([TextCellValue('Interval: Past $intervalDays Days | Generated: ${dateFormatter.format(DateTime.now())}')]);
+    summarySheet.appendRow(
+        [TextCellValue('SHIPTRACKER - CONSOLIDATED AUDIT & REVENUE REPORT')]);
+    summarySheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 0))
+        .cellStyle = headerStyle;
+    summarySheet.appendRow([
+      TextCellValue(
+          'Interval: Past $intervalDays Days | Generated: ${dateFormatter.format(DateTime.now())}')
+    ]);
     summarySheet.appendRow([TextCellValue('')]); // Blank line
 
     // SECTION A: Performance by Platform
     summarySheet.appendRow([TextCellValue('1. PERFORMANCE BY SALES CHANNEL')]);
     final secARow = summarySheet.maxRows - 1;
-    summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: secARow)).cellStyle = subHeaderStyle;
+    summarySheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: secARow))
+        .cellStyle = subHeaderStyle;
 
     summarySheet.appendRow([
       TextCellValue('Platform'),
@@ -182,13 +203,24 @@ class ExcelExportService {
 
     for (final platform in platforms) {
       final pList = filteredParcels.where((p) {
-        final plat = (p['platform'] ?? p['salesChannel'] ?? '').toString().toLowerCase();
+        final plat =
+            (p['platform'] ?? p['salesChannel'] ?? '').toString().toLowerCase();
         return plat.contains(platform.toLowerCase());
       }).toList();
 
       final count = pList.length;
-      final qty = pList.fold<int>(0, (sum, p) => sum + (int.tryParse(p['quantity']?.toString() ?? '1') ?? 1));
-      final rev = pList.fold<double>(0.0, (sum, p) => sum + (double.tryParse(p['totalAmount']?.toString() ?? p['amount']?.toString() ?? '0') ?? 0.0));
+      final qty = pList.fold<int>(
+          0,
+          (sum, p) =>
+              sum + (int.tryParse(p['quantity']?.toString() ?? '1') ?? 1));
+      final rev = pList.fold<double>(
+          0.0,
+          (sum, p) =>
+              sum +
+              (double.tryParse(p['totalAmount']?.toString() ??
+                      p['amount']?.toString() ??
+                      '0') ??
+                  0.0));
 
       grandTotalParcels += count;
       grandTotalQty += qty;
@@ -214,9 +246,15 @@ class ExcelExportService {
     // SECTION B: Status Breakdown
     summarySheet.appendRow([TextCellValue('2. ORDER STATUS BREAKDOWN')]);
     final secBRow = summarySheet.maxRows - 1;
-    summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: secBRow)).cellStyle = subHeaderStyle;
+    summarySheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: secBRow))
+        .cellStyle = subHeaderStyle;
 
-    summarySheet.appendRow([TextCellValue('Status'), TextCellValue('Parcels Count'), TextCellValue('% of Total')]);
+    summarySheet.appendRow([
+      TextCellValue('Status'),
+      TextCellValue('Parcels Count'),
+      TextCellValue('% of Total')
+    ]);
 
     final statusMap = <String, int>{};
     for (final p in filteredParcels) {
@@ -225,7 +263,9 @@ class ExcelExportService {
     }
 
     statusMap.forEach((status, count) {
-      final pct = grandTotalParcels > 0 ? (count / grandTotalParcels * 100).toStringAsFixed(1) : '0.0';
+      final pct = grandTotalParcels > 0
+          ? (count / grandTotalParcels * 100).toStringAsFixed(1)
+          : '0.0';
       summarySheet.appendRow([
         TextCellValue(status),
         IntCellValue(count),
@@ -237,16 +277,26 @@ class ExcelExportService {
     // SECTION C: Monthly Trajectory
     summarySheet.appendRow([TextCellValue('3. MONTHLY TRAJECTORY')]);
     final secCRow = summarySheet.maxRows - 1;
-    summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: secCRow)).cellStyle = subHeaderStyle;
+    summarySheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: secCRow))
+        .cellStyle = subHeaderStyle;
 
-    summarySheet.appendRow([TextCellValue('Month'), TextCellValue('Parcels Count'), TextCellValue('Gross Revenue')]);
+    summarySheet.appendRow([
+      TextCellValue('Month'),
+      TextCellValue('Parcels Count'),
+      TextCellValue('Gross Revenue')
+    ]);
 
-    final monthlyMap = <String, List<double>>{}; // Key: 'yyyy-MM', Value: [count, revenue]
+    final monthlyMap =
+        <String, List<double>>{}; // Key: 'yyyy-MM', Value: [count, revenue]
     for (final p in filteredParcels) {
       final date = _parseDate(p['orderDate'] ?? p['createdAt'] ?? p['date']);
       if (date != null) {
         final key = DateFormat('yyyy-MM').format(date);
-        final amt = double.tryParse(p['totalAmount']?.toString() ?? p['amount']?.toString() ?? '0') ?? 0.0;
+        final amt = double.tryParse(p['totalAmount']?.toString() ??
+                p['amount']?.toString() ??
+                '0') ??
+            0.0;
         monthlyMap.putIfAbsent(key, () => [0.0, 0.0]);
         monthlyMap[key]![0] += 1;
         monthlyMap[key]![1] += amt;
@@ -266,7 +316,9 @@ class ExcelExportService {
     // SECTION D: Returns & Lost Value
     summarySheet.appendRow([TextCellValue('4. RETURNS & DISPUTES AUDIT')]);
     final secDRow = summarySheet.maxRows - 1;
-    summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: secDRow)).cellStyle = subHeaderStyle;
+    summarySheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: secDRow))
+        .cellStyle = subHeaderStyle;
 
     summarySheet.appendRow([
       TextCellValue('Metric'),
@@ -274,15 +326,29 @@ class ExcelExportService {
     ]);
 
     final totalReturnsCount = returns.length;
-    final returnRate = grandTotalParcels > 0 ? (totalReturnsCount / grandTotalParcels * 100).toStringAsFixed(2) : '0.00';
+    final returnRate = grandTotalParcels > 0
+        ? (totalReturnsCount / grandTotalParcels * 100).toStringAsFixed(2)
+        : '0.00';
     final returnLostValue = returns.fold<double>(
       0.0,
-      (sum, r) => sum + (double.tryParse(r['amount']?.toString() ?? r['totalAmount']?.toString() ?? '0') ?? 0.0),
+      (sum, r) =>
+          sum +
+          (double.tryParse(r['amount']?.toString() ??
+                  r['totalAmount']?.toString() ??
+                  '0') ??
+              0.0),
     );
 
-    summarySheet.appendRow([TextCellValue('Total Logged Returns'), IntCellValue(totalReturnsCount)]);
-    summarySheet.appendRow([TextCellValue('Return Rate'), TextCellValue('$returnRate %')]);
-    summarySheet.appendRow([TextCellValue('Estimated Return Value Impact'), TextCellValue(currencyFormatter.format(returnLostValue))]);
+    summarySheet.appendRow([
+      TextCellValue('Total Logged Returns'),
+      IntCellValue(totalReturnsCount)
+    ]);
+    summarySheet.appendRow(
+        [TextCellValue('Return Rate'), TextCellValue('$returnRate %')]);
+    summarySheet.appendRow([
+      TextCellValue('Estimated Return Value Impact'),
+      TextCellValue(currencyFormatter.format(returnLostValue))
+    ]);
 
     // Set widths for Overall Summary sheet
     summarySheet.setColumnWidth(0, 32.0);
@@ -312,7 +378,11 @@ class ExcelExportService {
 
     // 5. Open Android/iOS native system sharesheet
     await Share.shareXFiles(
-      [XFile(file.path, mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')],
+      [
+        XFile(file.path,
+            mimeType:
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+      ],
       subject: 'ShipTracker Consolidated Export ($fileName)',
       text: 'Exported ShipTracker report for the past $intervalDays days.',
     );

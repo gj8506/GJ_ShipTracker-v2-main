@@ -52,7 +52,8 @@ class SupportChatThread {
       'subject': subject,
       'status': status,
       'lastMessage': lastMessage,
-      'lastMessageAt': lastMessageAt != null ? Timestamp.fromDate(lastMessageAt!) : null,
+      'lastMessageAt':
+          lastMessageAt != null ? Timestamp.fromDate(lastMessageAt!) : null,
       'unreadForAdmin': unreadForAdmin,
       'unreadForCustomer': unreadForCustomer,
       'createdAt': Timestamp.fromDate(createdAt),

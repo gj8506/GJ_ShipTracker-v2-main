@@ -6,10 +6,12 @@ import 'core/router/app_router.dart';
 
 class ShipTrackerApp extends ConsumerWidget {
   final GlobalKey<NavigatorState> navigatorKey;
+  final GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey;
 
   const ShipTrackerApp({
     super.key,
     required this.navigatorKey,
+    this.scaffoldMessengerKey,
   });
 
   @override
@@ -20,6 +22,7 @@ class ShipTrackerApp extends ConsumerWidget {
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      scaffoldMessengerKey: scaffoldMessengerKey,
       routerConfig: router,
     );
   }

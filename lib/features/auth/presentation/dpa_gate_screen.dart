@@ -48,7 +48,8 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
             child: const Text('Review Again'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+            style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error),
             onPressed: () {
               if (Platform.isAndroid || Platform.isIOS) {
                 SystemNavigator.pop();
@@ -87,15 +88,20 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
                       color: AppColors.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.privacy_tip_outlined, color: AppColors.primary, size: 28),
+                    child: const Icon(Icons.privacy_tip_outlined,
+                        color: AppColors.primary, size: 28),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Republic Act No. 10173', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                        Text('Philippine Data Privacy Act (DPA)', style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
+                        Text('Republic Act No. 10173',
+                            style: theme.textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold)),
+                        Text('Philippine Data Privacy Act (DPA)',
+                            style: theme.textTheme.bodySmall
+                                ?.copyWith(color: AppColors.textSecondary)),
                       ],
                     ),
                   ),
@@ -117,7 +123,8 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
                       children: [
                         Text(
                           '1. Information We Collect',
-                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                          style: theme.textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 6),
                         const Text(
@@ -126,7 +133,8 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
                         const SizedBox(height: 14),
                         Text(
                           '2. Purpose of Processing',
-                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                          style: theme.textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 6),
                         const Text(
@@ -135,7 +143,8 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
                         const SizedBox(height: 14),
                         Text(
                           '3. Security & Storage',
-                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                          style: theme.textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 6),
                         const Text(
@@ -144,7 +153,8 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
                         const SizedBox(height: 14),
                         Text(
                           '4. Your Rights Under RA 10173',
-                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                          style: theme.textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 6),
                         const Text(
@@ -154,7 +164,8 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
                         Center(
                           child: Text(
                             'Policy Version: $kDpaPolicyVersion.0 • Effective 2026',
-                            style: theme.textTheme.labelSmall?.copyWith(color: Colors.grey),
+                            style: theme.textTheme.labelSmall
+                                ?.copyWith(color: AppColors.textSecondary),
                           ),
                         ),
                       ],
@@ -170,7 +181,8 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
                       onPressed: _onDecline,
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       child: const Text('Decline'),
                     ),
@@ -182,7 +194,8 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       child: const Text('Accept & Continue'),
                     ),

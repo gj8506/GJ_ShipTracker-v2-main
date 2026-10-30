@@ -43,7 +43,8 @@ final authStateStreamProvider = StreamProvider<User?>((ref) {
 // -------------------------------------------------------------
 // REAL-TIME STREAM PROVIDERS (AUTH PROTECTED & NO PERMISSION CRASHES)
 // -------------------------------------------------------------
-final allParcelsStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
+final allParcelsStreamProvider =
+    StreamProvider<List<Map<String, dynamic>>>((ref) {
   final user = ref.watch(authStateStreamProvider).value;
 
   // If user is not yet fully authenticated, emit empty list immediately
@@ -54,14 +55,16 @@ final allParcelsStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref
   return FirebaseFirestore.instance
       .collection(AppConstants.collectionParcels)
       .snapshots()
-      .map((snap) => snap.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList())
+      .map((snap) =>
+          snap.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList())
       .handleError((error) {
-        debugPrint('⚠️ [ParcelsStream] Silently caught transient error: $error');
-        return <Map<String, dynamic>>[];
-      });
+    debugPrint('⚠️ [ParcelsStream] Silently caught transient error: $error');
+    return <Map<String, dynamic>>[];
+  });
 });
 
-final allReturnsStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
+final allReturnsStreamProvider =
+    StreamProvider<List<Map<String, dynamic>>>((ref) {
   final user = ref.watch(authStateStreamProvider).value;
 
   if (user == null) {
@@ -71,11 +74,12 @@ final allReturnsStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref
   return FirebaseFirestore.instance
       .collection(AppConstants.collectionReturns)
       .snapshots()
-      .map((snap) => snap.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList())
+      .map((snap) =>
+          snap.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList())
       .handleError((error) {
-        debugPrint('⚠️ [ReturnsStream] Silently caught transient error: $error');
-        return <Map<String, dynamic>>[];
-      });
+    debugPrint('⚠️ [ReturnsStream] Silently caught transient error: $error');
+    return <Map<String, dynamic>>[];
+  });
 });
 
 // -------------------------------------------------------------
@@ -141,7 +145,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           final courier = couriers[random.nextInt(couriers.length)];
 
           final baseAmount = (random.nextInt(20) + 10) * 100.0;
-          final amount = double.parse((baseAmount * growthFactor).toStringAsFixed(2));
+          final amount =
+              double.parse((baseAmount * growthFactor).toStringAsFixed(2));
 
           final isReturned = (p == 0 && monthOffset % 2 == 0);
 
@@ -157,7 +162,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             'contactNumber': '0917${1000000 + random.nextInt(8999999)}',
             'amount': amount,
             'totalPrice': amount,
-            'status': isReturned ? AppConstants.statusReturned : AppConstants.statusDelivered,
+            'status': isReturned
+                ? AppConstants.statusReturned
+                : AppConstants.statusDelivered,
             'isSample': true,
             'createdAt': Timestamp.fromDate(date),
             'dispatchedAt': Timestamp.fromDate(date),
@@ -195,8 +202,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       if (mounted) {
         scaffoldMessenger.showSnackBar(
           const SnackBar(
-            content: Text('Sample data generated! Visual Analytics & Forecasting populated.'),
-            backgroundColor: Color(0xFF10B981),
+            content: Text(
+                'Sample data generated! Visual Analytics & Forecasting populated.'),
+            backgroundColor: AppColors.statusDelivered,
             duration: Duration(seconds: 3),
           ),
         );
@@ -249,7 +257,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         scaffoldMessenger.showSnackBar(
           const SnackBar(
             content: Text('Sample data removed.'),
-            backgroundColor: Colors.blueGrey,
+            backgroundColor: AppColors.statusCancelled,
           ),
         );
       }
@@ -302,7 +310,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final cutoffDate = now.subtract(Duration(days: selectedRange.days));
 
     final filteredParcels = allParcels.where((p) {
-      final date = _extractDate(p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
+      final date =
+          _extractDate(p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
       return date.isAfter(cutoffDate);
     }).toList();
 
@@ -328,21 +337,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         : '0.0';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text(
-          'Visual Analytics',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF1E293B),
+        title: const Text('Visual Analytics'),
         actions: [
           IconButton(
             key: const ValueKey('admin_excel_export_button'),
             icon: const Icon(
               Icons.table_chart_rounded,
-              color: Color(0xFF10B981),
+              color: AppColors.statusDelivered,
               size: 26,
             ),
             tooltip: 'Export Organized Excel',
@@ -352,12 +355,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             tooltip: 'Sales Forecasting (Admin)',
             icon: const Icon(
               Icons.auto_graph_rounded,
-              color: Color(0xFF2563EB),
+              color: AppColors.navyPrimary,
             ),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ForecastingScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const ForecastingScreen()),
               );
             },
           ),
@@ -380,7 +384,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -419,13 +424,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF3C7),
+        color: AppColors.statusPendingContainer,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFDE68A)),
+        border: Border.all(color: AppColors.warningBorder),
       ),
       child: Row(
         children: [
-          const Icon(Icons.bug_report_rounded, size: 20, color: Color(0xFFB45309)),
+          const Icon(Icons.bug_report_rounded,
+              size: 20, color: AppColors.warningDeep),
           const SizedBox(width: 8),
           const Expanded(
             child: Text(
@@ -433,7 +439,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF78350F),
+                color: AppColors.warningDeepest,
                 height: 1.2,
               ),
             ),
@@ -442,26 +448,29 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             const SizedBox(
               width: 18,
               height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFB45309)),
+              child: CircularProgressIndicator(
+                  strokeWidth: 2, color: AppColors.warningDeep),
             )
           else ...[
             TextButton(
               style: TextButton.styleFrom(
                 visualDensity: VisualDensity.compact,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                foregroundColor: const Color(0xFF2563EB),
+                foregroundColor: AppColors.navyPrimary,
               ),
               onPressed: _generateSampleData,
-              child: const Text('Generate', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              child: const Text('Generate',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
             ),
             TextButton(
               style: TextButton.styleFrom(
                 visualDensity: VisualDensity.compact,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                foregroundColor: const Color(0xFFDC2626),
+                foregroundColor: AppColors.statusReturned,
               ),
               onPressed: _deleteSampleData,
-              child: const Text('Delete', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              child: const Text('Delete',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
             ),
           ],
         ],
@@ -484,11 +493,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
+          color: AppColors.navyPrimary,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color: Colors.black.withValues(alpha: 0.15),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -499,15 +508,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
+                color: AppColors.navySecondary,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: const Color(0xFF3B82F6).withOpacity(0.3),
+                  color: AppColors.tealAccent.withValues(alpha: 0.3),
                 ),
               ),
               child: const Icon(
                 Icons.auto_graph_rounded,
-                color: Color(0xFF60A5FA),
+                color: AppColors.tealSecondary,
                 size: 24,
               ),
             ),
@@ -528,18 +537,21 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF10B981).withOpacity(0.18),
+                          color:
+                              AppColors.statusDelivered.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(
-                            color: const Color(0xFF10B981).withOpacity(0.4),
+                            color: AppColors.statusDelivered
+                                .withValues(alpha: 0.4),
                           ),
                         ),
                         child: const Text(
                           'Admin',
                           style: TextStyle(
-                            color: Color(0xFF34D399),
+                            color: AppColors.tealSecondary,
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                           ),
@@ -551,7 +563,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   const Text(
                     '1, 3, 6 & 12-month predictive trends & revenue projections',
                     style: TextStyle(
-                      color: Color(0xFF94A3B8),
+                      color: AppColors.textMuted,
                       fontSize: 11,
                     ),
                     maxLines: 1,
@@ -562,7 +574,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ),
             const Icon(
               Icons.chevron_right_rounded,
-              color: Color(0xFF94A3B8),
+              color: AppColors.textMuted,
               size: 20,
             ),
           ],
@@ -591,15 +603,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF2563EB) : Colors.white,
+                  color: isSelected ? AppColors.navyPrimary : Colors.white,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
+                    color: isSelected
+                        ? AppColors.navyPrimary
+                        : AppColors.borderLight,
                   ),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: const Color(0xFF2563EB).withOpacity(0.25),
+                            color:
+                                AppColors.navyPrimary.withValues(alpha: 0.25),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -616,8 +631,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     Text(
                       range.label,
                       style: TextStyle(
-                        color: isSelected ? Colors.white : const Color(0xFF64748B),
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                        color:
+                            isSelected ? Colors.white : AppColors.textSecondary,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.w600,
                         fontSize: 12,
                       ),
                     ),
@@ -652,7 +669,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF475569),
+            color: AppColors.navyMuted,
           ),
         ),
         const SizedBox(height: 10),
@@ -663,8 +680,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 title: 'Total Sales',
                 value: currencyFormatter.format(totalSales),
                 icon: Icons.payments_outlined,
-                color: const Color(0xFF10B981),
-                bgColor: const Color(0xFFECFDF5),
+                color: AppColors.statusDelivered,
+                bgColor: AppColors.statusDeliveredContainer,
               ),
             ),
             const SizedBox(width: 12),
@@ -673,8 +690,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 title: 'Dispatched',
                 value: '$totalDispatched parcels',
                 icon: Icons.local_shipping_outlined,
-                color: const Color(0xFF2563EB),
-                bgColor: const Color(0xFFEFF6FF),
+                color: AppColors.navyPrimary,
+                bgColor: AppColors.tealContainer,
               ),
             ),
           ],
@@ -687,8 +704,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 title: 'Total Returns',
                 value: '$totalReturned tickets',
                 icon: Icons.assignment_return_outlined,
-                color: const Color(0xFFF59E0B),
-                bgColor: const Color(0xFFFFFBEB),
+                color: AppColors.statusPending,
+                bgColor: AppColors.warningSurface,
               ),
             ),
             const SizedBox(width: 12),
@@ -697,8 +714,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 title: 'Return Rate',
                 value: '$returnRate%',
                 icon: Icons.percent,
-                color: const Color(0xFFEF4444),
-                bgColor: const Color(0xFFFEF2F2),
+                color: AppColors.statusReturned,
+                bgColor: AppColors.statusReturnedContainer,
               ),
             ),
           ],
@@ -719,10 +736,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AppColors.borderLight),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x06000000),
+            color: AppColors.scrimFaint,
             blurRadius: 4,
             offset: Offset(0, 2),
           ),
@@ -747,7 +764,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   title,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF64748B),
+                    color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -761,7 +778,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0F172A),
+              color: AppColors.navyPrimary,
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -789,8 +806,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
         double monthRevenue = 0;
         for (var p in parcels) {
-          final pDate = _extractDate(p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
-          if (pDate.year == targetMonth.year && pDate.month == targetMonth.month) {
+          final pDate = _extractDate(
+              p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
+          if (pDate.year == targetMonth.year &&
+              pDate.month == targetMonth.month) {
             final amt = p['amount'] ?? p['totalPrice'];
             if (amt is num) monthRevenue += amt.toDouble();
             if (amt is String) monthRevenue += double.tryParse(amt) ?? 0.0;
@@ -805,8 +824,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
         double dayRev = 0;
         for (var p in parcels) {
-          final pDate = _extractDate(p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
-          if (pDate.year == day.year && pDate.month == day.month && pDate.day == day.day) {
+          final pDate = _extractDate(
+              p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
+          if (pDate.year == day.year &&
+              pDate.month == day.month &&
+              pDate.day == day.day) {
             final amt = p['amount'] ?? p['totalPrice'];
             if (amt is num) dayRev += amt.toDouble();
             if (amt is String) dayRev += double.tryParse(amt) ?? 0.0;
@@ -822,7 +844,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
         double weekRev = 0;
         for (var p in parcels) {
-          final pDate = _extractDate(p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
+          final pDate = _extractDate(
+              p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
           if (pDate.isAfter(start) && pDate.isBefore(end)) {
             final amt = p['amount'] ?? p['totalPrice'];
             if (amt is num) weekRev += amt.toDouble();
@@ -839,8 +862,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
         double rev = 0;
         for (var p in parcels) {
-          final pDate = _extractDate(p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
-          if (pDate.year == targetMonth.year && pDate.month == targetMonth.month) {
+          final pDate = _extractDate(
+              p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
+          if (pDate.year == targetMonth.year &&
+              pDate.month == targetMonth.month) {
             final amt = p['amount'] ?? p['totalPrice'];
             if (amt is num) rev += amt.toDouble();
             if (amt is String) rev += double.tryParse(amt) ?? 0.0;
@@ -858,7 +883,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -871,13 +896,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F172A),
+                  color: AppColors.navyPrimary,
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
+                  color: AppColors.surfaceMuted,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -885,7 +910,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF475569),
+                    color: AppColors.navyMuted,
                   ),
                 ),
               ),
@@ -894,7 +919,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           const SizedBox(height: 6),
           const Text(
             'Sales revenue generated during the selected period (in ₱)',
-            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+            style: TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
           const SizedBox(height: 24),
           SizedBox(
@@ -911,14 +936,17 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         _touchedBarIndex = -1;
                         return;
                       }
-                      _touchedBarIndex = barTouchResponse.spot!.touchedBarGroupIndex;
+                      _touchedBarIndex =
+                          barTouchResponse.spot!.touchedBarGroupIndex;
                     });
                   },
                 ),
                 titlesData: FlTitlesData(
                   show: true,
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -931,8 +959,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                               labels[index],
                               style: TextStyle(
                                 color: _touchedBarIndex == index
-                                    ? const Color(0xFF2563EB)
-                                    : const Color(0xFF64748B),
+                                    ? AppColors.navyPrimary
+                                    : AppColors.textSecondary,
                                 fontWeight: _touchedBarIndex == index
                                     ? FontWeight.bold
                                     : FontWeight.w500,
@@ -955,7 +983,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         return Text(
                           NumberFormat.compact().format(value),
                           style: const TextStyle(
-                            color: Color(0xFF94A3B8),
+                            color: AppColors.textMuted,
                             fontSize: 10,
                           ),
                         );
@@ -968,7 +996,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   show: true,
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) => const FlLine(
-                    color: Color(0xFFF1F5F9),
+                    color: AppColors.surfaceMuted,
                     strokeWidth: 1,
                   ),
                 ),
@@ -979,8 +1007,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     barRods: [
                       BarChartRodData(
                         toY: values[index],
-                        color: isTouched ? const Color(0xFF1D4ED8) : const Color(0xFF3B82F6),
-                        width: range == AnalyticsTimeRange.threeMonths ? 26 : 14,
+                        color: isTouched
+                            ? AppColors.logoBlue
+                            : AppColors.navySecondary,
+                        width:
+                            range == AnalyticsTimeRange.threeMonths ? 26 : 14,
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(5),
                           topRight: Radius.circular(5),
@@ -988,7 +1019,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         backDrawRodData: BackgroundBarChartRodData(
                           show: true,
                           toY: safeMaxY,
-                          color: const Color(0xFFF8FAFC),
+                          color: AppColors.backgroundLight,
                         ),
                       ),
                     ],
@@ -1016,9 +1047,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     for (var p in parcels) {
       final plat = p['platform'] as String? ?? 'Direct / Walk-in';
       if (plat.toLowerCase().contains('shopee')) {
-        counts[AppConstants.platformShopee] = (counts[AppConstants.platformShopee] ?? 0) + 1;
+        counts[AppConstants.platformShopee] =
+            (counts[AppConstants.platformShopee] ?? 0) + 1;
       } else if (plat.toLowerCase().contains('lazada')) {
-        counts[AppConstants.platformLazada] = (counts[AppConstants.platformLazada] ?? 0) + 1;
+        counts[AppConstants.platformLazada] =
+            (counts[AppConstants.platformLazada] ?? 0) + 1;
       } else if (plat.toLowerCase().contains('tiktok')) {
         counts['TikTok'] = (counts['TikTok'] ?? 0) + 1;
       } else {
@@ -1033,7 +1066,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1043,7 +1076,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0F172A),
+              color: AppColors.navyPrimary,
             ),
           ),
           const SizedBox(height: 14),
@@ -1062,14 +1095,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF334155),
+                          color: AppColors.navySecondary,
                         ),
                       ),
                       Text(
                         '${entry.value} orders (${percent.toStringAsFixed(1)}%)',
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF64748B),
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -1080,15 +1113,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     child: LinearProgressIndicator(
                       value: parcels.isEmpty ? 0 : entry.value / total,
                       minHeight: 8,
-                      backgroundColor: const Color(0xFFF1F5F9),
+                      backgroundColor: AppColors.surfaceMuted,
                       valueColor: AlwaysStoppedAnimation<Color>(
                         entry.key == AppConstants.platformShopee
-                            ? const Color(0xFFEE4D2D)
+                            ? AppColors.shopeeOrange
                             : entry.key == AppConstants.platformLazada
-                                ? const Color(0xFF0F146D)
+                                ? AppColors.lazadaBlue
                                 : entry.key.toLowerCase().contains('tiktok')
                                     ? Colors.black
-                                    : const Color(0xFF10B981),
+                                    : AppColors.statusDelivered,
                       ),
                     ),
                   ),
@@ -1109,7 +1142,8 @@ class AdminExcelExportSheet extends ConsumerStatefulWidget {
   const AdminExcelExportSheet({super.key});
 
   @override
-  ConsumerState<AdminExcelExportSheet> createState() => _AdminExcelExportSheetState();
+  ConsumerState<AdminExcelExportSheet> createState() =>
+      _AdminExcelExportSheetState();
 }
 
 class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
@@ -1144,7 +1178,8 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
         intervalDays: _selectedDays,
       );
 
-      debugPrint('📊 [EXCEL_EXPORT] Share tray returned with status: ${result.status}');
+      debugPrint(
+          '📊 [EXCEL_EXPORT] Share tray returned with status: ${result.status}');
 
       if (mounted) {
         navigator.pop();
@@ -1152,16 +1187,18 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
         if (result.status == ShareResultStatus.success) {
           messenger.showSnackBar(
             const SnackBar(
-              backgroundColor: Color(0xFF10B981),
+              backgroundColor: AppColors.statusDelivered,
               behavior: SnackBarBehavior.floating,
               content: Row(
                 children: [
-                  Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
+                  Icon(Icons.check_circle_outline,
+                      color: Colors.white, size: 20),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Workbook generated and shared successfully!',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
@@ -1171,14 +1208,15 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
         } else if (result.status == ShareResultStatus.dismissed) {
           messenger.showSnackBar(
             const SnackBar(
-              backgroundColor: Color(0xFF64748B),
+              backgroundColor: AppColors.textSecondary,
               behavior: SnackBarBehavior.floating,
               duration: Duration(seconds: 2),
               content: Row(
                 children: [
                   Icon(Icons.info_outline, color: Colors.white, size: 20),
                   SizedBox(width: 8),
-                  Text('Export cancelled.', style: TextStyle(color: Colors.white)),
+                  Text('Export cancelled.',
+                      style: TextStyle(color: Colors.white)),
                 ],
               ),
             ),
@@ -1196,7 +1234,8 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
           SnackBar(
             backgroundColor: AppColors.errorRed,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             margin: const EdgeInsets.all(16),
             content: Row(
               children: [
@@ -1205,7 +1244,10 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
                 Expanded(
                   child: Text(
                     cleanMsg,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 13),
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13),
                   ),
                 ),
               ],
@@ -1242,22 +1284,22 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFFCBD5E1),
+                color: AppColors.borderStrong,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
           const SizedBox(height: 18),
-
           Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0x1F107C41),
+                  color: AppColors.excelGreenTint,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.table_view_rounded, color: Color(0xFF107C41), size: 28),
+                child: const Icon(Icons.table_view_rounded,
+                    color: AppColors.excelGreen, size: 28),
               ),
               const SizedBox(width: 14),
               const Expanded(
@@ -1269,34 +1311,35 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F172A),
+                        color: AppColors.navyPrimary,
                       ),
                     ),
                     Text(
                       'Multi-sheet audit & platform summary',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                      style: TextStyle(
+                          fontSize: 12, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close, color: Color(0xFF94A3B8)),
-                onPressed: _isExporting ? null : () => Navigator.of(context, rootNavigator: true).pop(),
+                icon: const Icon(Icons.close, color: AppColors.textMuted),
+                onPressed: _isExporting
+                    ? null
+                    : () => Navigator.of(context, rootNavigator: true).pop(),
               ),
             ],
           ),
           const SizedBox(height: 20),
-
           const Text(
             'Select Date Range Interval:',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1E293B),
+              color: AppColors.navySecondary,
             ),
           ),
           const SizedBox(height: 10),
-
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -1305,78 +1348,87 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
               return ChoiceChip(
                 label: Text(item['label'] as String),
                 selected: isSelected,
-                selectedColor: const Color(0xFF107C41),
+                selectedColor: AppColors.excelGreen,
                 labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : const Color(0xFF1E293B),
+                  color: isSelected ? Colors.white : AppColors.navySecondary,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   fontSize: 12,
                 ),
                 onSelected: !_isExporting
                     ? (selected) {
-                        if (selected) setState(() => _selectedDays = item['days'] as int);
+                        if (selected) {
+                          setState(() => _selectedDays = item['days'] as int);
+                        }
                       }
                     : null,
               );
             }).toList(),
           ),
           const SizedBox(height: 16),
-
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
+              color: AppColors.surfaceMuted,
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.shield_outlined, size: 18, color: Color(0xFF64748B)),
+                Icon(Icons.shield_outlined,
+                    size: 18, color: AppColors.textSecondary),
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Saves to local app cache and opens native Android Share. No broad storage permissions required.',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF64748B), height: 1.3),
+                    style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                        height: 1.3),
                   ),
                 ),
               ],
             ),
           ),
-
           if (_errorMessage != null) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFFEF2F2),
+                color: AppColors.statusReturnedContainer,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFFCA5A5)),
+                border: Border.all(color: AppColors.dangerBorder),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.error_outline_rounded, color: AppColors.errorRed, size: 18),
+                  const Icon(Icons.error_outline_rounded,
+                      color: AppColors.errorRed, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _errorMessage!,
-                      style: const TextStyle(color: Color(0xFF991B1B), fontSize: 12, fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                          color: AppColors.dangerDeep,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500),
                     ),
                   ),
                 ],
               ),
             ),
           ],
-
           const SizedBox(height: 24),
-
           Row(
             children: [
               Expanded(
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  onPressed: _isExporting ? null : () => Navigator.of(context, rootNavigator: true).pop(),
+                  onPressed: _isExporting
+                      ? null
+                      : () => Navigator.of(context, rootNavigator: true).pop(),
                   child: const Text('Cancel'),
                 ),
               ),
@@ -1385,9 +1437,10 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
                 flex: 2,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF107C41),
+                    backgroundColor: AppColors.excelGreen,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   onPressed: !_isExporting ? _handleExport : null,
@@ -1395,10 +1448,12 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
                         )
                       : const Icon(Icons.file_download_outlined, size: 18),
-                  label: Text(_isExporting ? 'Generating...' : 'Export & Share .XLSX'),
+                  label: Text(
+                      _isExporting ? 'Generating...' : 'Export & Share .XLSX'),
                 ),
               ),
             ],
@@ -1422,7 +1477,8 @@ class _ExcelExportEngine {
     // 1. GLOBAL PARCEL VALIDATION CHECK
     // ---------------------------------------------------------
     if (parcels.isEmpty) {
-      throw Exception('No parcel records exist in your database to export. Please add or generate parcel data first.');
+      throw Exception(
+          'No parcel records exist in your database to export. Please add or generate parcel data first.');
     }
 
     // ---------------------------------------------------------
@@ -1430,7 +1486,8 @@ class _ExcelExportEngine {
     // ---------------------------------------------------------
     final cutoffDate = DateTime.now().subtract(Duration(days: intervalDays));
     final filteredParcels = parcels.where((p) {
-      final orderDate = _parseDate(p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
+      final orderDate =
+          _parseDate(p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
       return orderDate == null || orderDate.isAfter(cutoffDate);
     }).toList();
 
@@ -1446,7 +1503,8 @@ class _ExcelExportEngine {
     final excel = Excel.createExcel();
     final defaultSheet = excel.getDefaultSheet() ?? 'Sheet1';
 
-    final currencyFormatter = NumberFormat.currency(locale: 'en_PH', symbol: '₱ ', decimalDigits: 2);
+    final currencyFormatter =
+        NumberFormat.currency(locale: 'en_PH', symbol: '₱ ', decimalDigits: 2);
     final dateFormatter = DateFormat('yyyy-MM-dd HH:mm');
 
     final headerStyle = CellStyle(
@@ -1497,13 +1555,17 @@ class _ExcelExportEngine {
 
       sheet.appendRow(headers.map((h) => TextCellValue(h)).toList());
       for (var col = 0; col < headers.length; col++) {
-        sheet.cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: 0)).cellStyle = headerStyle;
+        sheet
+            .cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: 0))
+            .cellStyle = headerStyle;
       }
 
       final platformParcels = filteredParcels.where((p) {
         final plat = (p['platform'] ?? '').toString().toLowerCase();
         if (platform == 'Direct / Walk-in') {
-          return !plat.contains('shopee') && !plat.contains('lazada') && !plat.contains('tiktok');
+          return !plat.contains('shopee') &&
+              !plat.contains('lazada') &&
+              !plat.contains('tiktok');
         }
         return plat.contains(platform.toLowerCase());
       }).toList();
@@ -1511,7 +1573,8 @@ class _ExcelExportEngine {
       double platformTotalRevenue = 0.0;
 
       for (final p in platformParcels) {
-        final rawDate = _parseDate(p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
+        final rawDate =
+            _parseDate(p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
         final dateStr = rawDate != null ? dateFormatter.format(rawDate) : 'N/A';
         final tracking = (p['trackingNumber'] ?? 'N/A').toString();
         final courier = (p['courier'] ?? 'Standard').toString();
@@ -1548,7 +1611,10 @@ class _ExcelExportEngine {
       ]);
 
       for (var col = 0; col < headers.length; col++) {
-        sheet.cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: totalRowIndex)).cellStyle = totalRowStyle;
+        sheet
+            .cell(CellIndex.indexByColumnRow(
+                columnIndex: col, rowIndex: totalRowIndex))
+            .cellStyle = totalRowStyle;
       }
 
       sheet.setColumnWidth(0, 22.0);
@@ -1566,14 +1632,23 @@ class _ExcelExportEngine {
     const summarySheetName = 'Overall Summary';
     final summarySheet = excel[summarySheetName];
 
-    summarySheet.appendRow([TextCellValue('SHIPTRACKER - CONSOLIDATED LOGISTICS & REVENUE AUDIT')]);
-    summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 0)).cellStyle = headerStyle;
-    summarySheet.appendRow([TextCellValue('Interval: Past $intervalDays Days | Generated: ${dateFormatter.format(DateTime.now())}')]);
+    summarySheet.appendRow([
+      TextCellValue('SHIPTRACKER - CONSOLIDATED LOGISTICS & REVENUE AUDIT')
+    ]);
+    summarySheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 0))
+        .cellStyle = headerStyle;
+    summarySheet.appendRow([
+      TextCellValue(
+          'Interval: Past $intervalDays Days | Generated: ${dateFormatter.format(DateTime.now())}')
+    ]);
     summarySheet.appendRow([TextCellValue('')]);
 
     summarySheet.appendRow([TextCellValue('1. PERFORMANCE BY CHANNEL')]);
     final secARow = summarySheet.maxRows - 1;
-    summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: secARow)).cellStyle = subHeaderStyle;
+    summarySheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: secARow))
+        .cellStyle = subHeaderStyle;
 
     summarySheet.appendRow([
       TextCellValue('Platform'),
@@ -1588,7 +1663,9 @@ class _ExcelExportEngine {
       final pList = filteredParcels.where((p) {
         final plat = (p['platform'] ?? '').toString().toLowerCase();
         if (platform == 'Direct / Walk-in') {
-          return !plat.contains('shopee') && !plat.contains('lazada') && !plat.contains('tiktok');
+          return !plat.contains('shopee') &&
+              !plat.contains('lazada') &&
+              !plat.contains('tiktok');
         }
         return plat.contains(platform.toLowerCase());
       }).toList();
@@ -1620,7 +1697,9 @@ class _ExcelExportEngine {
 
     summarySheet.appendRow([TextCellValue('2. RETURNS & LOSS AUDIT')]);
     final secBRow = summarySheet.maxRows - 1;
-    summarySheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: secBRow)).cellStyle = subHeaderStyle;
+    summarySheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: secBRow))
+        .cellStyle = subHeaderStyle;
 
     final returnRate = grandTotalParcels > 0
         ? (returns.length / grandTotalParcels * 100).toStringAsFixed(2)
@@ -1632,9 +1711,14 @@ class _ExcelExportEngine {
       return total;
     });
 
-    summarySheet.appendRow([TextCellValue('Total Logged Returns'), IntCellValue(returns.length)]);
-    summarySheet.appendRow([TextCellValue('Return Rate'), TextCellValue('$returnRate %')]);
-    summarySheet.appendRow([TextCellValue('Return Impact Value'), TextCellValue(currencyFormatter.format(returnLostValue))]);
+    summarySheet.appendRow(
+        [TextCellValue('Total Logged Returns'), IntCellValue(returns.length)]);
+    summarySheet.appendRow(
+        [TextCellValue('Return Rate'), TextCellValue('$returnRate %')]);
+    summarySheet.appendRow([
+      TextCellValue('Return Impact Value'),
+      TextCellValue(currencyFormatter.format(returnLostValue))
+    ]);
 
     summarySheet.setColumnWidth(0, 32.0);
     summarySheet.setColumnWidth(1, 24.0);
@@ -1658,9 +1742,14 @@ class _ExcelExportEngine {
     await file.writeAsBytes(bytes, flush: true);
 
     return await Share.shareXFiles(
-      [XFile(file.path, mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')],
+      [
+        XFile(file.path,
+            mimeType:
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+      ],
       subject: 'ShipTracker Consolidated Export ($fileName)',
-      text: 'Exported ShipTracker audit report for the past $intervalDays days.',
+      text:
+          'Exported ShipTracker audit report for the past $intervalDays days.',
     );
   }
 

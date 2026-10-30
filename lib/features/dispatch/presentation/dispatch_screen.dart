@@ -32,7 +32,7 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
   String _selectedPlatform = AppConstants.platformShopee;
   String _selectedCourier = AppConstants.supportedCouriers.first;
   bool _isLoading = false;
-  
+
   String? _pendingOrderId;
   String? _scannedCustomerId;
 
@@ -61,10 +61,13 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
       final pendingOrderId = result['pendingOrderId'] as String?;
 
       setState(() {
-        _scannedCustomerId = customer.id; 
-        _customerNameController.text = pendingOrder?['customerName'] ?? customer.name;
-        _contactController.text = pendingOrder?['contactNumber'] ?? customer.contactNumber;
-        _addressController.text = pendingOrder?['deliveryAddress'] ?? customer.address;
+        _scannedCustomerId = customer.id;
+        _customerNameController.text =
+            pendingOrder?['customerName'] ?? customer.name;
+        _contactController.text =
+            pendingOrder?['contactNumber'] ?? customer.contactNumber;
+        _addressController.text =
+            pendingOrder?['deliveryAddress'] ?? customer.address;
 
         if (lastParcel != null) {
           _selectedPlatform = lastParcel.platform;
@@ -72,7 +75,8 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
         }
 
         if (pendingOrder != null) {
-          _itemsController.text = 'Custom Plate: [${pendingOrder['plateNumber']}] ${pendingOrder['plateSpecs']}';
+          _itemsController.text =
+              'Custom Plate: [${pendingOrder['plateNumber']}] ${pendingOrder['plateSpecs']}';
           _notesController.text = pendingOrder['specialNotes'] ?? '';
           _pendingOrderId = pendingOrderId;
         }
@@ -81,7 +85,7 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(pendingOrder != null 
+            content: Text(pendingOrder != null
                 ? 'Auto-filled pending order for ${customer.name}!'
                 : 'Auto-filled customer details for ${customer.name}!'),
             backgroundColor: AppColors.statusDelivered,
@@ -97,7 +101,8 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be logged in to dispatch parcels.')),
+        const SnackBar(
+            content: Text('You must be logged in to dispatch parcels.')),
       );
       return;
     }
@@ -112,7 +117,7 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
         trackingNumber: _trackingController.text.trim(),
         platform: _selectedPlatform,
         courier: _selectedCourier,
-        customerId: _scannedCustomerId, 
+        customerId: _scannedCustomerId,
         customerName: _customerNameController.text.trim(),
         contactNumber: _contactController.text.trim(),
         address: _addressController.text.trim(),
@@ -129,7 +134,10 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
       await ref.read(parcelRepositoryProvider).addParcel(newParcel);
 
       if (_pendingOrderId != null) {
-        await FirebaseFirestore.instance.collection('order_requests').doc(_pendingOrderId).update({
+        await FirebaseFirestore.instance
+            .collection('order_requests')
+            .doc(_pendingOrderId)
+            .update({
           'status': 'DISPATCHED',
           'finalAmount': amount,
           'trackingNumber': _trackingController.text.trim(),
@@ -140,7 +148,8 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Parcel ${newParcel.trackingNumber} dispatched successfully!'),
+            content: Text(
+                'Parcel ${newParcel.trackingNumber} dispatched successfully!'),
             backgroundColor: AppColors.statusDelivered,
           ),
         );
@@ -149,7 +158,9 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error dispatching parcel: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Error dispatching parcel: $e'),
+              backgroundColor: AppColors.statusReturned),
         );
       }
     } finally {
@@ -169,7 +180,7 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
       _selectedPlatform = AppConstants.platformShopee;
       _selectedCourier = AppConstants.supportedCouriers.first;
       _pendingOrderId = null;
-      _scannedCustomerId = null; 
+      _scannedCustomerId = null;
     });
   }
 
@@ -177,12 +188,7 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      appBar: AppBar(
-        title: const Text('Outbound Dispatch'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.navyPrimary,
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Outbound Dispatch')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -195,25 +201,30 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: _openCustomerQrScanner,
-                      icon: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.tealAccent),
+                      icon: const Icon(Icons.qr_code_scanner_rounded,
+                          color: AppColors.tealAccent),
                       label: const Text(
                         'Scan QR (Check Plate Orders)',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.bold),
                       ),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: AppColors.tealAccent),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.people_outline_rounded, color: AppColors.navyPrimary),
+                    icon: const Icon(Icons.people_outline_rounded,
+                        color: AppColors.navyPrimary),
                     tooltip: 'Customer Registry',
                     onPressed: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const CustomerListScreen()),
+                        MaterialPageRoute(
+                            builder: (_) => const CustomerListScreen()),
                       );
                     },
                   ),
@@ -222,7 +233,12 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
               const SizedBox(height: 18),
               const Text(
                 'Select Platform',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                  color: AppColors.navyMuted,
+                  letterSpacing: 0.2,
+                ),
               ),
               const SizedBox(height: 8),
               SingleChildScrollView(
@@ -235,23 +251,29 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                       padding: const EdgeInsets.only(right: 8.0),
                       child: ChoiceChip(
                         avatar: isSelected
-                            ? const Icon(Icons.check, size: 16, color: Colors.white)
+                            ? const Icon(Icons.check,
+                                size: 16, color: Colors.white)
                             : null,
                         label: Text(platform),
                         selected: isSelected,
-                        onSelected: (_) => setState(() => _selectedPlatform = platform),
+                        onSelected: (_) =>
+                            setState(() => _selectedPlatform = platform),
                         selectedColor: AppColors.navyPrimary,
                         backgroundColor: Colors.white,
                         showCheckmark: false,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                           side: BorderSide(
-                            color: isSelected ? AppColors.navyPrimary : const Color(0xFFE2E8F0),
+                            color: isSelected
+                                ? AppColors.navyPrimary
+                                : AppColors.borderLight,
                           ),
                         ),
                         labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : AppColors.navyPrimary,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          color:
+                              isSelected ? Colors.white : AppColors.navyPrimary,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.w500,
                         ),
                       ),
                     );
@@ -275,7 +297,9 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                   ),
                 ),
                 validator: (val) {
-                  if (val == null || val.trim().isEmpty) return 'Enter tracking number';
+                  if (val == null || val.trim().isEmpty) {
+                    return 'Enter tracking number';
+                  }
                   return null;
                 },
               ),
@@ -303,7 +327,9 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                         labelText: 'Customer Name *',
                         prefixIcon: Icon(Icons.person_outline),
                       ),
-                      validator: (val) => val == null || val.trim().isEmpty ? 'Enter name' : null,
+                      validator: (val) => val == null || val.trim().isEmpty
+                          ? 'Enter name'
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -311,13 +337,16 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                     flex: 2,
                     child: TextFormField(
                       controller: _amountController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       decoration: const InputDecoration(
                         labelText: 'Final Amount (₱) *',
                         prefixText: '₱ ',
                         hintText: '0.00',
                       ),
-                      validator: (val) => val == null || val.trim().isEmpty ? 'Enter amount' : null,
+                      validator: (val) => val == null || val.trim().isEmpty
+                          ? 'Enter amount'
+                          : null,
                     ),
                   ),
                 ],
@@ -373,12 +402,14 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2),
                         )
                       : const Icon(Icons.send_rounded),
                   label: Text(
                     _isLoading ? 'Dispatching...' : 'Dispatch Parcel',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
