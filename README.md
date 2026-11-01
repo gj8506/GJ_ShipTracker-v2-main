@@ -63,6 +63,47 @@ The Android application ID is `com.gjandasher.digitalprinting` and the launcher
 uses the adaptive icon set. Firebase configuration in
 `android/app/google-services.json` matches that package.
 
+## Google Sign-In on Play Store builds
+
+Google Sign-In validates the certificate that signed the installed APK. Google
+Play re-signs every release with its **app signing key**, so that certificate
+must be registered in Firebase in addition to the local upload key.
+
+1. Play Console → **Setup → App integrity → App signing** → copy the
+   **app signing key SHA-1**.
+2. Firebase Console → **Project settings → Your apps → Android app**
+   (`com.gjandasher.digitalprinting`) → **Add fingerprint** and add:
+   - the Play app signing key SHA-1 (required for installs from Google Play),
+   - the upload key SHA-1 (required for locally built release APKs).
+3. Optionally download the refreshed `google-services.json` over
+   `android/app/google-services.json`. The web client ID does not change, so
+   this is only needed to keep the file in sync.
+4. Check **Google Cloud Console → APIs & Services → OAuth consent screen**
+   (or **Google Auth Platform → Audience**). While the publishing status is
+   *Testing*, only listed test users can complete Google Sign-In. Publish the
+   app; the `email` and `profile` scopes do not require verification.
+
+`lib/features/auth/data/auth_repository.dart` passes the project's web OAuth
+client as `serverClientId` so Google Sign-In always returns an `idToken`, and
+`lib/features/auth/presentation/auth_error_text.dart` turns Firebase/Google
+errors into readable messages.
+
+Because the certificate check happens on Google's servers, adding the missing
+SHA-1 fixes already-installed Play builds without shipping a new version.
+
+## Accounts created before the Play Store release
+
+Accounts live in the Firebase project (`shiptracker-v2`), not in the installed
+app, so they keep working after reinstalling from Google Play. Profiles created
+before the approval workflow have no `status` field; `UserProfileModel` treats
+a missing status as `active` (covered by `test/user_profile_model_test.dart`).
+
+If an existing staff member cannot sign in with their password, open
+**Firebase Console → Authentication → Users**, find the account and use
+**Reset password** — or use "Forgot Password?" in the app. Accounts that were
+created with *Continue with Google* have no password and must use the Google
+button.
+
 ## Development
 
 ```powershell

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import 'auth_providers.dart';
+import 'auth_error_text.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -84,12 +85,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       // Customer accounts are redirected by the router after auth succeeds.
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: AppColors.errorRed,
-          ),
-        );
+        _showAuthError(describeAuthError(e).message);
       }
     } finally {
       ref.read(authFlowInProgressProvider.notifier).state = false;
@@ -120,19 +116,23 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       // Customer accounts are redirected by the router after auth succeeds.
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              e.toString().replaceFirst('Exception: ', ''),
-            ),
-            backgroundColor: AppColors.errorRed,
-          ),
-        );
+        _showAuthError(describeAuthError(e, isGoogle: true).message);
       }
     } finally {
       ref.read(authFlowInProgressProvider.notifier).state = false;
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showAuthError(String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.errorRed,
+        duration: const Duration(seconds: 6),
+      ),
+    );
   }
 
   /// Staff accounts are created in a pending state. Sign them out immediately

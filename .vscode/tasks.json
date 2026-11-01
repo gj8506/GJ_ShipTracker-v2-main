@@ -32,6 +32,20 @@
       "command": "flutter",
       "args": ["build", "apk", "--debug"],
       "problemMatcher": []
+    },
+    {
+      "label": "Flutter: build release AAB (Play Store)",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["build", "appbundle", "--release"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Flutter: build release APK",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["build", "apk", "--release"],
+      "problemMatcher": []
     }
   ]
 }

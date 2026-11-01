@@ -7,6 +7,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_logo.dart';
 import 'auth_providers.dart';
+import 'auth_error_text.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -44,7 +45,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await authRepo.signOut();
       if (mounted) {
         _showErrorSnackBar(
-          "Your account doesn't exist. Create an account first.",
+          'No app account was found for this sign-in. Please tap "Sign Up" '
+          'and register first — you can use Continue with Google there.',
         );
       }
       return false;
@@ -112,11 +114,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.read(authFlowInProgressProvider.notifier).state = true;
     setState(() => _isLoading = true);
 
-    try {
-      final authRepo = ref.read(authRepositoryProvider);
-      final rawInput = _identifierCtrl.text.trim();
-      String resolvedEmail = rawInput;
+    final authRepo = ref.read(authRepositoryProvider);
+    final rawInput = _identifierCtrl.text.trim();
+    String resolvedEmail = rawInput;
 
+    try {
       // If input is a username (no '@'), look up registered email in Firestore
       if (!rawInput.contains('@')) {
         try {
@@ -168,49 +170,53 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         }
       }
     } on FirebaseAuthException catch (e) {
-      if (mounted) {
-        String msg;
-        switch (e.code) {
-          case 'user-not-found':
-            msg = 'No account found with this email.';
-            break;
-          case 'wrong-password':
-          case 'invalid-credential':
-            msg =
-                'Incorrect email or password. Please verify your credentials.';
-            break;
-          case 'too-many-requests':
-            msg =
-                'Too many failed attempts. Please wait a few minutes before trying again.';
-            break;
-          case 'user-disabled':
-            msg = 'This account has been disabled. Contact your administrator.';
-            break;
-          default:
-            msg = e.message ?? 'Authentication failed.';
+      var info = describeAuthError(e);
+
+      // Email/password failed: check whether this address actually belongs to
+      // a Google-only account so the message below is accurate. This is a hint
+      // only — Firebase may hide the answer when email enumeration protection
+      // is enabled.
+      if (e.code == 'invalid-credential' ||
+          e.code == 'wrong-password' ||
+          e.code == 'user-not-found') {
+        final methods = await authRepo.signInMethodsForEmail(resolvedEmail);
+        if (methods.contains('google.com') && !methods.contains('password')) {
+          info = const AuthErrorInfo(
+            'This account was created with Google. Tap "Continue with Google" '
+            'to sign in.',
+          );
         }
-        _showErrorSnackBar(msg);
       }
+
+      if (mounted) _showAuthErrorInfo(info);
     } catch (e) {
-      if (mounted) {
-        final message = e
-            .toString()
-            .replaceAll('Exception: ', '')
-            .replaceAll('FirebaseAuthException: ', '');
-        _showErrorSnackBar(message);
-      }
+      if (mounted) _showAuthErrorInfo(describeAuthError(e));
     } finally {
       ref.read(authFlowInProgressProvider.notifier).state = false;
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _showErrorSnackBar(String message) {
+  void _showAuthErrorInfo(AuthErrorInfo info) {
+    _showErrorSnackBar(
+      info.message,
+      action: info.canResetPassword
+          ? SnackBarAction(
+              label: 'Reset password',
+              textColor: Colors.white,
+              onPressed: _showForgotPasswordDialog,
+            )
+          : null,
+    );
+  }
+
+  void _showErrorSnackBar(String message, {SnackBarAction? action}) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: AppColors.errorRed,
-        duration: const Duration(seconds: 4),
+        duration: const Duration(seconds: 6),
+        action: action,
         content: Text(message),
       ),
     );
@@ -225,6 +231,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final authRepo = ref.read(authRepositoryProvider);
       final credential = await authRepo.signInWithGoogle();
 
+      // Null means the user closed the Google account picker.
       final user = credential?.user;
       if (user != null) {
         final isValidRole = await _verifyPortalRole(user);
@@ -234,12 +241,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.errorRed,
-            content: Text('Google Sign-In failed: ${e.toString()}'),
-          ),
-        );
+        _showErrorSnackBar(describeAuthError(e, isGoogle: true).message);
       }
     } finally {
       ref.read(authFlowInProgressProvider.notifier).state = false;

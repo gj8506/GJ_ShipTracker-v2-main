@@ -6,6 +6,15 @@ import '../../../core/services/email_service.dart';
 import '../domain/user_profile_model.dart';
 import '../../qr_customers/domain/customer_model.dart'; // Added import for customer synchronization
 
+/// The Web OAuth client of Firebase project `shiptracker-v2`.
+///
+/// Passing it as `serverClientId` makes Google Sign-In return an `idToken`,
+/// which Firebase needs to turn a Google account into a Firebase credential.
+/// Without it the `idToken` is often null and the Firebase sign-in fails even
+/// when the Android OAuth client is configured correctly.
+const String kGoogleServerClientId =
+    '1051323344116-ffvoqqr66nsandtoe3pf0do35rvrc8nj.apps.googleusercontent.com';
+
 class AuthRepository {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
@@ -17,7 +26,11 @@ class AuthRepository {
     GoogleSignIn? googleSignIn,
   })  : _auth = auth ?? FirebaseAuth.instance,
         _firestore = firestore ?? FirebaseFirestore.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn();
+        _googleSignIn = googleSignIn ??
+            GoogleSignIn(
+              serverClientId: kGoogleServerClientId,
+              scopes: const <String>['email', 'profile'],
+            );
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
@@ -28,6 +41,9 @@ class AuthRepository {
   // ==========================================
   /// Authenticates with Google only. It never creates a Firestore profile:
   /// accounts must be created through the Sign Up screen first.
+  ///
+  /// Throws a `FirebaseAuthException` or a `PlatformException` which the
+  /// caller can translate into a readable message.
   Future<UserCredential?> signInWithGoogle() async {
     // FORCE ACCOUNT PICKER: Clear the cached Google session first
     await _googleSignIn.signOut();
@@ -42,6 +58,15 @@ class AuthRepository {
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
 
+    // The idToken is what Firebase actually validates. If it is missing the
+    // credential below would silently fail, so surface a clear error instead.
+    if (googleAuth.idToken == null) {
+      throw Exception(
+        'Google did not return an ID token. Please make sure the app was '
+        'installed from Google Play and try again.',
+      );
+    }
+
     // 3. Create a credential for Firebase
     final OAuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
@@ -49,7 +74,38 @@ class AuthRepository {
     );
 
     // 4. Sign in to Firebase
-    return await _auth.signInWithCredential(credential);
+    try {
+      return await _auth.signInWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'account-exists-with-different-credential') {
+        throw Exception(
+          'An account with ${googleUser.email} already exists using a '
+          'password. Sign in with your email and password instead.',
+        );
+      }
+      rethrow;
+    }
+  }
+
+  /// Best-effort lookup of the sign-in providers registered for [email].
+  ///
+  /// Returns an empty list when Firebase hides the result (email enumeration
+  /// protection) or when the request fails, so callers must treat the result
+  /// as a hint only.
+  ///
+  /// `fetchSignInMethodsForEmail` is deprecated upstream (email enumeration
+  /// protection), but it is the only client-side way to tell a Google-only
+  /// account apart from a password account.
+  // ignore: deprecated_member_use
+  Future<List<String>> signInMethodsForEmail(String email) async {
+    final trimmed = email.trim();
+    if (trimmed.isEmpty || !trimmed.contains('@')) return const <String>[];
+    try {
+      // ignore: deprecated_member_use
+      return await _auth.fetchSignInMethodsForEmail(trimmed);
+    } catch (_) {
+      return const <String>[];
+    }
   }
 
   // ==========================================
