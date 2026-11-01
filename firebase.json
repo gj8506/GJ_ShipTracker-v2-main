@@ -4,7 +4,7 @@
       "android": {
         "default": {
           "projectId": "shiptracker-v2",
-          "appId": "1:1051323344116:android:ab402b99c36a1ff04d6aa1",
+          "appId": "1:1051323344116:android:2474a1ab8b812bf54d6aa1",
           "fileOutput": "android/app/google-services.json"
         }
       },
@@ -12,7 +12,7 @@
         "lib/firebase_options.dart": {
           "projectId": "shiptracker-v2",
           "configurations": {
-            "android": "1:1051323344116:android:ab402b99c36a1ff04d6aa1"
+            "android": "1:1051323344116:android:2474a1ab8b812bf54d6aa1"
           }
         }
       }

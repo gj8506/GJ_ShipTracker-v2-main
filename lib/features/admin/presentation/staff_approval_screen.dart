@@ -260,14 +260,9 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
       ),
       body: pendingAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              'Could not load pending staff registrations:\n$err',
-              textAlign: TextAlign.center,
-            ),
-          ),
+        error: (err, _) => _ErrorState(
+          error: err,
+          onRetry: () => ref.invalidate(pendingStaffProvider),
         ),
         data: (staff) {
           if (staff.isEmpty) {
@@ -527,6 +522,64 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  final Object error;
+  final VoidCallback onRetry;
+
+  const _ErrorState({required this.error, required this.onRetry});
+
+  bool get _isPermissionDenied =>
+      error.toString().toLowerCase().contains('permission-denied');
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: const BoxDecoration(
+                color: AppColors.statusReturnedContainer,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.lock_outline_rounded,
+                size: 38,
+                color: AppColors.errorRed,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Could not load pending staff registrations',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _isPermissionDenied
+                  ? 'Your account is not allowed to read the staff list. Ask '
+                      'the owner to deploy the latest Firestore rules, and make '
+                      'sure your profile role is "admin".'
+                  : error.toString(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13, color: AppColors.navyMuted),
+            ),
+            const SizedBox(height: 18),
+            OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Try again'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

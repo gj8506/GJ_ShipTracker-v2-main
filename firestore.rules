@@ -1,34 +1,65 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
+    // ------------------------------------------------------------------
+    // Helpers
+    // ------------------------------------------------------------------
+
+    function userPath(uid) {
+      return /databases/$(database)/documents/users/$(uid);
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Reads the caller's role and normalises legacy values ("Admin", "STAFF ",
+    // etc.) so accounts created before the role names were standardised keep
+    // working. Without this the Staff Approvals list is denied to an owner
+    // whose profile stores "Admin" instead of "admin".
+    function currentRole() {
+      return exists(userPath(request.auth.uid))
+        ? get(userPath(request.auth.uid)).data.get('role', 'customer').trim().lower()
+        : '';
+    }
+
     function isStaffOrAdmin() {
-      return request.auth != null && 
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'customer') in ['admin', 'staff'];
+      return isSignedIn() && currentRole() in ['admin', 'staff'];
     }
 
     function isAdmin() {
-      return request.auth != null &&
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'customer') == 'admin';
+      return isSignedIn() && currentRole() == 'admin';
     }
 
+    function roleOf(data) {
+      return data.get('role', 'customer').trim().lower();
+    }
+
+    function statusOf(data) {
+      return data.get('status', '').trim().lower();
+    }
+
+    // ------------------------------------------------------------------
+    // Users / staff approvals
+    // ------------------------------------------------------------------
+
     match /users/{userId} {
-      allow read: if isStaffOrAdmin() || 
-                     (request.auth != null && request.auth.uid == userId) || 
-                     (request.auth != null && resource.data.role in ['admin', 'staff']);
+      // Admins and staff can list every profile (needed by the Staff
+      // Approvals screen); everyone can always read their own profile.
+      allow read: if isStaffOrAdmin()
+                  || (isSignedIn() && request.auth.uid == userId);
 
       // New accounts: customers are active immediately; staff start pending
       // and must be approved by an admin/owner.
-      allow create: if request.auth != null
+      allow create: if isSignedIn()
                     && request.auth.uid == userId
                     && (
-                      (request.resource.data.role == 'customer'
-                        && request.resource.data.status == 'active')
+                      (roleOf(request.resource.data) == 'customer'
+                        && statusOf(request.resource.data) == 'active')
                       ||
-                      (request.resource.data.role == 'staff'
-                        && request.resource.data.status == 'pending')
+                      (roleOf(request.resource.data) == 'staff'
+                        && statusOf(request.resource.data) == 'pending')
                     );
 
       // Admins can update any profile (approve/reject staff, change roles).
@@ -36,17 +67,17 @@ service cloud.firestore {
       // their own role or approval status.
       allow update: if isAdmin()
                     || (
-                      request.auth != null
+                      isSignedIn()
                       && request.auth.uid == userId
                       && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'status'])
                     );
 
       allow delete: if isAdmin();
     }
-    
+
     match /usernames/{username} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isSignedIn();
     }
 
     match /parcels/{parcelId} {
@@ -62,24 +93,24 @@ service cloud.firestore {
     }
 
     match /customers/{customerId} {
-      allow read: if isStaffOrAdmin() || (request.auth != null && resource.data.linkedUid == request.auth.uid);
-      allow write: if request.auth != null; 
+      allow read: if isStaffOrAdmin() || (isSignedIn() && resource.data.linkedUid == request.auth.uid);
+      allow write: if isSignedIn();
     }
 
     match /order_requests/{requestId} {
-      allow read: if isStaffOrAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read: if isStaffOrAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isStaffOrAdmin();
     }
 
     match /support_chats/{chatId} {
-      allow read: if isStaffOrAdmin() || (request.auth != null && resource.data.customerUid == request.auth.uid);
-      allow create: if request.auth != null && request.resource.data.customerUid == request.auth.uid;
-      allow update: if isStaffOrAdmin() || (request.auth != null && resource.data.customerUid == request.auth.uid);
-      
+      allow read: if isStaffOrAdmin() || (isSignedIn() && resource.data.customerUid == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.customerUid == request.auth.uid;
+      allow update: if isStaffOrAdmin() || (isSignedIn() && resource.data.customerUid == request.auth.uid);
+
       match /messages/{messageId} {
-        allow read: if isStaffOrAdmin() || (request.auth != null && get(/databases/$(database)/documents/support_chats/$(chatId)).data.customerUid == request.auth.uid);
-        allow create: if isStaffOrAdmin() || (request.auth != null && get(/databases/$(database)/documents/support_chats/$(chatId)).data.customerUid == request.auth.uid);
+        allow read: if isStaffOrAdmin() || (isSignedIn() && get(/databases/$(database)/documents/support_chats/$(chatId)).data.customerUid == request.auth.uid);
+        allow create: if isStaffOrAdmin() || (isSignedIn() && get(/databases/$(database)/documents/support_chats/$(chatId)).data.customerUid == request.auth.uid);
       }
     }
   }

@@ -104,6 +104,32 @@ If an existing staff member cannot sign in with their password, open
 created with *Continue with Google* have no password and must use the Google
 button.
 
+## Staff registration approvals
+
+New staff accounts are created with `status: "pending"` and are signed out
+immediately after sign-up. They cannot reach any portal until an owner/admin
+approves them from **Profile → Staff Approvals**:
+
+- pending staff see "Your staff account is still awaiting admin approval"
+- rejected staff see a permanent rejection message
+- the router also blocks pending/rejected accounts that still have a cached
+  Firebase session
+
+### Deploying the Firestore rules
+
+The role checks are case-insensitive (`"Admin"`, `"STAFF "`, …) so profiles
+created before the approval workflow keep working. The rules must be deployed
+whenever `firestore.rules` changes:
+
+```powershell
+firebase deploy --only firestore:rules --project shiptracker-v2
+```
+
+The Staff Approvals screen needs `list` access to the `users` collection, which
+only staff/admin accounts have. If it shows
+`[cloud_firestore/permission-denied]`, the deployed rules are out of date or the
+signed-in profile stores a role that is not `admin`/`staff`.
+
 ## Development
 
 ```powershell
