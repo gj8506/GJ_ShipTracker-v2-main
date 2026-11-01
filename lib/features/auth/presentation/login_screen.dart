@@ -159,7 +159,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // Perform authentication with Firebase Auth
       final credential = await authRepo.signInWithEmail(
         email: resolvedEmail,
-        password: _passwordCtrl.text.trim(),
+        password: _passwordCtrl.text,
       );
 
       final user = credential.user;

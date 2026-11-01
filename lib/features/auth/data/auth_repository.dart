@@ -202,23 +202,46 @@ class AuthRepository {
   }
 
   // Sign in using named parameters
+  //
+  // The password is sent exactly as typed first. Older builds trimmed the
+  // password before creating the account, so if that attempt is rejected we
+  // retry with the trimmed value. This keeps legacy accounts (and passwords
+  // typed with a stray leading/trailing space) working.
   Future<UserCredential> signInWithEmail({
     required String email,
     required String password,
   }) async {
-    return await _auth.signInWithEmailAndPassword(
-      email: email.trim(),
-      password: password.trim(),
-    );
+    return _signInWithPassword(email, password);
   }
 
   // Positional alias for signInWithEmailAndPassword
   Future<UserCredential> signInWithEmailAndPassword(
       String email, String password) async {
-    return await _auth.signInWithEmailAndPassword(
-      email: email.trim(),
-      password: password.trim(),
-    );
+    return _signInWithPassword(email, password);
+  }
+
+  Future<UserCredential> _signInWithPassword(
+    String email,
+    String password,
+  ) async {
+    final normalizedEmail = email.trim();
+    try {
+      return await _auth.signInWithEmailAndPassword(
+        email: normalizedEmail,
+        password: password,
+      );
+    } on FirebaseAuthException catch (e) {
+      final trimmedPassword = password.trim();
+      final isCredentialError =
+          e.code == 'invalid-credential' || e.code == 'wrong-password';
+      if (isCredentialError && trimmedPassword != password) {
+        return _auth.signInWithEmailAndPassword(
+          email: normalizedEmail,
+          password: trimmedPassword,
+        );
+      }
+      rethrow;
+    }
   }
 
   // Sign up using named parameters (defaults to customer if not specified)
