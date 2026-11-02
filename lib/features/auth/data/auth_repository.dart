@@ -15,6 +15,16 @@ import '../../qr_customers/domain/customer_model.dart'; // Added import for cust
 const String kGoogleServerClientId =
     '1051323344116-ffvoqqr66nsandtoe3pf0do35rvrc8nj.apps.googleusercontent.com';
 
+/// Which sender was used for a password-reset email.
+enum PasswordResetDelivery {
+  /// Sent through the Cloudflare worker from the verified custom domain.
+  branded,
+
+  /// Sent by Firebase Auth from `<project>.firebaseapp.com`, which mailbox
+  /// providers commonly filter into Spam.
+  firebaseFallback,
+}
+
 class AuthRepository {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
@@ -311,20 +321,25 @@ class AuthRepository {
   // Password reset. When the branded email worker is configured we send a
   // custom reset link from the verified domain; otherwise we fall back to
   // Firebase Auth's built-in reset email so the flow never breaks.
-  Future<void> sendPasswordReset(String email) async {
+  //
+  // The fallback is sent from `<project>.firebaseapp.com`, which Gmail and
+  // Outlook routinely filter into Spam. Callers use the returned value to tell
+  // the user to check their Spam folder in that case.
+  Future<PasswordResetDelivery> sendPasswordReset(String email) async {
     final trimmed = email.trim();
     final emailService = EmailService();
 
     if (emailService.isConfigured) {
       try {
         await emailService.sendPasswordReset(email: trimmed);
-        return;
+        return PasswordResetDelivery.branded;
       } catch (_) {
         // Fall through to Firebase Auth's reset email.
       }
     }
 
     await _auth.sendPasswordResetEmail(email: trimmed);
+    return PasswordResetDelivery.firebaseFallback;
   }
 
   // Quick helper to ensure or switch role for testing

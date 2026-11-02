@@ -1,0 +1,5 @@
+{
+  "_comment": "Copy this file to release.local.json and fill in the real values. release.local.json is git-ignored and is read by tools/build-release.ps1.",
+  "emailWorkerUrl": "https://gjandasher-email.YOUR-SUBDOMAIN.workers.dev",
+  "emailApiKey": "the-same-value-you-set-with-wrangler-secret-put-API_KEY"
+}

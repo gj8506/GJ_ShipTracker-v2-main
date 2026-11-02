@@ -15,6 +15,25 @@ up the domain.
 
 ---
 
+## Why reset mail lands in Spam
+
+Firebase Auth's built-in reset mail is sent from
+`noreply@<project>.firebaseapp.com`. That domain belongs to Firebase, so:
+
+- you cannot publish SPF, DKIM, or DMARC for it on your own domain;
+- Gmail/Outlook treat it as an unknown bulk sender;
+- the result is the message shown in the app's reset dialog landing in **Spam**.
+
+No amount of app code changes that; the sender domain has to change. This
+worker sends the same two messages from a domain you own and have verified in
+Resend, which is what lets SPF, DKIM, and DMARC align and what gets the message
+into the inbox.
+
+`MAIL_FROM` is validated on every send. The worker rejects `firebaseapp.com`,
+`web.app`, `gmail.com`, `outlook.com`, and similar free/owned-elsewhere domains
+with a clear error, so a misconfiguration fails loudly instead of quietly
+filling a tester's spam folder.
+
 ## Why a worker?
 
 A mobile app cannot safely hold an SMTP password or a Resend API key. The worker
@@ -27,9 +46,11 @@ email can be branded and sent from your own authenticated domain instead of
 
 1. A **Cloudflare** account (the same one already hosting the FCM worker is fine).
 2. A **Resend** account: <https://resend.com>.
-3. A **domain you own** (for example `gjandasher.com`). Resend must verify this
+3. A **domain you own** (for example `gjandasher.ph`). Resend must verify this
    domain before it can send to arbitrary recipients. Resend's shared
    `onboarding@resend.dev` sender is only for testing to your own account email.
+   If you do not own a domain yet, buy one (about $10/year) — it is the only
+   reliable way to reach the inbox.
 4. A **Firebase service account** for the `shiptracker-v2` project.
 
 > Inbox placement is never guaranteed by code. A verified domain with SPF, DKIM,
@@ -41,29 +62,41 @@ email can be branded and sent from your own authenticated domain instead of
 ## 1. Verify a sending domain in Resend
 
 1. In Resend, open **Domains → Add Domain** and enter your domain (or a
-   subdomain such as `mail.gjandasher.com`).
+   subdomain such as `mail.gjandasher.ph`).
 2. Add the DNS records Resend gives you:
-   - **SPF** (`TXT` on the sending domain)
-   - **DKIM** (`TXT` records)
+   - **SPF** (`TXT` on the `send` subdomain)
+   - **DKIM** (`TXT` on `resend._domainkey`)
+   - **MX** (`MX` on the `send` subdomain, for bounces/complaints)
    - **DMARC** (`TXT` on `_dmarc.yourdomain.com`)
 3. Wait for Resend to show **Verified**.
 4. Create an API key under **API Keys** and copy it.
+5. Confirm the records are actually live in public DNS:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File tools\check-email-dns.ps1 -Domain gjandasher.ph
+   ```
+
+   It prints PASS/FAIL for DKIM, SPF, the feedback MX, and DMARC, with the
+   exact record to add for anything that fails. Re-run it until all four pass.
+   Records usually appear within minutes but can take up to 48 hours.
 
 A reasonable DMARC starter record:
 
 ```text
-v=DMARC1; p=quarantine; rua=mailto:dmarc@yourdomain.com; adkim=s; aspf=s; pct=100
+v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com; adkim=s; aspf=s; pct=100
 ```
 
 Start with `p=none` while testing, then move to `p=quarantine` once you have
-confirmed that legitimate mail passes.
+confirmed that legitimate mail passes. Starting at `p=quarantine` on a fresh
+domain can reject your own mail if a record is wrong.
 
 Set `MAIL_FROM` in `wrangler.toml` to an address on the verified domain, for
 example:
 
 ```toml
-MAIL_FROM = "GJandAsher Digital Printing <notifications@mail.gjandasher.com>"
-REPLY_TO = "support@gjandasher.com"
+MAIL_FROM = "GJandAsher Digital Printing <notifications@mail.gjandasher.ph>"
+REPLY_TO = "support@gjandasher.ph"
+COMPANY_ADDRESS = "GJandAsher Digital Printing, Laguna, Philippines"
 ```
 
 Use a real, monitored Reply-To address. Do not use `no-reply@` unless you also
@@ -109,15 +142,46 @@ Wrangler prints the worker URL, for example:
 https://gjandasher-email.your-subdomain.workers.dev
 ```
 
-## 4. Build the app with the worker URL
-
-Pass both values at build time:
+Then confirm what the deployed revision will actually send from. This is the
+check that catches a stale or placeholder `MAIL_FROM`:
 
 ```powershell
-flutter build apk --release `
-  --dart-define=EMAIL_WORKER_URL=https://gjandasher-email.your-subdomain.workers.dev `
-  --dart-define=EMAIL_API_KEY=your-long-random-key
+curl.exe https://gjandasher-email.your-subdomain.workers.dev/health
 ```
+
+```json
+{
+  "ok": true,
+  "service": "gjandasher-email",
+  "deliverability": {
+    "mailFromDomain": "mail.gjandasher.ph",
+    "mailFromUsable": true,
+    "mailFromProblem": null,
+    "replyToConfigured": true,
+    "companyAddressConfigured": true,
+    "resendKeyConfigured": true,
+    "passwordResetConfigured": true
+  }
+}
+```
+
+`mailFromUsable` must be `true` and `passwordResetConfigured` must be `true`.
+If either is false, the app would fall back to Firebase's `firebaseapp.com`
+sender and the reset mail would land in Spam again.
+
+## 4. Build the app with the worker URL
+
+Use the release script. It refuses to build unless the worker URL is supplied,
+and it runs the `/health` check above before building:
+
+```powershell
+copy release.local.example.json release.local.json
+# edit release.local.json with your worker URL and API key
+powershell -ExecutionPolicy Bypass -File tools\build-release.ps1
+```
+
+`release.local.json` is git-ignored. The script writes the same values into the
+app as `--dart-define` flags and produces both the AAB and the APK.
 
 For local testing:
 
@@ -127,8 +191,9 @@ flutter run `
   --dart-define=EMAIL_API_KEY=your-long-random-key
 ```
 
-If you later build an Android App Bundle for Play Store, pass the same
-`--dart-define` flags to `flutter build appbundle`.
+If the flags are missing the app still works, but password reset falls back to
+Firebase's built-in email — which is exactly the Spam problem this worker
+exists to fix. That is why `tools/build-release.ps1` makes them mandatory.
 
 ## 5. Test the endpoints
 
@@ -164,9 +229,14 @@ but it lands in spam, work through the checklist below.
 ## Deliverability checklist
 
 - [ ] Sending domain is **verified in Resend** (SPF + DKIM records present).
-- [ ] DMARC record exists and passes for the sending domain.
-- [ ] `MAIL_FROM` uses the verified domain, not a free Gmail/Outlook address.
+- [ ] DKIM, SPF, feedback MX, and DMARC all **PASS** in
+      `tools\check-email-dns.ps1`.
+- [ ] `MAIL_FROM` uses the verified domain, not `firebaseapp.com`, `web.app`,
+      Gmail, Outlook, or another free mailbox domain. The worker rejects those.
 - [ ] `REPLY_TO` is a real, monitored mailbox.
+- [ ] `COMPANY_ADDRESS` is set, so the footer carries a real postal address.
+- [ ] `/health` reports `mailFromUsable: true` and
+      `passwordResetConfigured: true`.
 - [ ] Both HTML and plain-text bodies are sent (the worker does this).
 - [ ] No URL shorteners, no misleading subjects, no ALL CAPS, no excessive
       exclamation marks, no attachments.

@@ -15,7 +15,11 @@
  *   API_KEY
  *
  * Vars:
- *   FIREBASE_PROJECT_ID, APP_NAME, MAIL_FROM, REPLY_TO
+ *   FIREBASE_PROJECT_ID, APP_NAME, MAIL_FROM, REPLY_TO, COMPANY_ADDRESS
+ *
+ * MAIL_FROM must be on a domain you have verified in Resend (SPF + DKIM +
+ * DMARC). Requests that would send from a free or Firebase-owned domain are
+ * rejected, because those are the senders Gmail and Outlook spam-filter.
  */
 
 const CORS_HEADERS = {
@@ -25,6 +29,28 @@ const CORS_HEADERS = {
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Sender domains that mailbox providers routinely spam-filter. Firebase's
+ * default `firebaseapp.com` sender is the reason the built-in reset email lands
+ * in Gmail's Spam folder; free mailbox domains cannot be authenticated for a
+ * third-party sender, so aligning SPF/DKIM/DMARC is impossible from them.
+ *
+ * Sending from any of these would defeat the whole point of this worker, so we
+ * refuse the request and return an actionable error instead.
+ */
+const BLOCKED_SENDER_DOMAINS = [
+  'firebaseapp.com',
+  'web.app',
+  'gmail.com',
+  'googlemail.com',
+  'yahoo.com',
+  'hotmail.com',
+  'outlook.com',
+  'live.com',
+  'example.com',
+  'your_verified_domain',
+];
 
 let cachedAccessToken = null;
 let cachedTokenExpiry = 0;
@@ -38,7 +64,13 @@ export default {
     }
 
     if (request.method === 'GET' && url.pathname === '/health') {
-      return json({ ok: true, service: 'gjandasher-email' });
+      return json({
+        ok: true,
+        service: 'gjandasher-email',
+        // Deliberately only reports whether things are configured, never the
+        // values, so this endpoint stays safe to leave public.
+        deliverability: describeDeliverability(env),
+      });
     }
 
     if (request.method !== 'POST') {
@@ -92,7 +124,11 @@ async function handleStaffApproved(env, body) {
   const name = sanitizeName(body?.name) || 'there';
 
   const subject = `Your ${appName} staff account is approved`;
-  const html = staffApprovedHtml({ appName, name });
+  const html = staffApprovedHtml({
+    appName,
+    name,
+    companyAddress: env.COMPANY_ADDRESS,
+  });
   const text = staffApprovedText({ appName, name });
 
   await sendEmail(env, { to, subject, html, text });
@@ -128,20 +164,109 @@ async function handlePasswordReset(env, body) {
 
   const appName = env.APP_NAME || 'GJandAsher Digital Printing';
   const subject = `Reset your ${appName} password`;
-  const html = passwordResetHtml({ appName, resetLink });
+  const html = passwordResetHtml({
+    appName,
+    resetLink,
+    companyAddress: env.COMPANY_ADDRESS,
+  });
   const text = passwordResetText({ appName, resetLink });
 
   await sendEmail(env, { to: email, subject, html, text });
   return json({ ok: true, sent: true });
 }
 
+/**
+ * Summarises the configuration that decides inbox placement. Used by `/health`
+ * so you can confirm the deployed worker is not still on a placeholder sender.
+ */
+function describeDeliverability(env) {
+  const domain = senderDomain(env.MAIL_FROM);
+  const isBlocked = isBlockedSenderDomain(domain);
+  return {
+    mailFromDomain: domain || null,
+    mailFromUsable: Boolean(domain) && !isBlocked,
+    mailFromProblem: isBlocked
+      ? `MAIL_FROM is on "${domain}", which is spam-filtered by Gmail/Outlook. Verify a domain you own in Resend and set MAIL_FROM to an address on it.`
+      : domain
+        ? null
+        : 'MAIL_FROM is missing or not a valid email address.',
+    replyToConfigured: Boolean(env.REPLY_TO),
+    companyAddressConfigured: Boolean(env.COMPANY_ADDRESS),
+    resendKeyConfigured: Boolean(env.RESEND_API_KEY),
+    passwordResetConfigured: Boolean(
+      env.FIREBASE_PROJECT_ID &&
+        env.FIREBASE_CLIENT_EMAIL &&
+        env.FIREBASE_PRIVATE_KEY,
+    ),
+  };
+}
+
+/** Extracts the bare address from `Name <addr@domain>` or `addr@domain`. */
+function senderAddress(from) {
+  const raw = String(from || '').trim();
+  const match = raw.match(/<\s*([^>]+?)\s*>/);
+  return (match ? match[1] : raw).trim().toLowerCase();
+}
+
+function senderDomain(from) {
+  const address = senderAddress(from);
+  const at = address.lastIndexOf('@');
+  return at === -1 ? '' : address.slice(at + 1).trim();
+}
+
+function isBlockedSenderDomain(domain) {
+  if (!domain) return false;
+  const normalized = domain.toLowerCase().replace(/\.$/, '');
+  return BLOCKED_SENDER_DOMAINS.some(
+    (blocked) =>
+      normalized === blocked || normalized.endsWith(`.${blocked}`),
+  );
+}
+
+/**
+ * Fails fast instead of delivering mail that Gmail/Outlook will bury in Spam.
+ * A clear error in the Resend/Cloudflare logs beats a silent deliverability
+ * problem that only shows up in a tester's spam folder.
+ */
+function assertDeliverableFrom(from) {
+  const address = senderAddress(from);
+  const domain = senderDomain(from);
+
+  if (!domain || !EMAIL_PATTERN.test(address)) {
+    throw new Error(
+      'MAIL_FROM is not a valid address. Set it in wrangler.toml to ' +
+        'something like "GJandAsher <notifications@mail.yourdomain.com>".',
+    );
+  }
+
+  if (isBlockedSenderDomain(domain)) {
+    throw new Error(
+      `MAIL_FROM uses "${domain}", which Gmail and Outlook routinely filter ` +
+        'into Spam because it cannot be authenticated for your domain. ' +
+        'Verify a domain you own in Resend, then set MAIL_FROM to an address ' +
+        'on that domain (see backend/email-worker/README.md).',
+    );
+  }
+
+  return domain;
+}
+
 async function sendEmail(env, { to, subject, html, text }) {
+  assertDeliverableFrom(env.MAIL_FROM);
+
   const payload = {
     from: env.MAIL_FROM,
     to: [to],
     subject,
     html,
     text,
+    // Transactional hygiene: a per-message reference stops mailbox providers
+    // collapsing unrelated messages into one thread, and the auto-response
+    // header keeps out-of-office replies from polluting the Reply-To mailbox.
+    headers: {
+      'X-Entity-Ref-ID': crypto.randomUUID(),
+      'X-Auto-Response-Suppress': 'All',
+    },
   };
 
   if (env.REPLY_TO) {
@@ -153,6 +278,8 @@ async function sendEmail(env, { to, subject, html, text }) {
     headers: {
       Authorization: `Bearer ${env.RESEND_API_KEY}`,
       'Content-Type': 'application/json',
+      // Makes retries safe if the request is replayed by the platform.
+      'Idempotency-Key': `gjandasher-${crypto.randomUUID()}`,
     },
     body: JSON.stringify(payload),
   });
@@ -334,7 +461,16 @@ function json(body, status = 200) {
   });
 }
 
-function emailLayout({ appName, heading, bodyHtml, footerHtml = '' }) {
+function emailLayout({
+  appName,
+  heading,
+  bodyHtml,
+  footerHtml = '',
+  companyAddress = '',
+}) {
+  const addressLine = companyAddress
+    ? `<br>${escapeHtml(companyAddress)}`
+    : '';
   return `<!doctype html>
 <html lang="en">
   <body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
@@ -357,7 +493,7 @@ function emailLayout({ appName, heading, bodyHtml, footerHtml = '' }) {
             </tr>
             <tr>
               <td style="padding:18px 28px;background:#f8fafc;border-top:1px solid #e2e8f0;color:#64748b;font-size:12px;line-height:1.5;">
-                This is a transactional message from ${escapeHtml(appName)}. You received it because an account action was requested for this email address.
+                This is a transactional message from ${escapeHtml(appName)}. You received it because an account action was requested for this email address.${addressLine}
               </td>
             </tr>
           </table>
@@ -368,9 +504,10 @@ function emailLayout({ appName, heading, bodyHtml, footerHtml = '' }) {
 </html>`;
 }
 
-function staffApprovedHtml({ appName, name }) {
+function staffApprovedHtml({ appName, name, companyAddress }) {
   return emailLayout({
     appName,
+    companyAddress,
     heading: 'Your staff account is approved',
     bodyHtml: `
       <p style="margin:0 0 14px;font-size:15px;line-height:1.6;">Hi ${escapeHtml(name)},</p>
@@ -398,9 +535,10 @@ If you did not request this account, please contact the administrator immediatel
 This is a transactional message from ${appName}.`;
 }
 
-function passwordResetHtml({ appName, resetLink }) {
+function passwordResetHtml({ appName, resetLink, companyAddress }) {
   return emailLayout({
     appName,
+    companyAddress,
     heading: 'Reset your password',
     bodyHtml: `
       <p style="margin:0 0 14px;font-size:15px;line-height:1.6;">Hello,</p>

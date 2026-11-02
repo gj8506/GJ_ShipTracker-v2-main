@@ -2,13 +2,22 @@ name = "gjandasher-email"
 main = "src/index.js"
 compatibility_date = "2025-01-01"
 
-# Non-secret configuration. Replace the MAIL_FROM/REPLY_TO domain with the
-# domain you verify in Resend.
+# Non-secret configuration.
+#
+# MAIL_FROM MUST use a domain you have verified in Resend. Do not use
+# firebaseapp.com, web.app, gmail.com, or another free mailbox domain: those
+# cannot be SPF/DKIM/DMARC-aligned for a third-party sender and Gmail puts them
+# in Spam. The worker refuses to send from such a domain.
 [vars]
 FIREBASE_PROJECT_ID = "shiptracker-v2"
 APP_NAME = "GJandAsher Digital Printing"
-MAIL_FROM = "GJandAsher Digital Printing <notifications@YOUR_VERIFIED_DOMAIN>"
-REPLY_TO = "support@YOUR_VERIFIED_DOMAIN"
+MAIL_FROM = "GJandAsher Digital Printing <notifications@mail.gjandasher.ph>"
+# A real, monitored mailbox. Replies improve sender reputation, so avoid
+# no-reply@ unless someone actually reads it.
+REPLY_TO = "support@gjandasher.ph"
+# Shown in the email footer. A real postal address is a positive trust signal
+# for Gmail/Outlook filters. Leave empty to omit the line.
+COMPANY_ADDRESS = "GJandAsher Digital Printing, Laguna, Philippines"
 
 # Secrets (set with `wrangler secret put NAME`):
 #   RESEND_API_KEY

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import 'auth_providers.dart';
+import '../data/auth_repository.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -15,6 +16,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
   bool _isLoading = false;
   bool _submitted = false;
+  bool _usedFallback = false;
 
   Future<void> _handleReset() async {
     final email = _emailController.text.trim();
@@ -26,17 +28,20 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     }
 
     setState(() => _isLoading = true);
+    var usedFallback = false;
     try {
-      await ref.read(authRepositoryProvider).sendPasswordReset(email);
+      final delivery =
+          await ref.read(authRepositoryProvider).sendPasswordReset(email);
+      usedFallback = delivery == PasswordResetDelivery.firebaseFallback;
     } catch (_) {
       // Intentionally silent on error to prevent account enumeration
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _submitted = true;
-        });
-      }
+    }
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+        _submitted = true;
+        _usedFallback = usedFallback;
+      });
     }
   }
 
@@ -78,6 +83,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             style: TextStyle(
                                 color: AppColors.textSecondary, fontSize: 13),
                           ),
+                          if (_usedFallback) ...[
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Tip: this email is sent by Firebase and can land in '
+                              'your Spam folder. If you do not see it in your inbox, '
+                              'check Spam and mark it as "Not spam".',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: AppColors.textSecondary, fontSize: 12),
+                            ),
+                          ],
                           const SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: () => Navigator.pop(context),

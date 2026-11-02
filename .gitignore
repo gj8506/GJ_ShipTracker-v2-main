@@ -64,3 +64,6 @@ app.*.map.json
 # JVM crash logs
 hs_err_pid*.log
 replay_pid*.log
+
+# Release build configuration (contains the email worker URL + shared key)
+release.local.json

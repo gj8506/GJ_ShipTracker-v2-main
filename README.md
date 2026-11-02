@@ -37,17 +37,29 @@ deliverability guidance.
 Build the app with the worker URL and shared key:
 
 ```powershell
-flutter build apk --release `
-  --dart-define=EMAIL_WORKER_URL=https://your-worker.workers.dev `
-  --dart-define=EMAIL_API_KEY=your-shared-key
+copy release.local.example.json release.local.json   # then fill in the values
+powershell -ExecutionPolicy Bypass -File tools\build-release.ps1
+```
+
+`tools\build-release.ps1` refuses to build without `EMAIL_WORKER_URL`, checks
+the deployed worker's `/health` first, and then produces the AAB and APK with
+the `--dart-define` flags already applied.
+
+Check that the DNS records actually reach the inbox:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\check-email-dns.ps1 -Domain yourdomain.com
 ```
 
 If the worker is not configured, staff approval still succeeds in Firestore
 (the admin sees a warning), and password reset falls back to Firebase Auth's
 built-in reset email.
 
-> Inbox placement cannot be guaranteed by code. A verified sending domain with
-> SPF, DKIM, and DMARC is the standard way to maximize deliverability.
+> **The Firebase fallback is the spam problem.** Built-in reset mail is sent
+> from `noreply@<project>.firebaseapp.com`, a domain you cannot authenticate.
+> Gmail and Outlook routinely file it under Spam. Only the worker, sending from
+> a domain you own and verified in Resend, puts the message in the inbox. That
+> is why the release script makes the worker flags mandatory.
 
 ## Merged branch
 

@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_logo.dart';
 import 'auth_providers.dart';
 import 'auth_error_text.dart';
+import '../data/auth_repository.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -681,13 +682,22 @@ class _ForgotPasswordDialogState extends ConsumerState<_ForgotPasswordDialog> {
     setState(() => _isSending = true);
     try {
       final authRepo = ref.read(authRepositoryProvider);
-      await authRepo.sendPasswordReset(email);
+      final delivery = await authRepo.sendPasswordReset(email);
       if (mounted) {
         Navigator.pop(context);
+        final usedFallback = delivery == PasswordResetDelivery.firebaseFallback;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: AppColors.statusDelivered,
-            content: Text('Password reset link sent to $email'),
+            duration: const Duration(seconds: 6),
+            content: Text(
+              usedFallback
+                  // Firebase's built-in mail comes from firebaseapp.com and is
+                  // frequently filed under Spam, so point the user there.
+                  ? 'Reset link sent to $email. If it is not in your inbox, '
+                      'check your Spam folder.'
+                  : 'Password reset link sent to $email',
+            ),
           ),
         );
       }
