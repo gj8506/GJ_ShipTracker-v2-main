@@ -7,6 +7,7 @@ import '../constants/app_constants.dart';
 import '../../features/auth/presentation/auth_providers.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/signup_screen.dart';
+import '../../features/auth/presentation/signup_prefill.dart';
 import '../../features/auth/presentation/splash_screen.dart';
 
 import '../../features/shell/presentation/main_navigation_shell.dart';
@@ -77,9 +78,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return '/login';
       }
 
-      // Signed in but no Firestore profile: never treat this as a customer.
-      // Sign the account out and send it back to the login screen.
+      // Signed in but no Firestore profile: this is a Google sign-in that has
+      // not finished registration yet. The Sign Up screen completes the
+      // profile for the session that is already authenticated, so let it stay.
       if (userProfile.value == null) {
+        if (currentLoc == '/signup') {
+          return null;
+        }
         if (!signingOutBlockedAccount) {
           signingOutBlockedAccount = true;
           Future.microtask(() async {
@@ -159,7 +164,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
         path: '/signup',
-        builder: (context, state) => const SignupScreen(),
+        builder: (context, state) {
+          final extra = state.extra;
+          return SignupScreen(
+            prefill: extra is SignupPrefill ? extra : null,
+          );
+        },
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

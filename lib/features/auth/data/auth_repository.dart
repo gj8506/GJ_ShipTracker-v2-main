@@ -154,6 +154,52 @@ class AuthRepository {
     return userCredential;
   }
 
+  /// Creates the Firestore profile for the Google account that is already
+  /// signed in to Firebase.
+  ///
+  /// The login screen routes here when a Google sign-in succeeds but no app
+  /// account exists yet, so the user finishes registration without having to
+  /// choose their Google account a second time.
+  ///
+  /// Throws when there is no Google session, or when the signed-in account uses
+  /// a different sign-in method.
+  Future<UserProfileModel?> completeGoogleSignUp({
+    required String role,
+    String? fullName,
+    String? phoneNumber,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception(
+        'Your Google session has expired. Please sign in with Google again.',
+      );
+    }
+
+    final isGoogleAccount =
+        user.providerData.any((info) => info.providerId == 'google.com');
+    if (!isGoogleAccount) {
+      throw Exception(
+        'This account was not created with Google. Please use the sign-up '
+        'form instead.',
+      );
+    }
+
+    // Already registered (for example a retried request): keep the profile.
+    final existing = await getUserProfile(user.uid);
+    if (existing != null) return existing;
+
+    final trimmedName = (fullName ?? '').trim();
+
+    await _createUserProfile(
+      user,
+      role,
+      fullName: trimmedName.isEmpty ? null : trimmedName,
+      phoneNumber: phoneNumber,
+    );
+
+    return getUserProfile(user.uid);
+  }
+
   /// Creates the Firestore profile and, for customers, the linked registry row.
   Future<void> _createUserProfile(
     User user,

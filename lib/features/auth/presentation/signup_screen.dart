@@ -6,9 +6,15 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import 'auth_providers.dart';
 import 'auth_error_text.dart';
+import 'signup_prefill.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
-  const SignupScreen({super.key});
+  const SignupScreen({super.key, this.prefill});
+
+  /// Set when the user arrived here after a Google sign-in that had no app
+  /// account yet. The screen then finishes that registration instead of
+  /// asking for a password.
+  final SignupPrefill? prefill;
 
   @override
   ConsumerState<SignupScreen> createState() => _SignupScreenState();
@@ -27,12 +33,42 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   bool _agreedToTerms = false;
   bool _isLoading = false;
 
+  /// Captured in [initState] because `ref` cannot be used from `dispose`.
+  late final StateController<bool> _authFlow;
+
   String _selectedRole = AppConstants.roleCustomer; // 'customer' or 'staff'
+
+  /// True when finishing the registration of a Google account that is already
+  /// signed in to Firebase.
+  bool get _isGoogleSetup => widget.prefill?.fromGoogleLogin == true;
+
+  @override
+  void initState() {
+    super.initState();
+    _authFlow = ref.read(authFlowInProgressProvider.notifier);
+
+    final prefill = widget.prefill;
+    if (prefill == null) return;
+
+    _emailCtrl.text = prefill.email;
+    if (prefill.fullName.isNotEmpty) {
+      _nameCtrl.text = prefill.fullName;
+    }
+    if (prefill.role.trim().toLowerCase() == AppConstants.roleStaff) {
+      _selectedRole = AppConstants.roleStaff;
+    }
+  }
 
   @override
   void dispose() {
     // Never leave the router paused if the user backs out mid-request.
-    ref.read(authFlowInProgressProvider.notifier).state = false;
+    // The provider scope may already be gone during app shutdown or in tests,
+    // so this must not throw.
+    try {
+      _authFlow.state = false;
+    } catch (_) {
+      // Ignored on purpose.
+    }
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
@@ -67,7 +103,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     if (!_formKey.currentState!.validate()) return;
 
-    ref.read(authFlowInProgressProvider.notifier).state = true;
+    _authFlow.state = true;
     setState(() => _isLoading = true);
 
     try {
@@ -88,7 +124,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         _showAuthError(describeAuthError(e).message);
       }
     } finally {
-      ref.read(authFlowInProgressProvider.notifier).state = false;
+      _authFlow.state = false;
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -99,7 +135,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       return;
     }
 
-    ref.read(authFlowInProgressProvider.notifier).state = true;
+    _authFlow.state = true;
     setState(() => _isLoading = true);
 
     try {
@@ -119,7 +155,45 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         _showAuthError(describeAuthError(e, isGoogle: true).message);
       }
     } finally {
-      ref.read(authFlowInProgressProvider.notifier).state = false;
+      _authFlow.state = false;
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  /// Finishes the registration of the Google account that is already signed in.
+  ///
+  /// The login screen keeps the Firebase session alive when it finds no app
+  /// account, so this only creates the Firestore profile with the details
+  /// collected here.
+  Future<void> _handleFinishGoogleSetup() async {
+    if (!_agreedToTerms) {
+      _showTermsAndPrivacyModal();
+      return;
+    }
+
+    if (!_formKey.currentState!.validate()) return;
+
+    _authFlow.state = true;
+    setState(() => _isLoading = true);
+
+    try {
+      await ref.read(authRepositoryProvider).completeGoogleSignUp(
+            role: _selectedRole,
+            fullName: _nameCtrl.text.trim(),
+            phoneNumber: _phoneCtrl.text.trim(),
+          );
+
+      if (_selectedRole == AppConstants.roleStaff) {
+        await _finishStaffRegistration();
+      }
+      // Customer accounts are redirected by the router after the profile is
+      // created, because userProfileProvider emits the new document.
+    } catch (e) {
+      if (mounted) {
+        _showAuthError(describeAuthError(e, isGoogle: true).message);
+      }
+    } finally {
+      _authFlow.state = false;
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -235,24 +309,30 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Create Account',
+                Text(
+                  _isGoogleSetup ? 'Finish Your Account' : 'Create Account',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: AppColors.navyPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Sign up to access tracking, orders, and\ndispatch',
+                Text(
+                  _isGoogleSetup
+                      ? 'Your Google account is connected.\nAdd the details below to activate it.'
+                      : 'Sign up to access tracking, orders, and\ndispatch',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondary,
                       height: 1.4),
                 ),
+                if (_isGoogleSetup) ...[
+                  const SizedBox(height: 18),
+                  _GoogleAccountBanner(email: widget.prefill!.email),
+                ],
                 const SizedBox(height: 24),
 
                 // Role Segmented Control
@@ -374,6 +454,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   hint: 'Email Address',
                   icon: Icons.mail_outline_rounded,
                   keyboardType: TextInputType.emailAddress,
+                  readOnly: _isGoogleSetup,
                   validator: (v) =>
                       !v!.contains('@') ? 'Enter a valid email' : null,
                 ),
@@ -384,43 +465,48 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   icon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
                 ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _passwordCtrl,
-                  hint: 'Password',
-                  icon: Icons.lock_outline_rounded,
-                  obscureText: _obscurePassword,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        color: AppColors.textSecondary),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
+                // Google accounts authenticate through Google, so there is no
+                // app password to choose here.
+                if (!_isGoogleSetup) ...[
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _passwordCtrl,
+                    hint: 'Password',
+                    icon: Icons.lock_outline_rounded,
+                    obscureText: _obscurePassword,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: AppColors.textSecondary),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
+                    ),
+                    validator: (v) => v!.length < 6
+                        ? 'Password must be at least 6 characters'
+                        : null,
                   ),
-                  validator: (v) => v!.length < 6
-                      ? 'Password must be at least 6 characters'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _confirmPasswordCtrl,
-                  hint: 'Confirm Password',
-                  icon: Icons.lock_outline_rounded,
-                  obscureText: _obscureConfirm,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                        _obscureConfirm
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        color: AppColors.textSecondary),
-                    onPressed: () =>
-                        setState(() => _obscureConfirm = !_obscureConfirm),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _confirmPasswordCtrl,
+                    hint: 'Confirm Password',
+                    icon: Icons.lock_outline_rounded,
+                    obscureText: _obscureConfirm,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                          _obscureConfirm
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: AppColors.textSecondary),
+                      onPressed: () =>
+                          setState(() => _obscureConfirm = !_obscureConfirm),
+                    ),
+                    validator: (v) => v != _passwordCtrl.text
+                        ? 'Passwords do not match'
+                        : null,
                   ),
-                  validator: (v) =>
-                      v != _passwordCtrl.text ? 'Passwords do not match' : null,
-                ),
+                ],
                 const SizedBox(height: 16),
 
                 // Terms & Privacy Checkbox
@@ -476,7 +562,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
                     ),
-                    onPressed: _isLoading ? null : _handleSignUp,
+                    onPressed: _isLoading
+                        ? null
+                        : (_isGoogleSetup
+                            ? _handleFinishGoogleSetup
+                            : _handleSignUp),
                     child: _isLoading
                         ? const SizedBox(
                             width: 24,
@@ -484,7 +574,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             child: CircularProgressIndicator(
                                 color: Colors.white, strokeWidth: 2))
                         : Text(
-                            'Sign Up as ${_selectedRole == AppConstants.roleCustomer ? 'Customer' : 'Staff'}',
+                            _isGoogleSetup
+                                ? 'Finish Account Setup'
+                                : 'Sign Up as ${_selectedRole == AppConstants.roleCustomer ? 'Customer' : 'Staff'}',
                             style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold),
                           ),
@@ -492,76 +584,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Divider
-                const Row(
-                  children: [
-                    Expanded(child: Divider(color: AppColors.borderLight)),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('OR',
-                          style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600)),
-                    ),
-                    Expanded(child: Divider(color: AppColors.borderLight)),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // Google Button (Fixed: Using offline stylized 'G' instead of SVG network image)
-                SizedBox(
-                  width: double.infinity,
-                  height: 54,
-                  child: OutlinedButton(
-                    onPressed: _isLoading ? null : _handleGoogleSignUp,
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: AppColors.navyPrimary,
-                      side: const BorderSide(color: AppColors.borderLight),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(3),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: AppColors.borderCool,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: const Text(
-                                  'G',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                    color: AppColors.statusInTransit,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              const Text(
-                                'Continue with Google',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
-                ),
+                // The Google account is already signed in when finishing a
+                // Google registration, so only offer the button otherwise.
+                if (!_isGoogleSetup) ...[
+                  const _OrDivider(),
+                  const SizedBox(height: 24),
+                  _buildGoogleButton(),
+                ],
                 const SizedBox(height: 32),
               ],
             ),
@@ -571,11 +600,50 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     );
   }
 
+  Widget _buildGoogleButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 54,
+      child: OutlinedButton(
+        onPressed: _isLoading ? null : _handleGoogleSignUp,
+        style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: AppColors.navyPrimary,
+          side: const BorderSide(color: AppColors.borderLight),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: _isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _GoogleGlyph(),
+                  SizedBox(width: 12),
+                  Text(
+                    'Continue with Google',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String hint,
     required IconData icon,
     bool obscureText = false,
+    bool readOnly = false,
     TextInputType? keyboardType,
     Widget? suffixIcon,
     String? Function(String?)? validator,
@@ -583,6 +651,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     return TextFormField(
       controller: controller,
       obscureText: obscureText,
+      readOnly: readOnly,
       keyboardType: keyboardType,
       validator: validator,
       decoration: InputDecoration(
@@ -592,7 +661,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         prefixIcon: Icon(icon, color: AppColors.textTertiary),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: readOnly ? AppColors.surfaceMuted : Colors.white,
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -606,6 +675,102 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.tealAccent, width: 1.6),
         ),
+      ),
+    );
+  }
+}
+
+/// The "OR" rule between the password form and the Google button.
+class _OrDivider extends StatelessWidget {
+  const _OrDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        Expanded(child: Divider(color: AppColors.borderLight)),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Text('OR',
+              style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600)),
+        ),
+        Expanded(child: Divider(color: AppColors.borderLight)),
+      ],
+    );
+  }
+}
+
+/// Offline, stylised Google "G" used by the Google buttons.
+class _GoogleGlyph extends StatelessWidget {
+  const _GoogleGlyph();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: AppColors.borderCool, width: 1.5),
+      ),
+      child: const Text(
+        'G',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 15,
+          color: AppColors.statusInTransit,
+        ),
+      ),
+    );
+  }
+}
+
+/// Confirms which Google account is already signed in while the user finishes
+/// creating their app account.
+class _GoogleAccountBanner extends StatelessWidget {
+  const _GoogleAccountBanner({required this.email});
+
+  final String email;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: Row(
+        children: [
+          const _GoogleGlyph(),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Signed in with Google',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.navyPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  email,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -8,7 +8,9 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_logo.dart';
 import 'auth_providers.dart';
 import 'auth_error_text.dart';
+import 'signup_prefill.dart';
 import '../data/auth_repository.dart';
+import '../domain/user_profile_model.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -37,11 +39,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   /// Verifies that the account has a Firestore profile and that its role
   /// matches the current login tab. Any failure signs the user out.
-  Future<bool> _verifyPortalRole(User user) async {
+  ///
+  /// [profile] lets callers pass a profile they already loaded, avoiding a
+  /// second Firestore read on the Google path.
+  Future<bool> _verifyPortalRole(
+    User user, {
+    UserProfileModel? profile,
+  }) async {
     final authRepo = ref.read(authRepositoryProvider);
-    final profile = await authRepo.getUserProfile(user.uid);
+    final resolvedProfile = profile ?? await authRepo.getUserProfile(user.uid);
 
-    if (profile == null) {
+    if (resolvedProfile == null) {
       // The Google/Firebase account exists, but no app account was created.
       await authRepo.signOut();
       if (mounted) {
@@ -55,7 +63,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     // Staff registrations must be approved by the owner/admin before they can
     // access any portal. Rejected accounts are blocked permanently.
-    if (profile.isPending) {
+    if (resolvedProfile.isPending) {
       await authRepo.signOut();
       if (mounted) {
         _showErrorSnackBar(
@@ -66,7 +74,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return false;
     }
 
-    if (profile.isRejected) {
+    if (resolvedProfile.isRejected) {
       await authRepo.signOut();
       if (mounted) {
         _showErrorSnackBar(
@@ -76,7 +84,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return false;
     }
 
-    final rawRole = profile.role.trim().toLowerCase();
+    final rawRole = resolvedProfile.role.trim().toLowerCase();
     final isStaffOrAdmin = rawRole == 'admin' ||
         rawRole == 'staff' ||
         rawRole == AppConstants.roleAdmin.toLowerCase() ||
@@ -234,12 +242,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       // Null means the user closed the Google account picker.
       final user = credential?.user;
-      if (user != null) {
-        final isValidRole = await _verifyPortalRole(user);
-        if (!isValidRole) {
-          return;
+      if (user == null) return;
+
+      final profile = await authRepo.getUserProfile(user.uid);
+
+      if (profile == null) {
+        // The Google account is valid but has no app account yet. Keep the
+        // Firebase session and let the Sign Up screen finish the registration,
+        // so the user only picks their Google account once.
+        if (mounted) {
+          context.push(
+            '/signup',
+            extra: SignupPrefill.fromGoogleUser(
+              user,
+              role: _isCustomerPortal
+                  ? AppConstants.roleCustomer
+                  : AppConstants.roleStaff,
+            ),
+          );
         }
+        return;
       }
+
+      await _verifyPortalRole(user, profile: profile);
     } catch (e) {
       if (mounted) {
         _showErrorSnackBar(describeAuthError(e, isGoogle: true).message);
