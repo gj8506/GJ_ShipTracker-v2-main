@@ -23,20 +23,95 @@ class _OrderRequestFormScreenState
 
   // Form Field Controllers
   final _plateNumberCtrl = TextEditingController(text: 'M221NH');
-  final _regionCtrl = TextEditingController(text: 'REGION 12');
-  final _brandCtrl = TextEditingController(text: 'HONDA');
   final _fullNameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
-  final _addressCtrl = TextEditingController();
+  final _addressDetailCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
 
-  // Style Options
-  static const List<String> _plateStyles = [
-    'Standard',
-    'Large',
-    'Irregular Hexagon',
+  // ---------------------------------------------------------------------
+  // Plate styles and their estimated fixed prices.
+  //
+  // Edit [_plateStylePrices] when your rates change: the amount is written to
+  // the order request as `price` / `estimatedPrice`.
+  // ---------------------------------------------------------------------
+  static const String _styleStandard = 'Standard (Irregular Hexagon)';
+  static const String _styleLarge = 'Large';
+
+  static const List<String> _plateStyles = [_styleStandard, _styleLarge];
+
+  static const Map<String, double> _plateStylePrices = {
+    _styleStandard: 1450.0,
+    _styleLarge: 1950.0,
+  };
+
+  String _selectedStyle = _styleStandard;
+
+  // ---------------------------------------------------------------------
+  // Dropdown choices.
+  // `_deliveryAreas` is the list of places you deliver to. Add or remove
+  // entries to match your coverage; "Other" always falls back to a free-text
+  // address so an order is never blocked.
+  // ---------------------------------------------------------------------
+  static const String _otherAreaOption = 'Other (type full address)';
+
+  static const List<String> _deliveryAreas = [
+    'Nagcarlan, Laguna',
+    'Liliw, Laguna',
+    'Magdalena, Laguna',
+    'Majayjay, Laguna',
+    'Rizal, Laguna',
+    'San Pablo City, Laguna',
+    'Calauan, Laguna',
+    'Pila, Laguna',
+    'Santa Cruz, Laguna',
+    'Los Baños, Laguna',
+    'Bay, Laguna',
+    'Calamba, Laguna',
+    'Metro Manila',
+    'Batangas',
+    'Cavite',
+    'Quezon',
+    _otherAreaOption,
   ];
-  String _selectedStyle = 'Irregular Hexagon';
+
+  static const List<String> _regions = [
+    'NCR',
+    'CAR',
+    'REGION 1',
+    'REGION 2',
+    'REGION 3',
+    'REGION 4-A',
+    'MIMAROPA',
+    'REGION 5',
+    'REGION 6',
+    'REGION 7',
+    'REGION 8',
+    'REGION 9',
+    'REGION 10',
+    'REGION 11',
+    'REGION 12',
+    'REGION 13',
+    'BARMM',
+  ];
+
+  static const List<String> _motorcycleMakes = [
+    'HONDA',
+    'YAMAHA',
+    'SUZUKI',
+    'KAWASAKI',
+    'TVS',
+    'KYMCO',
+    'RUSI',
+    'BAJAJ',
+    'CFMOTO',
+    'OTHER',
+  ];
+
+  String _selectedRegion = 'REGION 12';
+  String _selectedMake = 'HONDA';
+  String? _selectedArea;
+
+  bool get _isOtherArea => _selectedArea == _otherAreaOption;
 
   bool _isSubmitting = false;
 
@@ -59,11 +134,9 @@ class _OrderRequestFormScreenState
   @override
   void dispose() {
     _plateNumberCtrl.dispose();
-    _regionCtrl.dispose();
-    _brandCtrl.dispose();
     _fullNameCtrl.dispose();
     _phoneCtrl.dispose();
-    _addressCtrl.dispose();
+    _addressDetailCtrl.dispose();
     _notesCtrl.dispose();
     super.dispose();
   }
@@ -85,19 +158,31 @@ class _OrderRequestFormScreenState
     setState(() => _isSubmitting = true);
 
     try {
+      final area = _selectedArea ?? '';
+      final addressDetail = _addressDetailCtrl.text.trim();
+      final deliveryAddress =
+          area == _otherAreaOption ? addressDetail : '$addressDetail, $area';
+
+      final estimatedPrice = _plateStylePrices[_selectedStyle] ?? 0.0;
       final plateSpecSummary =
-          '${_selectedStyle.toUpperCase()} | Reg: ${_regionCtrl.text.trim()} | Make: ${_brandCtrl.text.trim().toUpperCase()}';
+          '${_selectedStyle.toUpperCase()} | Reg: $_selectedRegion | Make: $_selectedMake';
 
       await FirebaseFirestore.instance.collection('order_requests').add({
         'userId': user.uid,
         'customerName': _fullNameCtrl.text.trim(),
         'contactNumber': _phoneCtrl.text.trim(),
-        'deliveryAddress': _addressCtrl.text.trim(),
+        'deliveryAddress': deliveryAddress,
+        'deliveryArea': area,
         'plateNumber': _plateNumberCtrl.text.trim().toUpperCase(),
         'plateStyle': _selectedStyle,
-        'region': _regionCtrl.text.trim().toUpperCase(),
-        'brandMake': _brandCtrl.text.trim().toUpperCase(),
+        'region': _selectedRegion,
+        'brandMake': _selectedMake,
         'plateSpecs': plateSpecSummary,
+        // Fixed, published estimate for the chosen plate style. Kept as both
+        // `price` (read by OrderRequestModel and analytics) and
+        // `estimatedPrice` (explicit: this is not a final invoice).
+        'price': estimatedPrice,
+        'estimatedPrice': estimatedPrice,
         'specialNotes':
             _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
         'status': 'PENDING', // UPDATED: Matches 'My Orders' screen exactly
@@ -206,9 +291,9 @@ class _OrderRequestFormScreenState
   }
 
   Widget _buildPlateVisualPreview() {
-    final isHexagon = _selectedStyle == 'Irregular Hexagon';
+    final isHexagon = _selectedStyle == _styleStandard;
     const plateWidth = double.infinity;
-    final plateHeight = _selectedStyle == 'Large' ? 200.0 : 180.0;
+    final plateHeight = _selectedStyle == _styleLarge ? 200.0 : 180.0;
 
     Widget innerPlate = Container(
       width: plateWidth,
@@ -263,21 +348,21 @@ class _OrderRequestFormScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                _regionCtrl.text.trim().isEmpty
-                    ? 'REGION 12'
-                    : _regionCtrl.text.trim().toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                  color: AppColors.navyPrimary,
+              Expanded(
+                child: Text(
+                  _selectedRegion,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                    color: AppColors.navyPrimary,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Text(
-                _brandCtrl.text.trim().isEmpty
-                    ? 'MOTORCYCLE'
-                    : _brandCtrl.text.trim().toUpperCase(),
+                _selectedMake,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w900,
@@ -365,7 +450,10 @@ class _OrderRequestFormScreenState
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             ),
             items: _plateStyles
-                .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                .map((s) => DropdownMenuItem(
+                      value: s,
+                      child: Text(s, overflow: TextOverflow.ellipsis),
+                    ))
                 .toList(),
             onChanged: (val) {
               if (val != null) setState(() => _selectedStyle = val);
@@ -375,13 +463,11 @@ class _OrderRequestFormScreenState
           Row(
             children: [
               Expanded(
-                child: TextFormField(
-                  controller: _regionCtrl,
-                  textCapitalization: TextCapitalization.characters,
-                  onChanged: (_) => setState(() {}),
+                child: DropdownButtonFormField<String>(
+                  initialValue: _selectedRegion,
+                  isExpanded: true,
                   decoration: InputDecoration(
                     labelText: 'Region *',
-                    hintText: 'e.g. REGION 12, NCR',
                     prefixIcon: const Icon(Icons.map_outlined,
                         color: AppColors.navyPrimary),
                     border: OutlineInputBorder(
@@ -389,19 +475,26 @@ class _OrderRequestFormScreenState
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 12),
                   ),
+                  items: _regions
+                      .map((r) => DropdownMenuItem(
+                            value: r,
+                            child: Text(r, overflow: TextOverflow.ellipsis),
+                          ))
+                      .toList(),
+                  onChanged: (val) {
+                    if (val != null) setState(() => _selectedRegion = val);
+                  },
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      (v == null || v.isEmpty) ? 'Required' : null,
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: TextFormField(
-                  controller: _brandCtrl,
-                  textCapitalization: TextCapitalization.characters,
-                  onChanged: (_) => setState(() {}),
+                child: DropdownButtonFormField<String>(
+                  initialValue: _selectedMake,
+                  isExpanded: true,
                   decoration: InputDecoration(
                     labelText: 'Motorcycle Make *',
-                    hintText: 'e.g. HONDA, YAMAHA',
                     prefixIcon: const Icon(Icons.two_wheeler_outlined,
                         color: AppColors.navyPrimary),
                     border: OutlineInputBorder(
@@ -409,8 +502,17 @@ class _OrderRequestFormScreenState
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 12),
                   ),
+                  items: _motorcycleMakes
+                      .map((m) => DropdownMenuItem(
+                            value: m,
+                            child: Text(m, overflow: TextOverflow.ellipsis),
+                          ))
+                      .toList(),
+                  onChanged: (val) {
+                    if (val != null) setState(() => _selectedMake = val);
+                  },
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      (v == null || v.isEmpty) ? 'Required' : null,
                 ),
               ),
             ],
@@ -472,15 +574,45 @@ class _OrderRequestFormScreenState
                 (v == null || v.trim().isEmpty) ? 'Enter contact number' : null,
           ),
           const SizedBox(height: 14),
-          TextFormField(
-            controller: _addressCtrl,
-            maxLines: 2,
+          DropdownButtonFormField<String>(
+            initialValue: _selectedArea,
+            isExpanded: true,
             decoration: InputDecoration(
-              labelText: 'Complete Shipping Address *',
-              hintText: 'Barangay, Municipality/City, Province',
-              alignLabelWithHint: true,
+              labelText: 'Delivery Area *',
               prefixIcon: const Icon(Icons.location_on_outlined,
                   color: AppColors.navyPrimary),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            ),
+            items: _deliveryAreas
+                .map((a) => DropdownMenuItem(
+                      value: a,
+                      child: Text(a, overflow: TextOverflow.ellipsis),
+                    ))
+                .toList(),
+            onChanged: (val) => setState(() => _selectedArea = val),
+            validator: (v) =>
+                (v == null || v.isEmpty) ? 'Select delivery area' : null,
+          ),
+          const SizedBox(height: 14),
+          // Areas on the list only need the street/barangay line; "Other" asks
+          // for the whole address so an uncovered customer is never blocked.
+          TextFormField(
+            controller: _addressDetailCtrl,
+            maxLines: _isOtherArea ? 2 : 1,
+            textCapitalization: TextCapitalization.words,
+            decoration: InputDecoration(
+              labelText: _isOtherArea
+                  ? 'Complete Shipping Address *'
+                  : 'House No., Street, Barangay *',
+              hintText: _isOtherArea
+                  ? 'House/Unit No., Street, Barangay, City/Municipality, Province'
+                  : 'e.g. 123 Rizal St., Brgy. Poblacion',
+              alignLabelWithHint: _isOtherArea,
+              prefixIcon:
+                  const Icon(Icons.home_outlined, color: AppColors.navyPrimary),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               contentPadding:
