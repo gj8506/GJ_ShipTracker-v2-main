@@ -51,6 +51,11 @@ class ParcelsDashboardScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.manage_search_rounded),
+            onPressed: () => context.push('/search-summary'),
+            tooltip: 'Search Summary',
+          ),
+          IconButton(
             icon: const Icon(Icons.add_box_outlined),
             onPressed: () => context.go('/dispatch'),
             tooltip: 'Dispatch New Parcel',

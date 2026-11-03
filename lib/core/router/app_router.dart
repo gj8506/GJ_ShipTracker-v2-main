@@ -20,6 +20,7 @@ import '../../features/admin/presentation/staff_approval_screen.dart';
 import '../../features/qr_customers/presentation/customer_list_screen.dart';
 import '../../features/qr_customers/presentation/reseller_scanner_screen.dart';
 import '../../features/analytics/presentation/analytics_screen.dart';
+import '../../features/search_summary/presentation/search_summary_screen.dart';
 
 import '../../features/customer/presentation/customer_shell.dart';
 import '../../features/customer/presentation/order_request_form_screen.dart';
@@ -180,6 +181,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/reseller-scanner',
         builder: (context, state) => const ResellerScannerScreen(),
+      ),
+      // Admin/staff lookup for historical orders and parcels.
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/search-summary',
+        builder: (context, state) => const SearchSummaryScreen(),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

@@ -304,6 +304,16 @@ class ProfileScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     ListTile(
+                      leading: Icon(Icons.manage_search_rounded,
+                          color: AppColors.navyPrimary),
+                      title: const Text('Search Summary'),
+                      subtitle:
+                          const Text('Look up past orders and parcels by date'),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => context.push('/search-summary'),
+                    ),
+                    Divider(height: 1, color: AppColors.borderLight),
+                    ListTile(
                       leading: Icon(Icons.qr_code_2_rounded,
                           color: AppColors.tealDark),
                       title: const Text('Customer & Reseller QR Directory'),
