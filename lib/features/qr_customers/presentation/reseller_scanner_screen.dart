@@ -20,96 +20,147 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
   bool _isProcessing = false;
   bool _torchEnabled = false;
 
+  /// Set in [dispose] so late async callbacks never touch a dead camera or
+  /// call `setState` after the screen is gone.
+  bool _isDisposed = false;
+
   @override
   void dispose() {
+    _isDisposed = true;
+    // Release the platform camera session. Skipping this leaves the previous
+    // scan's camera alive, so consecutive scans pile up native resources until
+    // the app crashes.
     _scannerController.dispose();
     _manualSearchCtrl.dispose();
     super.dispose();
   }
 
+  /// Stops decoding frames while a result sheet is open.
+  Future<void> _pauseScanner() async {
+    try {
+      await _scannerController.stop();
+    } catch (_) {
+      // The controller can already be gone when the user backs out mid-scan.
+    }
+  }
+
+  /// Restarts the camera for the next scan.
+  Future<void> _resumeScanner() async {
+    if (_isDisposed) return;
+    try {
+      await _scannerController.start();
+    } on MobileScannerException {
+      // Thrown when a start is already in flight (fast double taps) or the
+      // controller was disposed; the camera is running or no longer needed.
+    } catch (_) {
+      // Ignored on purpose: the next scan retries the camera.
+    }
+  }
+
+  /// Re-arms the scanner after a scan was rejected or dismissed.
+  void _finishScan() {
+    if (_isDisposed) return;
+    _resumeScanner();
+    if (mounted) setState(() => _isProcessing = false);
+  }
+
+  void _showScanMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.statusReturned,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+  }
+
   Future<void> _handleBarcode(String rawCode) async {
+    if (_isDisposed || _isProcessing) return;
+
     final cleanCode = rawCode.trim();
     if (cleanCode.isEmpty) return;
 
-    if (_isProcessing) return;
     setState(() => _isProcessing = true);
 
-    if (!cleanCode.toUpperCase().startsWith('GJAS1:')) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                'Invalid QR! Only official GJandAsher customer QR codes are accepted.'),
-            backgroundColor: AppColors.statusReturned,
-            duration: Duration(seconds: 2),
-          ),
-        );
+    // Stop the camera before the lookups: every remaining detection frame
+    // would otherwise queue another query while this one is still running.
+    await _pauseScanner();
+
+    try {
+      if (!cleanCode.toUpperCase().startsWith('GJAS1:')) {
+        _showScanMessage(
+            'Invalid QR! Only official GJandAsher customer QR codes are accepted.');
+        _finishScan();
+        return;
       }
-      setState(() => _isProcessing = false);
-      return;
-    }
 
-    final customerId = cleanCode.substring(6).trim();
-    final repo = ref.read(customerRepositoryProvider);
-    final customer = await repo.getCustomerById(customerId);
+      final customerId = cleanCode.substring(6).trim();
+      final repo = ref.read(customerRepositoryProvider);
+      final customer = await repo.getCustomerById(customerId);
 
-    if (customer == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Customer record not found in system.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+      if (!mounted || _isDisposed) return;
+      if (customer == null) {
+        _showScanMessage('Customer record not found in system.');
+        _finishScan();
+        return;
       }
-      setState(() => _isProcessing = false);
-      return;
-    }
 
-    // 1. Fetch Previous Parcel Data (Courier Prefs)
-    final lastParcel = await repo.getMostRecentParcel(customer.name);
+      // 1. Fetch Previous Parcel Data (Courier Prefs)
+      final lastParcel = await repo.getMostRecentParcel(customer.name);
 
-    // 2. Fetch Pending Custom Plate Orders (Robust Search)
-    Map<String, dynamic>? pendingOrder;
-    String? pendingOrderId;
+      if (!mounted || _isDisposed) return;
 
-    QuerySnapshot orderSnap;
+      // 2. Fetch Pending Custom Plate Orders (Robust Search)
+      Map<String, dynamic>? pendingOrder;
+      String? pendingOrderId;
 
-    // First try searching by exact User ID, fallback to searching by Customer Name
-    if (customer.linkedUid != null && customer.linkedUid!.isNotEmpty) {
-      orderSnap = await FirebaseFirestore.instance
-          .collection('order_requests')
-          .where('userId', isEqualTo: customer.linkedUid)
-          .get();
-    } else {
-      orderSnap = await FirebaseFirestore.instance
-          .collection('order_requests')
-          .where('customerName', isEqualTo: customer.name)
-          .get();
-    }
+      QuerySnapshot orderSnap;
 
-    final pendingDocs = orderSnap.docs.where((doc) {
-      final status = (doc.data() as Map<String, dynamic>)['status'] as String?;
-      return status?.toUpperCase() == 'PENDING' || status == 'Pending Quote';
-    }).toList();
+      // First try searching by exact User ID, fallback to searching by Customer Name
+      if (customer.linkedUid != null && customer.linkedUid!.isNotEmpty) {
+        orderSnap = await FirebaseFirestore.instance
+            .collection('order_requests')
+            .where('userId', isEqualTo: customer.linkedUid)
+            .get();
+      } else {
+        orderSnap = await FirebaseFirestore.instance
+            .collection('order_requests')
+            .where('customerName', isEqualTo: customer.name)
+            .get();
+      }
 
-    if (pendingDocs.isNotEmpty) {
-      pendingDocs.sort((a, b) {
-        final aData = a.data() as Map<String, dynamic>?;
-        final bData = b.data() as Map<String, dynamic>?;
-        final aTime = aData?['createdAt'] as Timestamp?;
-        final bTime = bData?['createdAt'] as Timestamp?;
-        if (aTime == null || bTime == null) return 0;
-        return bTime.compareTo(aTime);
-      });
-      pendingOrderId = pendingDocs.first.id;
-      pendingOrder = pendingDocs.first.data() as Map<String, dynamic>;
-    }
+      if (!mounted || _isDisposed) return;
 
-    if (mounted) {
-      await _scannerController.stop();
+      final pendingDocs = orderSnap.docs.where((doc) {
+        final status = (doc.data() as Map<String, dynamic>)['status'] as String?;
+        return status?.toUpperCase() == 'PENDING' || status == 'Pending Quote';
+      }).toList();
+
+      if (pendingDocs.isNotEmpty) {
+        pendingDocs.sort((a, b) {
+          final aData = a.data() as Map<String, dynamic>?;
+          final bData = b.data() as Map<String, dynamic>?;
+          final aTime = aData?['createdAt'] as Timestamp?;
+          final bTime = bData?['createdAt'] as Timestamp?;
+          if (aTime == null || bTime == null) return 0;
+          return bTime.compareTo(aTime);
+        });
+        pendingOrderId = pendingDocs.first.id;
+        pendingOrder = pendingDocs.first.data() as Map<String, dynamic>;
+      }
+
       _showConfirmationSheet(
           customer, lastParcel, pendingOrder, pendingOrderId);
+    } catch (_) {
+      // Offline or a Firestore failure must not leave the scanner stuck in the
+      // processing state, otherwise it appears frozen after one bad scan.
+      if (mounted && !_isDisposed) {
+        _showScanMessage('Could not read this QR code. Please try again.');
+        _finishScan();
+      }
     }
   }
 
@@ -339,8 +390,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                         ),
                         onPressed: () {
                           Navigator.pop(ctx);
-                          _scannerController.start();
-                          setState(() => _isProcessing = false);
+                          _finishScan();
                         },
                         child: const Text(
                           'Scan Again',
@@ -401,9 +451,14 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
               _torchEnabled ? Icons.flash_on_rounded : Icons.flash_off_rounded,
               color: _torchEnabled ? AppColors.statusPending : Colors.white,
             ),
-            onPressed: () {
-              _scannerController.toggleTorch();
-              setState(() => _torchEnabled = !_torchEnabled);
+            onPressed: () async {
+              if (_isDisposed) return;
+              try {
+                await _scannerController.toggleTorch();
+                if (mounted) setState(() => _torchEnabled = !_torchEnabled);
+              } catch (_) {
+                // Torch is unavailable until the camera has started.
+              }
             },
           ),
         ],

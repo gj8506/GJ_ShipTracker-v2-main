@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/form_validators.dart';
 import 'customer_providers.dart';
 import 'customer_qr_dialog.dart';
 
@@ -420,8 +421,8 @@ class _AddEditCustomerDialogState
   void initState() {
     super.initState();
     _nameCtrl = TextEditingController(text: widget.existing?.name ?? '');
-    _contactCtrl =
-        TextEditingController(text: widget.existing?.contactNumber ?? '');
+    _contactCtrl = TextEditingController(
+        text: normalizeContactNumber(widget.existing?.contactNumber));
     _addressCtrl = TextEditingController(text: widget.existing?.address ?? '');
 
     // Normalize type and ensure it matches one of the dropdown items
@@ -444,10 +445,21 @@ class _AddEditCustomerDialogState
     final name = _nameCtrl.text.trim();
     final contact = _contactCtrl.text.trim();
 
-    if (name.isEmpty || contact.isEmpty) {
+    if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter name and contact number'),
+          content: Text('Please enter the customer name'),
+          backgroundColor: AppColors.statusReturned,
+        ),
+      );
+      return;
+    }
+
+    final contactError = validateContactNumber(contact);
+    if (contactError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(contactError),
           backgroundColor: AppColors.statusReturned,
         ),
       );
@@ -531,6 +543,8 @@ class _AddEditCustomerDialogState
               controller: _contactCtrl,
               enabled: !_isSaving,
               keyboardType: TextInputType.phone,
+              // Numeric only, capped at the 11-digit PH mobile format.
+              inputFormatters: contactNumberInputFormatters,
               decoration: const InputDecoration(
                 labelText: 'Contact Number *',
                 border: OutlineInputBorder(),

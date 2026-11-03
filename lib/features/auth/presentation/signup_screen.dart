@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/form_validators.dart';
 import 'auth_providers.dart';
 import 'auth_error_text.dart';
 import 'signup_prefill.dart';
@@ -32,6 +33,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   bool _obscureConfirm = true;
   bool _agreedToTerms = false;
   bool _isLoading = false;
+
+  /// Google accounts sign in through Google, so an app password is optional
+  /// there. Turning this on reveals the password fields below.
+  bool _addPassword = false;
 
   /// Captured in [initState] because `ref` cannot be used from `dispose`.
   late final StateController<bool> _authFlow;
@@ -181,6 +186,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             role: _selectedRole,
             fullName: _nameCtrl.text.trim(),
             phoneNumber: _phoneCtrl.text.trim(),
+            password: _addPassword ? _passwordCtrl.text : null,
           );
 
       if (_selectedRole == AppConstants.roleStaff) {
@@ -464,48 +470,27 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   hint: 'Phone Number',
                   icon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
+                  inputFormatters: contactNumberInputFormatters,
+                  validator: (v) =>
+                      validateContactNumber(v, required: false),
                 ),
-                // Google accounts authenticate through Google, so there is no
-                // app password to choose here.
-                if (!_isGoogleSetup) ...[
+                // Google accounts authenticate through Google, so a password is
+                // optional there. The toggle lets the user add one anyway, so
+                // they can also sign in with their email and password.
+                if (_isGoogleSetup) ...[
                   const SizedBox(height: 16),
-                  _buildTextField(
-                    controller: _passwordCtrl,
-                    hint: 'Password',
-                    icon: Icons.lock_outline_rounded,
-                    obscureText: _obscurePassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: AppColors.textSecondary),
-                      onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
-                    ),
-                    validator: (v) => v!.length < 6
-                        ? 'Password must be at least 6 characters'
-                        : null,
-                  ),
+                  _buildAddPasswordToggle(),
+                  if (_addPassword) ...[
+                    const SizedBox(height: 16),
+                    _buildPasswordField(),
+                    const SizedBox(height: 16),
+                    _buildConfirmPasswordField(),
+                  ],
+                ] else ...[
                   const SizedBox(height: 16),
-                  _buildTextField(
-                    controller: _confirmPasswordCtrl,
-                    hint: 'Confirm Password',
-                    icon: Icons.lock_outline_rounded,
-                    obscureText: _obscureConfirm,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                          _obscureConfirm
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: AppColors.textSecondary),
-                      onPressed: () =>
-                          setState(() => _obscureConfirm = !_obscureConfirm),
-                    ),
-                    validator: (v) => v != _passwordCtrl.text
-                        ? 'Passwords do not match'
-                        : null,
-                  ),
+                  _buildPasswordField(),
+                  const SizedBox(height: 16),
+                  _buildConfirmPasswordField(),
                 ],
                 const SizedBox(height: 16),
 
@@ -638,6 +623,110 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     );
   }
 
+  /// Optional password section for Google accounts.
+  Widget _buildAddPasswordToggle() {
+    return InkWell(
+      onTap: () => setState(() => _addPassword = !_addPassword),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+        decoration: BoxDecoration(
+          color: _addPassword ? AppColors.surfaceMuted : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _addPassword ? AppColors.tealAccent : AppColors.borderLight,
+            width: _addPassword ? 1.6 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.lock_outline_rounded,
+                color: AppColors.textTertiary),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Add a password (optional)',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Also lets you sign in with your email and password.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Switch(
+              value: _addPassword,
+              activeThumbColor: AppColors.tealAccent,
+              onChanged: (val) => setState(() => _addPassword = val),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return _buildTextField(
+      controller: _passwordCtrl,
+      hint: 'Password',
+      icon: Icons.lock_outline_rounded,
+      obscureText: _obscurePassword,
+      suffixIcon: IconButton(
+        icon: Icon(
+            _obscurePassword
+                ? Icons.visibility_off_outlined
+                : Icons.visibility_outlined,
+            color: AppColors.textSecondary),
+        onPressed: () =>
+            setState(() => _obscurePassword = !_obscurePassword),
+      ),
+      validator: _validatePassword,
+    );
+  }
+
+  Widget _buildConfirmPasswordField() {
+    return _buildTextField(
+      controller: _confirmPasswordCtrl,
+      hint: 'Confirm Password',
+      icon: Icons.lock_outline_rounded,
+      obscureText: _obscureConfirm,
+      suffixIcon: IconButton(
+        icon: Icon(
+            _obscureConfirm
+                ? Icons.visibility_off_outlined
+                : Icons.visibility_outlined,
+            color: AppColors.textSecondary),
+        onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
+      ),
+      validator: _validateConfirmPassword,
+    );
+  }
+
+  String? _validatePassword(String? value) {
+    // The fields are hidden while finishing a Google account unless the user
+    // asked for a password.
+    if (_isGoogleSetup && !_addPassword) return null;
+    return (value ?? '').length < 6
+        ? 'Password must be at least 6 characters'
+        : null;
+  }
+
+  String? _validateConfirmPassword(String? value) {
+    if (_isGoogleSetup && !_addPassword) return null;
+    return value != _passwordCtrl.text ? 'Passwords do not match' : null;
+  }
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String hint,
@@ -645,6 +734,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     bool obscureText = false,
     bool readOnly = false,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
     Widget? suffixIcon,
     String? Function(String?)? validator,
   }) {
@@ -653,6 +743,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       obscureText: obscureText,
       readOnly: readOnly,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       validator: validator,
       decoration: InputDecoration(
         hintText: hint,

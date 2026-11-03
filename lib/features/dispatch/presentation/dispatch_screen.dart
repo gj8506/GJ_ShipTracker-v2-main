@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // ADDED: Required for input formatters
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/form_validators.dart';
 import '../../parcels/domain/parcel_model.dart';
 import '../../parcels/presentation/parcel_providers.dart';
 import '../../auth/presentation/auth_providers.dart';
@@ -283,25 +283,19 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _trackingController,
-                // ADDED: Limit tracking number to exactly 15 characters
-                inputFormatters: [
-                  LengthLimitingTextInputFormatter(15),
-                ],
+                textCapitalization: TextCapitalization.characters,
+                // Tracking numbers are exactly 15 characters.
+                inputFormatters: trackingNumberInputFormatters,
                 decoration: InputDecoration(
                   labelText: 'Tracking Number *',
-                  hintText: 'e.g. SPX4572829R9E8',
+                  hintText: 'e.g. SPX4572829R9E88',
                   prefixIcon: const Icon(Icons.qr_code_scanner_rounded),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.clear),
                     onPressed: () => _trackingController.clear(),
                   ),
                 ),
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
-                    return 'Enter tracking number';
-                  }
-                  return null;
-                },
+                validator: validateTrackingNumber,
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
@@ -355,15 +349,13 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
               TextFormField(
                 controller: _contactController,
                 keyboardType: TextInputType.phone,
-                // ADDED: Block letters/symbols and cap at 11 digits
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(11),
-                ],
+                // Numeric only, capped at the 11-digit PH mobile format.
+                inputFormatters: contactNumberInputFormatters,
                 decoration: const InputDecoration(
                   labelText: 'Contact Number',
                   prefixIcon: Icon(Icons.phone_outlined),
                 ),
+                validator: (val) => validateContactNumber(val, required: false),
               ),
               const SizedBox(height: 14),
               TextFormField(

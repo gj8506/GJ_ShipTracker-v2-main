@@ -31,12 +31,20 @@ void main() {
       expect(find.text('tester@example.com'), findsWidgets);
       expect(find.text('Test Tester'), findsOneWidget);
 
-      // The Google account already authenticated, so no password is asked and
-      // the Google button is not offered a second time.
+      // The Google account already authenticated, so a password is optional:
+      // the fields stay hidden until the user asks for one, and the Google
+      // button is not offered a second time.
       expect(find.text('Finish Account Setup'), findsOneWidget);
+      expect(find.text('Add a password (optional)'), findsOneWidget);
       expect(find.text('Password'), findsNothing);
       expect(find.text('Confirm Password'), findsNothing);
       expect(find.text('Continue with Google'), findsNothing);
+
+      // Opting in reveals the password fields for the new account.
+      await tester.tap(find.text('Add a password (optional)'));
+      await tester.pumpAndSettle();
+      expect(find.text('Password'), findsOneWidget);
+      expect(find.text('Confirm Password'), findsOneWidget);
     },
   );
 

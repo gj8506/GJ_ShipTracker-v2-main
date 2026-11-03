@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/form_validators.dart';
 import 'returns_providers.dart';
 
 class CreateReturnScreen extends ConsumerStatefulWidget {
@@ -204,20 +205,17 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                 TextFormField(
                   controller: _trackingController,
                   textCapitalization: TextCapitalization.characters,
+                  // Tracking numbers are exactly 15 characters.
+                  inputFormatters: trackingNumberInputFormatters,
                   decoration: InputDecoration(
                     labelText: 'Original Tracking Number *',
-                    hintText: 'e.g. SPX123456789PH',
+                    hintText: 'e.g. SPX1234567890PH',
                     prefixIcon:
                         const Icon(Icons.qr_code, color: AppColors.navyPrimary),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'Original tracking number is required';
-                    }
-                    return null;
-                  },
+                  validator: validateTrackingNumber,
                 ),
                 const SizedBox(height: 16),
 
@@ -307,6 +305,8 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                 TextFormField(
                   controller: _contactController,
                   keyboardType: TextInputType.phone,
+                  // Numeric only, capped at the 11-digit PH mobile format.
+                  inputFormatters: contactNumberInputFormatters,
                   decoration: InputDecoration(
                     labelText: 'Contact Number (Optional)',
                     prefixIcon: const Icon(Icons.phone_outlined,
@@ -314,6 +314,8 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
+                  validator: (val) =>
+                      validateContactNumber(val, required: false),
                 ),
                 const SizedBox(height: 16),
 

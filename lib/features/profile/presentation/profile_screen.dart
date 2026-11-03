@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/form_validators.dart';
 import '../../../core/widgets/app_avatar.dart';
 import '../../admin/presentation/staff_approval_providers.dart';
 import '../../auth/presentation/auth_providers.dart';
@@ -88,7 +89,8 @@ class ProfileScreen extends ConsumerWidget {
     String uid,
   ) {
     final nameCtrl = TextEditingController(text: currentName);
-    final phoneCtrl = TextEditingController(text: currentPhone ?? '');
+    final phoneCtrl =
+        TextEditingController(text: normalizeContactNumber(currentPhone));
 
     showDialog(
       context: context,
@@ -111,6 +113,8 @@ class ProfileScreen extends ConsumerWidget {
             TextField(
               controller: phoneCtrl,
               keyboardType: TextInputType.phone,
+              // Numeric only, capped at the 11-digit PH mobile format.
+              inputFormatters: contactNumberInputFormatters,
               decoration: const InputDecoration(
                 labelText: 'Contact Number',
                 border: OutlineInputBorder(),
@@ -130,13 +134,25 @@ class ProfileScreen extends ConsumerWidget {
             ),
             onPressed: () async {
               if (nameCtrl.text.trim().isEmpty) return;
+
+              final phone = phoneCtrl.text.trim();
+              final phoneError =
+                  validateContactNumber(phone, required: false);
+              if (phoneError != null) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  SnackBar(
+                    content: Text(phoneError),
+                    backgroundColor: AppColors.errorRed,
+                  ),
+                );
+                return;
+              }
+
               try {
                 await ref.read(authRepositoryProvider).updateProfile(
                       uid: uid,
                       displayName: nameCtrl.text.trim(),
-                      phoneNumber: phoneCtrl.text.trim().isNotEmpty
-                          ? phoneCtrl.text.trim()
-                          : null,
+                      phoneNumber: phone.isNotEmpty ? phone : null,
                     );
                 if (ctx.mounted) Navigator.of(ctx).pop();
               } catch (e) {

@@ -161,12 +161,16 @@ class AuthRepository {
   /// account exists yet, so the user finishes registration without having to
   /// choose their Google account a second time.
   ///
+  /// When [password] is given, it is attached to the same Firebase account so
+  /// the user can also sign in with their email address and password later.
+  ///
   /// Throws when there is no Google session, or when the signed-in account uses
   /// a different sign-in method.
   Future<UserProfileModel?> completeGoogleSignUp({
     required String role,
     String? fullName,
     String? phoneNumber,
+    String? password,
   }) async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -184,6 +188,13 @@ class AuthRepository {
       );
     }
 
+    // Set the optional app password first, so a rejected password leaves no
+    // half-finished registration behind.
+    final appPassword = (password ?? '').trim();
+    if (appPassword.isNotEmpty) {
+      await _setAppPassword(user, appPassword);
+    }
+
     // Already registered (for example a retried request): keep the profile.
     final existing = await getUserProfile(user.uid);
     if (existing != null) return existing;
@@ -198,6 +209,27 @@ class AuthRepository {
     );
 
     return getUserProfile(user.uid);
+  }
+
+  /// Gives the signed-in account an email/password sign-in option.
+  ///
+  /// Firebase attaches the password to the existing (Google) account instead of
+  /// creating a second one, so both sign-in methods reach the same profile.
+  Future<void> _setAppPassword(User user, String password) async {
+    if (password.length < 6) {
+      throw Exception('Password must be at least 6 characters.');
+    }
+    try {
+      await user.updatePassword(password);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        throw Exception(
+          'Your Google session is too old to save a password. Sign in with '
+          'Google again and retry.',
+        );
+      }
+      rethrow;
+    }
   }
 
   /// Creates the Firestore profile and, for customers, the linked registry row.

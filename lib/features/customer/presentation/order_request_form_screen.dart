@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/form_validators.dart';
 import '../../auth/presentation/auth_providers.dart';
 import 'widgets/irregular_hexagon_clipper.dart';
 
@@ -125,7 +126,7 @@ class _OrderRequestFormScreenState
           _fullNameCtrl.text = userProfile.displayName;
         }
         if (_phoneCtrl.text.isEmpty && userProfile.phoneNumber != null) {
-          _phoneCtrl.text = userProfile.phoneNumber!;
+          _phoneCtrl.text = normalizeContactNumber(userProfile.phoneNumber);
         }
       }
     });
@@ -561,6 +562,8 @@ class _OrderRequestFormScreenState
           TextFormField(
             controller: _phoneCtrl,
             keyboardType: TextInputType.phone,
+            // Numeric only, capped at the 11-digit PH mobile format.
+            inputFormatters: contactNumberInputFormatters,
             decoration: InputDecoration(
               labelText: 'Mobile Phone Number *',
               prefixIcon: const Icon(Icons.phone_outlined,
@@ -570,8 +573,7 @@ class _OrderRequestFormScreenState
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             ),
-            validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Enter contact number' : null,
+            validator: validateContactNumber,
           ),
           const SizedBox(height: 14),
           DropdownButtonFormField<String>(
