@@ -7,6 +7,16 @@ const int kTrackingNumberLength = 15;
 /// Philippine mobile numbers are 11 digits (e.g. `09171234567`).
 const int kContactNumberLength = 11;
 
+/// Shipping addresses are capped so a long address cannot break the dispatch
+/// and customer-list row layouts.
+const int kShippingAddressMaxLength = 35;
+
+/// Items / plate specification summaries share the same short-form limit.
+const int kItemSpecsMaxLength = 35;
+
+/// Optional order notes are capped so they never overflow a parcel card.
+const int kOrderNotesMaxLength = 30;
+
 /// Keeps the tracking-number fields at the courier's 15-character format and
 /// blocks characters that can never appear in a tracking code.
 final List<TextInputFormatter> trackingNumberInputFormatters =
@@ -21,6 +31,35 @@ final List<TextInputFormatter> contactNumberInputFormatters =
   FilteringTextInputFormatter.digitsOnly,
   LengthLimitingTextInputFormatter(kContactNumberLength),
 ];
+
+/// Caps a shipping address at [kShippingAddressMaxLength] characters.
+final List<TextInputFormatter> shippingAddressInputFormatters =
+    <TextInputFormatter>[
+  LengthLimitingTextInputFormatter(kShippingAddressMaxLength),
+];
+
+/// Caps an items / plate-specs summary at [kItemSpecsMaxLength] characters.
+final List<TextInputFormatter> itemSpecsInputFormatters =
+    <TextInputFormatter>[
+  LengthLimitingTextInputFormatter(kItemSpecsMaxLength),
+];
+
+/// Caps optional order notes at [kOrderNotesMaxLength] characters.
+final List<TextInputFormatter> orderNotesInputFormatters =
+    <TextInputFormatter>[
+  LengthLimitingTextInputFormatter(kOrderNotesMaxLength),
+];
+
+/// Trims [value] down to [maxLength] characters.
+///
+/// Used for values loaded from Firestore (existing customers, pending orders,
+/// scanned profiles), which never passed through an input formatter and may be
+/// longer than the current limit.
+String limitLength(String? value, int maxLength) {
+  final text = value ?? '';
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength);
+}
 
 /// Validates a tracking number, which must be exactly 15 characters.
 ///
@@ -52,6 +91,43 @@ String? validateContactNumber(String? value, {bool required = true}) {
   }
   if (contact.length != kContactNumberLength) {
     return 'Contact number must be $kContactNumberLength digits';
+  }
+  return null;
+}
+
+/// Validates a shipping address against [kShippingAddressMaxLength].
+///
+/// Set [required] to false for optional fields: an empty value is then valid,
+/// but anything typed must stay within the limit.
+String? validateShippingAddress(String? value, {bool required = false}) {
+  final address = (value ?? '').trim();
+  if (address.isEmpty) {
+    return required ? 'Enter delivery address' : null;
+  }
+  if (address.length > kShippingAddressMaxLength) {
+    return 'Address must be $kShippingAddressMaxLength characters or fewer';
+  }
+  return null;
+}
+
+/// Validates an items / plate-specs summary against [kItemSpecsMaxLength].
+String? validateItemSpecs(String? value, {bool required = false}) {
+  final specs = (value ?? '').trim();
+  if (specs.isEmpty) {
+    return required ? 'Enter items or plate specs' : null;
+  }
+  if (specs.length > kItemSpecsMaxLength) {
+    return 'Items / plate specs must be $kItemSpecsMaxLength characters or fewer';
+  }
+  return null;
+}
+
+/// Validates optional order notes against [kOrderNotesMaxLength].
+String? validateOrderNotes(String? value) {
+  final notes = (value ?? '').trim();
+  if (notes.isEmpty) return null;
+  if (notes.length > kOrderNotesMaxLength) {
+    return 'Notes must be $kOrderNotesMaxLength characters or fewer';
   }
   return null;
 }

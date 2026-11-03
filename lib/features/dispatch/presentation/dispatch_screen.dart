@@ -64,10 +64,14 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
         _scannedCustomerId = customer.id;
         _customerNameController.text =
             pendingOrder?['customerName'] ?? customer.name;
-        _contactController.text =
-            pendingOrder?['contactNumber'] ?? customer.contactNumber;
-        _addressController.text =
-            pendingOrder?['deliveryAddress'] ?? customer.address;
+        _contactController.text = normalizeContactNumber(
+            pendingOrder?['contactNumber'] ?? customer.contactNumber);
+        // Stored addresses may predate the length limit, so trim them before
+        // they land in the field.
+        _addressController.text = limitLength(
+          pendingOrder?['deliveryAddress'] ?? customer.address,
+          kShippingAddressMaxLength,
+        );
 
         if (lastParcel != null) {
           _selectedPlatform = lastParcel.platform;
@@ -75,9 +79,14 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
         }
 
         if (pendingOrder != null) {
-          _itemsController.text =
-              'Custom Plate: [${pendingOrder['plateNumber']}] ${pendingOrder['plateSpecs']}';
-          _notesController.text = pendingOrder['specialNotes'] ?? '';
+          _itemsController.text = limitLength(
+            'Custom Plate: [${pendingOrder['plateNumber']}] ${pendingOrder['plateSpecs']}',
+            kItemSpecsMaxLength,
+          );
+          _notesController.text = limitLength(
+            pendingOrder['specialNotes'],
+            kOrderNotesMaxLength,
+          );
           _pendingOrderId = pendingOrderId;
         }
       });
@@ -366,28 +375,38 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
               TextFormField(
                 controller: _addressController,
                 maxLines: 2,
+                // Shipping addresses are capped at 35 characters.
+                inputFormatters: shippingAddressInputFormatters,
                 decoration: const InputDecoration(
                   labelText: 'Delivery Address',
                   prefixIcon: Icon(Icons.location_on_outlined),
                 ),
+                validator: (val) =>
+                    validateShippingAddress(val, required: false),
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _itemsController,
                 maxLines: 2,
+                // Items / plate specs are capped at 35 characters.
+                inputFormatters: itemSpecsInputFormatters,
                 decoration: const InputDecoration(
                   labelText: 'Items / Plate Specs',
                   hintText: 'e.g. 2x Side Mirror, Custom Plate',
                   prefixIcon: Icon(Icons.inventory_2_outlined),
                 ),
+                validator: (val) => validateItemSpecs(val, required: false),
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _notesController,
+                // Optional notes are capped at 30 characters.
+                inputFormatters: orderNotesInputFormatters,
                 decoration: const InputDecoration(
                   labelText: 'Order Notes (Optional)',
                   prefixIcon: Icon(Icons.note_alt_outlined),
                 ),
+                validator: validateOrderNotes,
               ),
               const SizedBox(height: 28),
               SizedBox(

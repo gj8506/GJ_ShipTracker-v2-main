@@ -322,6 +322,8 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                 // Motorcycle Plate Specifications
                 TextFormField(
                   controller: _specsController,
+                  // Plate specs are capped at 35 characters.
+                  inputFormatters: itemSpecsInputFormatters,
                   decoration: InputDecoration(
                     labelText: 'Motorcycle Plate Specifications',
                     hintText: 'e.g. White plate, embossed, 4x7 with bracket',
@@ -330,6 +332,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
+                  validator: (val) => validateItemSpecs(val, required: false),
                 ),
                 const SizedBox(height: 16),
 
@@ -362,6 +365,8 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                 TextFormField(
                   controller: _notesController,
                   maxLines: 3,
+                  // Optional notes are capped at 30 characters.
+                  inputFormatters: orderNotesInputFormatters,
                   decoration: InputDecoration(
                     labelText: 'Defect Description / Notes',
                     hintText: 'Describe damage or defect details...',
@@ -369,6 +374,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
+                  validator: validateOrderNotes,
                 ),
                 const SizedBox(height: 20),
 

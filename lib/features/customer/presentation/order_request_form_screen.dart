@@ -606,6 +606,8 @@ class _OrderRequestFormScreenState
             controller: _addressDetailCtrl,
             maxLines: _isOtherArea ? 2 : 1,
             textCapitalization: TextCapitalization.words,
+            // Shipping addresses are capped at 35 characters.
+            inputFormatters: shippingAddressInputFormatters,
             decoration: InputDecoration(
               labelText: _isOtherArea
                   ? 'Complete Shipping Address *'
@@ -623,11 +625,13 @@ class _OrderRequestFormScreenState
             ),
             validator: (v) => (v == null || v.trim().isEmpty)
                 ? 'Enter delivery address'
-                : null,
+                : validateShippingAddress(v, required: true),
           ),
           const SizedBox(height: 14),
           TextFormField(
             controller: _notesCtrl,
+            // Optional notes are capped at 30 characters.
+            inputFormatters: orderNotesInputFormatters,
             decoration: InputDecoration(
               labelText: 'Special Notes / Conduction Details',
               hintText: 'e.g. Free bracket, hole spacing, or rush',
@@ -638,6 +642,7 @@ class _OrderRequestFormScreenState
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             ),
+            validator: validateOrderNotes,
           ),
         ],
       ),

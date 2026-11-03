@@ -464,7 +464,10 @@ class _AddEditCustomerDialogState
     _nameCtrl = TextEditingController(text: widget.existing?.name ?? '');
     _contactCtrl = TextEditingController(
         text: normalizeContactNumber(widget.existing?.contactNumber));
-    _addressCtrl = TextEditingController(text: widget.existing?.address ?? '');
+    _addressCtrl = TextEditingController(
+      // Existing records may predate the 35-character limit.
+      text: limitLength(widget.existing?.address, kShippingAddressMaxLength),
+    );
 
     // Normalize type and ensure it matches one of the dropdown items
     final rawType = (widget.existing?.type ?? AppConstants.customerTypeRegular)
@@ -598,6 +601,8 @@ class _AddEditCustomerDialogState
               controller: _addressCtrl,
               enabled: !_isSaving,
               maxLines: 2,
+              // Shipping addresses are capped at 35 characters.
+              inputFormatters: shippingAddressInputFormatters,
               decoration: const InputDecoration(
                 labelText: 'Delivery Address',
                 border: OutlineInputBorder(),
