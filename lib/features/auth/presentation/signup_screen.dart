@@ -88,7 +88,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       isScrollControlled: true,
       isDismissible: false,
       enableDrag: false,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surfaceWhite,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -246,11 +246,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           ),
           icon: Container(
             padding: const EdgeInsets.all(14),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.warningSurface,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.hourglass_top_rounded,
               size: 36,
               color: AppColors.warningStrong,
@@ -302,7 +302,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded,
+          icon: Icon(Icons.arrow_back_rounded,
               color: AppColors.navyPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -318,7 +318,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 Text(
                   _isGoogleSetup ? 'Finish Your Account' : 'Create Account',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: AppColors.navyPrimary,
@@ -330,7 +330,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ? 'Your Google account is connected.\nAdd the details below to activate it.'
                       : 'Sign up to access tracking, orders, and\ndispatch',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondary,
                       height: 1.4),
@@ -358,7 +358,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
                               color: _selectedRole == AppConstants.roleCustomer
-                                  ? Colors.white
+                                  ? AppColors.surfaceWhite
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(8),
                               boxShadow:
@@ -404,7 +404,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
                               color: _selectedRole == AppConstants.roleStaff
-                                  ? Colors.white
+                                  ? AppColors.surfaceWhite
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(8),
                               boxShadow: _selectedRole == AppConstants.roleStaff
@@ -521,7 +521,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             }
                           },
                         ),
-                        const Expanded(
+                        Expanded(
                           child: Text(
                             'I agree to the Terms of Service &\nPrivacy Policy',
                             style: TextStyle(
@@ -592,9 +592,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       child: OutlinedButton(
         onPressed: _isLoading ? null : _handleGoogleSignUp,
         style: OutlinedButton.styleFrom(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surfaceWhite,
           foregroundColor: AppColors.navyPrimary,
-          side: const BorderSide(color: AppColors.borderLight),
+          side: BorderSide(color: AppColors.borderLight),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -631,7 +631,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
         decoration: BoxDecoration(
-          color: _addPassword ? AppColors.surfaceMuted : Colors.white,
+          color: _addPassword ? AppColors.surfaceMuted : AppColors.surfaceWhite,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: _addPassword ? AppColors.tealAccent : AppColors.borderLight,
@@ -640,10 +640,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         ),
         child: Row(
           children: [
-            const Icon(Icons.lock_outline_rounded,
+            Icon(Icons.lock_outline_rounded,
                 color: AppColors.textTertiary),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -654,7 +654,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
                     'Also lets you sign in with your email and password.',
                     style: TextStyle(
@@ -748,23 +748,23 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle:
-            const TextStyle(color: AppColors.textSecondary, fontSize: 15),
+            TextStyle(color: AppColors.textSecondary, fontSize: 15),
         prefixIcon: Icon(icon, color: AppColors.textTertiary),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: readOnly ? AppColors.surfaceMuted : Colors.white,
+        fillColor: readOnly ? AppColors.surfaceMuted : AppColors.surfaceWhite,
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderLight),
+          borderSide: BorderSide(color: AppColors.borderLight),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderLight),
+          borderSide: BorderSide(color: AppColors.borderLight),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.tealAccent, width: 1.6),
+          borderSide: BorderSide(color: AppColors.tealAccent, width: 1.6),
         ),
       ),
     );
@@ -777,11 +777,11 @@ class _OrDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       children: [
         Expanded(child: Divider(color: AppColors.borderLight)),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text('OR',
               style: TextStyle(
                   color: AppColors.textSecondary,
@@ -806,7 +806,7 @@ class _GoogleGlyph extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: AppColors.borderCool, width: 1.5),
       ),
-      child: const Text(
+      child: Text(
         'G',
         style: TextStyle(
           fontWeight: FontWeight.bold,
@@ -842,7 +842,7 @@ class _GoogleAccountBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Signed in with Google',
                   style: TextStyle(
                     fontSize: 13,
@@ -853,7 +853,7 @@ class _GoogleAccountBanner extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   email,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
                   ),
@@ -922,8 +922,8 @@ class _TermsAndPrivacySheetState extends State<_TermsAndPrivacySheet> {
                 borderRadius: BorderRadius.circular(10)),
           ),
           const SizedBox(height: 16),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Text(
               'Terms of Service & Data Privacy Act (RA 10173)',
               textAlign: TextAlign.center,
@@ -941,7 +941,7 @@ class _TermsAndPrivacySheetState extends State<_TermsAndPrivacySheet> {
               child: SingleChildScrollView(
                 controller: _scrollController,
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: const Text(
+                child: Text(
                   '''DATA PRIVACY CONSENT FORM
 Pursuant to the Data Privacy Act of 2012 (Republic Act No. 10173), we are committed to protecting your personal information. By checking the "I Agree" checkbox, you explicitly consent to the collection, processing, and storage of your personal data by GJandAsher ShipTracker.
 
@@ -976,7 +976,7 @@ Scroll to the bottom to agree.''',
           Container(
             padding: const EdgeInsets.all(24.0),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surfaceWhite,
               boxShadow: [
                 BoxShadow(
                     color: Colors.black.withValues(alpha: 0.05),

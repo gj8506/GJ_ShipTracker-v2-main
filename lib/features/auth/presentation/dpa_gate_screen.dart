@@ -88,7 +88,7 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
                       color: AppColors.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.privacy_tip_outlined,
+                    child: Icon(Icons.privacy_tip_outlined,
                         color: AppColors.primary, size: 28),
                   ),
                   const SizedBox(width: 14),

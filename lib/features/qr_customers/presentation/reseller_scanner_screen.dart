@@ -175,7 +175,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
       isDismissible: false,
       enableDrag: false,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surfaceWhite,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -207,7 +207,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Buy Now Uli',
                             style: TextStyle(
                               fontSize: 12,
@@ -220,7 +220,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                             customer.name,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textPrimary,
@@ -232,12 +232,12 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const Divider(height: 1, color: Colors.black12),
+                Divider(height: 1, color: AppColors.borderLight),
                 const SizedBox(height: 14),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.phone_outlined,
+                    Icon(Icons.phone_outlined,
                         size: 18, color: AppColors.textSecondary),
                     const SizedBox(width: 8),
                     const Text(
@@ -250,7 +250,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                         customer.contactNumber.isNotEmpty
                             ? customer.contactNumber
                             : 'None',
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 13, color: AppColors.textPrimary),
                       ),
                     ),
@@ -260,7 +260,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.location_on_outlined,
+                    Icon(Icons.location_on_outlined,
                         size: 18, color: AppColors.textSecondary),
                     const SizedBox(width: 8),
                     const Text(
@@ -271,7 +271,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                     Expanded(
                       child: Text(
                         customer.address.isNotEmpty ? customer.address : 'None',
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 13, color: AppColors.textPrimary),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -292,11 +292,11 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
                             Icon(Icons.inventory_2_rounded,
                                 size: 18, color: AppColors.statusDelivered),
-                            SizedBox(width: 6),
+                            const SizedBox(width: 6),
                             Text(
                               'Pending Plate Order Detected',
                               style: TextStyle(
@@ -310,7 +310,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                         const SizedBox(height: 6),
                         Text(
                           'Plate: ${pendingOrder['plateNumber'] ?? 'N/A'}\nSpecs: ${pendingOrder['plateSpecs'] ?? 'N/A'}',
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 12, color: AppColors.successDeep),
                         ),
                       ],
@@ -325,11 +325,11 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: AppColors.borderLight),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
                         Icon(Icons.info_outline_rounded,
                             size: 18, color: AppColors.textSecondary),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text(
                           'No pending custom plate orders.',
                           style: TextStyle(
@@ -353,7 +353,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.history_rounded,
                           size: 18,
                           color: AppColors.navyPrimary,
@@ -362,7 +362,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                         Expanded(
                           child: Text(
                             'Last Courier: ${lastParcel.platform} (${lastParcel.courier})',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: AppColors.navyPrimary,
@@ -386,7 +386,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           side:
-                              const BorderSide(color: AppColors.textSecondary),
+                              BorderSide(color: AppColors.textSecondary),
                         ),
                         onPressed: () {
                           Navigator.pop(ctx);
@@ -527,7 +527,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surfaceWhite,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: const [
                     BoxShadow(
@@ -538,13 +538,13 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.qr_code_rounded,
+                    Icon(Icons.qr_code_rounded,
                         color: AppColors.textSecondary, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: TextField(
                         controller: _manualSearchCtrl,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: 'Enter code manually (e.g. GJAS1:...)...',
                           hintStyle: TextStyle(
                               fontSize: 13, color: AppColors.textSecondary),
@@ -558,7 +558,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.arrow_forward_rounded,
+                      icon: Icon(Icons.arrow_forward_rounded,
                           color: AppColors.navyPrimary),
                       onPressed: () {
                         if (_manualSearchCtrl.text.trim().isNotEmpty) {

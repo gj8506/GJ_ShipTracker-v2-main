@@ -188,7 +188,12 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      appBar: AppBar(title: const Text('Outbound Dispatch')),
+      appBar: AppBar(
+        title: const Text(
+          'Outbound Dispatch',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -201,7 +206,7 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: _openCustomerQrScanner,
-                      icon: const Icon(Icons.qr_code_scanner_rounded,
+                      icon: Icon(Icons.qr_code_scanner_rounded,
                           color: AppColors.tealAccent),
                       label: const Text(
                         'Scan QR (Check Plate Orders)',
@@ -209,7 +214,7 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                             fontSize: 13, fontWeight: FontWeight.bold),
                       ),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.tealAccent),
+                        side: BorderSide(color: AppColors.tealAccent),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -218,7 +223,7 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.people_outline_rounded,
+                    icon: Icon(Icons.people_outline_rounded,
                         color: AppColors.navyPrimary),
                     tooltip: 'Customer Registry',
                     onPressed: () {
@@ -231,7 +236,7 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                 ],
               ),
               const SizedBox(height: 18),
-              const Text(
+              Text(
                 'Select Platform',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
@@ -259,7 +264,7 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                         onSelected: (_) =>
                             setState(() => _selectedPlatform = platform),
                         selectedColor: AppColors.navyPrimary,
-                        backgroundColor: Colors.white,
+                        backgroundColor: AppColors.surfaceWhite,
                         showCheckmark: false,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),

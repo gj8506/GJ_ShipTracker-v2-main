@@ -201,11 +201,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
       if (mounted) {
         scaffoldMessenger.showSnackBar(
-          const SnackBar(
-            content: Text(
+          SnackBar(
+            content: const Text(
                 'Sample data generated! Visual Analytics & Forecasting populated.'),
             backgroundColor: AppColors.statusDelivered,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -255,8 +255,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
       if (mounted) {
         scaffoldMessenger.showSnackBar(
-          const SnackBar(
-            content: Text('Sample data removed.'),
+          SnackBar(
+            content: const Text('Sample data removed.'),
             backgroundColor: AppColors.statusCancelled,
           ),
         );
@@ -343,7 +343,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         actions: [
           IconButton(
             key: const ValueKey('admin_excel_export_button'),
-            icon: const Icon(
+            icon: Icon(
               Icons.table_chart_rounded,
               color: AppColors.statusDelivered,
               size: 26,
@@ -353,7 +353,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           ),
           IconButton(
             tooltip: 'Sales Forecasting (Admin)',
-            icon: const Icon(
+            icon: Icon(
               Icons.auto_graph_rounded,
               color: AppColors.navyPrimary,
             ),
@@ -430,10 +430,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.bug_report_rounded,
+          Icon(Icons.bug_report_rounded,
               size: 20, color: AppColors.warningDeep),
           const SizedBox(width: 8),
-          const Expanded(
+          Expanded(
             child: Text(
               'Sample Data Tool (Syncs\nwith Returns Log)',
               style: TextStyle(
@@ -445,7 +445,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ),
           ),
           if (_isProcessingSample)
-            const SizedBox(
+            SizedBox(
               width: 18,
               height: 18,
               child: CircularProgressIndicator(
@@ -514,7 +514,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   color: AppColors.tealAccent.withValues(alpha: 0.3),
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.auto_graph_rounded,
                 color: AppColors.tealSecondary,
                 size: 24,
@@ -548,7 +548,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                 .withValues(alpha: 0.4),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Admin',
                           style: TextStyle(
                             color: AppColors.tealSecondary,
@@ -560,7 +560,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     ],
                   ),
                   const SizedBox(height: 3),
-                  const Text(
+                  Text(
                     '1, 3, 6 & 12-month predictive trends & revenue projections',
                     style: TextStyle(
                       color: AppColors.textMuted,
@@ -572,7 +572,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
               color: AppColors.textMuted,
               size: 20,
@@ -603,7 +603,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.navyPrimary : Colors.white,
+                  color: isSelected
+                      ? AppColors.navyPrimary
+                      : AppColors.surfaceWhite,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: isSelected
@@ -666,7 +668,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       children: [
         Text(
           'Overview for $rangeTitle',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: AppColors.navyMuted,
@@ -734,14 +736,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.borderLight),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.scrimFaint,
             blurRadius: 4,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -762,7 +764,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
@@ -775,7 +777,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           const SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppColors.navyPrimary,
@@ -881,7 +883,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderLight),
       ),
@@ -891,7 +893,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Revenue Performance',
                 style: TextStyle(
                   fontSize: 15,
@@ -907,7 +909,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 ),
                 child: Text(
                   'Bar Graph (${range.label})',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: AppColors.navyMuted,
@@ -917,7 +919,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ],
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Sales revenue generated during the selected period (in ₱)',
             style: TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
@@ -982,7 +984,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         if (value == 0) return const SizedBox.shrink();
                         return Text(
                           NumberFormat.compact().format(value),
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.textMuted,
                             fontSize: 10,
                           ),
@@ -995,7 +997,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
-                  getDrawingHorizontalLine: (value) => const FlLine(
+                  getDrawingHorizontalLine: (value) => FlLine(
                     color: AppColors.surfaceMuted,
                     strokeWidth: 1,
                   ),
@@ -1064,14 +1066,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Channel Volume Breakdown',
             style: TextStyle(
               fontSize: 15,
@@ -1092,7 +1094,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     children: [
                       Text(
                         entry.key,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.navySecondary,
@@ -1100,7 +1102,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       ),
                       Text(
                         '${entry.value} orders (${percent.toStringAsFixed(1)}%)',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
                         ),
@@ -1120,7 +1122,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             : entry.key == AppConstants.platformLazada
                                 ? AppColors.lazadaBlue
                                 : entry.key.toLowerCase().contains('tiktok')
-                                    ? Colors.black
+                                    ? AppColors.tikTokBlack
                                     : AppColors.statusDelivered,
                       ),
                     ),
@@ -1186,10 +1188,10 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
 
         if (result.status == ShareResultStatus.success) {
           messenger.showSnackBar(
-            const SnackBar(
+            SnackBar(
               backgroundColor: AppColors.statusDelivered,
               behavior: SnackBarBehavior.floating,
-              content: Row(
+              content: const Row(
                 children: [
                   Icon(Icons.check_circle_outline,
                       color: Colors.white, size: 20),
@@ -1207,11 +1209,11 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
           );
         } else if (result.status == ShareResultStatus.dismissed) {
           messenger.showSnackBar(
-            const SnackBar(
+            SnackBar(
               backgroundColor: AppColors.textSecondary,
               behavior: SnackBarBehavior.floating,
-              duration: Duration(seconds: 2),
-              content: Row(
+              duration: const Duration(seconds: 2),
+              content: const Row(
                 children: [
                   Icon(Icons.info_outline, color: Colors.white, size: 20),
                   SizedBox(width: 8),
@@ -1265,9 +1267,9 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
         left: 24,
@@ -1302,7 +1304,7 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
                     color: AppColors.excelGreen, size: 28),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1323,7 +1325,7 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close, color: AppColors.textMuted),
+                icon: Icon(Icons.close, color: AppColors.textMuted),
                 onPressed: _isExporting
                     ? null
                     : () => Navigator.of(context, rootNavigator: true).pop(),
@@ -1331,7 +1333,7 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
             ],
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Select Date Range Interval:',
             style: TextStyle(
               fontSize: 13,
@@ -1371,12 +1373,12 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
               color: AppColors.surfaceMuted,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Row(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(Icons.shield_outlined,
                     size: 18, color: AppColors.textSecondary),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Saves to local app cache and opens native Android Share. No broad storage permissions required.',
@@ -1400,13 +1402,13 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.error_outline_rounded,
+                  Icon(Icons.error_outline_rounded,
                       color: AppColors.errorRed, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _errorMessage!,
-                      style: const TextStyle(
+                      style: TextStyle(
                           color: AppColors.dangerDeep,
                           fontSize: 12,
                           fontWeight: FontWeight.w500),

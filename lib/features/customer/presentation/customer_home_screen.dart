@@ -33,7 +33,7 @@ class CustomerHomeScreen extends ConsumerWidget {
                 color: AppColors.surfaceWhite,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.verified_outlined,
                 color: AppColors.navyPrimary,
                 size: 20,
@@ -48,13 +48,13 @@ class CustomerHomeScreen extends ConsumerWidget {
                     userProfile?.displayName ?? 'Customer Portal',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: AppColors.navyDark,
                     ),
                   ),
-                  const Text(
+                  Text(
                     'Custom License Plate Service',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -70,7 +70,7 @@ class CustomerHomeScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.help_outline,
               color: AppColors.textSecondary,
             ),
@@ -89,7 +89,7 @@ class CustomerHomeScreen extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   colors: [AppColors.navySecondary, AppColors.navyPrimary],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -116,7 +116,7 @@ class CustomerHomeScreen extends ConsumerWidget {
                           color: AppColors.logoBlue,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const Text(
+                        child: Text(
                           'FAST TRACK FABRICATION',
                           style: TextStyle(
                             color: AppColors.navyDark,
@@ -174,7 +174,7 @@ class CustomerHomeScreen extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // Order Status Overview Cards
-            const Text(
+            Text(
               'Order Status Overview',
               style: TextStyle(
                 fontSize: 16,
@@ -233,7 +233,7 @@ class CustomerHomeScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Recent Plate Requests',
                   style: TextStyle(
                     fontSize: 16,
@@ -243,7 +243,7 @@ class CustomerHomeScreen extends ConsumerWidget {
                 ),
                 TextButton(
                   onPressed: onNavigateToOrders,
-                  child: const Text(
+                  child: Text(
                     'View All',
                     style: TextStyle(color: AppColors.tealDark),
                   ),
@@ -267,7 +267,7 @@ class CustomerHomeScreen extends ConsumerWidget {
                 ),
                 child: Text(
                   'Unable to load orders: $err',
-                  style: const TextStyle(color: AppColors.statusReturned),
+                  style: TextStyle(color: AppColors.statusReturned),
                 ),
               ),
               data: (orders) {
@@ -280,14 +280,14 @@ class CustomerHomeScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppColors.borderLight),
                     ),
-                    child: const Column(
+                    child: Column(
                       children: [
                         Icon(
                           Icons.inbox_outlined,
                           size: 48,
                           color: AppColors.textMuted,
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         Text(
                           'No Plate Orders Yet',
                           style: TextStyle(
@@ -295,7 +295,7 @@ class CustomerHomeScreen extends ConsumerWidget {
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           'Submit your first custom plate order to track status and dispatch here.',
                           textAlign: TextAlign.center,
@@ -360,7 +360,7 @@ class CustomerHomeScreen extends ConsumerWidget {
                                       'No Address',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                       fontSize: 11,
                                       color: AppColors.textSecondary),
                                 ),
@@ -441,7 +441,7 @@ class CustomerHomeScreen extends ConsumerWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ],

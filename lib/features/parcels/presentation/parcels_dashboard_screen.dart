@@ -47,7 +47,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text(
           'Parcels Dashboard',
-          style: TextStyle(fontWeight: FontWeight.w700),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
         ),
         actions: [
           IconButton(
@@ -110,11 +110,11 @@ class ParcelsDashboardScreen extends ConsumerWidget {
                     const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.borderLight),
+                  borderSide: BorderSide(color: AppColors.borderLight),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.borderLight),
+                  borderSide: BorderSide(color: AppColors.borderLight),
                 ),
               ),
             ),
@@ -147,7 +147,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
             child: allParcelsAsync.when(
               data: (_) {
                 if (filteredParcels.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -156,7 +156,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
                           size: 64,
                           color: AppColors.textMuted,
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         Text(
                           'No parcels match your filters',
                           style: TextStyle(
@@ -187,7 +187,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
                   child: Text(
                     'Error loading parcels: $err',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: AppColors.errorRed),
+                    style: TextStyle(color: AppColors.errorRed),
                   ),
                 ),
               ),
@@ -241,7 +241,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
           const SizedBox(height: 6),
           Text(
             count,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: AppColors.navyPrimary,
@@ -284,7 +284,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: const BorderSide(color: AppColors.borderLight),
+        side: BorderSide(color: AppColors.borderLight),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -299,7 +299,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
                 children: [
                   Text(
                     parcel.trackingNumber,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: AppColors.navyPrimary,
@@ -329,7 +329,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
                 children: [
                   Text(
                     parcel.customerName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -337,7 +337,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
                   ),
                   Text(
                     '₱${parcel.amount.toStringAsFixed(2)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: AppColors.navyPrimary,
@@ -348,7 +348,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
               const SizedBox(height: 6),
               Text(
                 '${parcel.platform} • ${parcel.courier}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondary,
                 ),

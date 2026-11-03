@@ -274,14 +274,14 @@ class ReturnsScreen extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surfaceWhite,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppColors.borderLight),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Pending Tickets',
                           style: TextStyle(
                               fontSize: 13,
@@ -291,7 +291,7 @@ class ReturnsScreen extends ConsumerWidget {
                         const SizedBox(height: 4),
                         Text(
                           '$pendingCount',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: AppColors.statusPending,
@@ -307,14 +307,14 @@ class ReturnsScreen extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surfaceWhite,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppColors.borderLight),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Resolved / Closed',
                           style: TextStyle(
                               fontSize: 13,
@@ -324,7 +324,7 @@ class ReturnsScreen extends ConsumerWidget {
                         const SizedBox(height: 4),
                         Text(
                           '$resolvedCount',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: AppColors.statusDelivered,
@@ -346,21 +346,21 @@ class ReturnsScreen extends ConsumerWidget {
                   ref.read(returnSearchQueryProvider.notifier).state = val,
               decoration: InputDecoration(
                 hintText: 'Search tracking number, customer, defect...',
-                hintStyle: const TextStyle(
+                hintStyle: TextStyle(
                     fontSize: 14, color: AppColors.textSecondary),
                 prefixIcon:
-                    const Icon(Icons.search, color: AppColors.textSecondary),
+                    Icon(Icons.search, color: AppColors.textSecondary),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.surfaceWhite,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: AppColors.borderLight),
+                  borderSide: BorderSide(color: AppColors.borderLight),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: AppColors.borderLight),
+                  borderSide: BorderSide(color: AppColors.borderLight),
                 ),
               ),
             ),
@@ -388,7 +388,7 @@ class ReturnsScreen extends ConsumerWidget {
                         : FontWeight.normal,
                     fontSize: 12,
                   ),
-                  backgroundColor: Colors.white,
+                  backgroundColor: AppColors.surfaceWhite,
                   side: BorderSide(
                     color: selectedDefect == null
                         ? AppColors.navyPrimary
@@ -414,7 +414,7 @@ class ReturnsScreen extends ConsumerWidget {
                             isSelected ? FontWeight.bold : FontWeight.normal,
                         fontSize: 12,
                       ),
-                      backgroundColor: Colors.white,
+                      backgroundColor: AppColors.surfaceWhite,
                       side: BorderSide(
                         color: isSelected
                             ? AppColors.navyPrimary
@@ -436,20 +436,20 @@ class ReturnsScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Text('Error loading returns: $err',
-                      style: const TextStyle(color: AppColors.statusReturned)),
+                      style: TextStyle(color: AppColors.statusReturned)),
                 ),
               ),
               data: (_) {
                 if (filteredReturns.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 32.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.inventory_2_outlined,
                               size: 60, color: AppColors.textMuted),
-                          SizedBox(height: 12),
+                          const SizedBox(height: 12),
                           Text(
                             'No return tickets found',
                             style: TextStyle(
@@ -457,7 +457,7 @@ class ReturnsScreen extends ConsumerWidget {
                                 fontSize: 16,
                                 color: AppColors.textSecondary),
                           ),
-                          SizedBox(height: 6),
+                          const SizedBox(height: 6),
                           Text(
                             'Tap "Log Return Ticket" above to record a defect or return.',
                             textAlign: TextAlign.center,
@@ -481,7 +481,7 @@ class ReturnsScreen extends ConsumerWidget {
                     return Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surfaceWhite,
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(color: AppColors.borderLight),
                         boxShadow: [
@@ -546,7 +546,7 @@ class ReturnsScreen extends ConsumerWidget {
                                   ),
                                   child: Text(
                                     item.platform,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                         fontSize: 11,
                                         color: AppColors.navyMuted),
                                   ),
@@ -563,7 +563,7 @@ class ReturnsScreen extends ConsumerWidget {
                                   ),
                                   child: Text(
                                     item.resolutionType,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11,
                                       color: AppColors.statusInTransit,
                                       fontWeight: FontWeight.w600,
@@ -578,13 +578,13 @@ class ReturnsScreen extends ConsumerWidget {
                           if (item.customerName.isNotEmpty) ...[
                             Row(
                               children: [
-                                const Icon(Icons.person_outline,
+                                Icon(Icons.person_outline,
                                     size: 16, color: AppColors.textSecondary),
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
                                     item.customerName,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                         fontSize: 13,
                                         color: AppColors.textPrimary),
                                     overflow: TextOverflow.ellipsis,
@@ -606,13 +606,13 @@ class ReturnsScreen extends ConsumerWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.warning_amber_rounded,
+                                Icon(Icons.warning_amber_rounded,
                                     size: 14, color: AppColors.dangerDeep),
                                 const SizedBox(width: 6),
                                 Flexible(
                                   child: Text(
                                     item.defectReason,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: AppColors.dangerDeep,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 12,
@@ -630,7 +630,7 @@ class ReturnsScreen extends ConsumerWidget {
                             const SizedBox(height: 8),
                             Text(
                               item.notes!,
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontSize: 13, color: AppColors.textPrimary),
                             ),
                           ],
@@ -643,13 +643,13 @@ class ReturnsScreen extends ConsumerWidget {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                const Icon(Icons.local_shipping_outlined,
+                                Icon(Icons.local_shipping_outlined,
                                     size: 14,
                                     color: AppColors.statusDispatched),
                                 const SizedBox(width: 6),
                                 Text(
                                   'Replacement: ${item.replacementTrackingNumber!}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.statusDispatched,
@@ -664,19 +664,19 @@ class ReturnsScreen extends ConsumerWidget {
                             const SizedBox(height: 10),
                             Row(
                               children: [
-                                const Icon(Icons.photo_library_outlined,
+                                Icon(Icons.photo_library_outlined,
                                     size: 14, color: AppColors.navyPrimary),
                                 const SizedBox(width: 5),
                                 Text(
                                   'Photo Evidence (${item.photoUrls.length})',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.navyPrimary,
                                   ),
                                 ),
                                 const SizedBox(width: 6),
-                                const Text(
+                                Text(
                                   '• Tap to preview',
                                   style: TextStyle(
                                       fontSize: 11,
@@ -740,7 +740,7 @@ class ReturnsScreen extends ConsumerWidget {
                                                 borderRadius:
                                                     BorderRadius.circular(10),
                                               ),
-                                              child: const Icon(
+                                              child: Icon(
                                                   Icons.broken_image,
                                                   size: 22,
                                                   color:
@@ -773,7 +773,7 @@ class ReturnsScreen extends ConsumerWidget {
                             ),
                           ],
 
-                          const Divider(
+                          Divider(
                               height: 20, color: AppColors.borderLight),
 
                           // Bottom Row: Date & Update Status Button
@@ -782,7 +782,7 @@ class ReturnsScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 'Logged: ${item.createdAt.month}/${item.createdAt.day}/${item.createdAt.year} ${item.createdAt.hour.toString().padLeft(2, '0')}:${item.createdAt.minute.toString().padLeft(2, '0')}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontSize: 11,
                                     color: AppColors.textSecondary),
                               ),
@@ -936,7 +936,7 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
               color: AppColors.navyPrimary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.rule_rounded,
+            child: Icon(Icons.rule_rounded,
                 color: AppColors.navyPrimary, size: 22),
           ),
           const SizedBox(width: 12),
@@ -957,13 +957,13 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
             children: [
               Text(
                 'Ticket: ${widget.item.trackingNumber}',
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textSecondary),
               ),
               const SizedBox(height: 6),
-              const Text(
+              Text(
                 'Select new status:',
                 style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
               ),
@@ -1018,7 +1018,7 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
                             Icon(Icons.check_circle_rounded,
                                 color: color, size: 20)
                           else
-                            const Icon(Icons.radio_button_unchecked_rounded,
+                            Icon(Icons.radio_button_unchecked_rounded,
                                 color: AppColors.textMuted, size: 20),
                         ],
                       ),
@@ -1039,7 +1039,7 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
                   decoration: InputDecoration(
                     labelText: 'New Replacement Tracking #',
                     hintText: 'e.g. SPX99887766',
-                    prefixIcon: const Icon(Icons.local_shipping_outlined,
+                    prefixIcon: Icon(Icons.local_shipping_outlined,
                         color: AppColors.navyPrimary, size: 20),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -1059,7 +1059,7 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
             Expanded(
               child: TextButton(
                 onPressed: _isSaving ? null : _handleCancel,
-                child: const Text('Cancel',
+                child: Text('Cancel',
                     style: TextStyle(color: AppColors.textSecondary)),
               ),
             ),

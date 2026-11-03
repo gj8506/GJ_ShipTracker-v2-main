@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_mode_provider.dart';
 import '../../../core/utils/form_validators.dart';
 import '../../../core/widgets/app_avatar.dart';
 import '../../admin/presentation/staff_approval_providers.dart';
@@ -20,7 +21,7 @@ class ProfileScreen extends ConsumerWidget {
           'Sign Out',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
-        content: const Text(
+        content: Text(
           'Are you sure you want to sign out?',
           style: TextStyle(fontSize: 15, color: AppColors.textPrimary),
         ),
@@ -33,7 +34,7 @@ class ProfileScreen extends ConsumerWidget {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text(
+                  child: Text(
                     'Cancel',
                     style: TextStyle(
                         color: AppColors.textSecondary,
@@ -173,6 +174,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userProfileAsync = ref.watch(userProfileProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -183,7 +185,7 @@ class ProfileScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout_rounded,
+            icon: Icon(Icons.logout_rounded,
                 color: AppColors.statusReturned),
             tooltip: 'Sign Out',
             onPressed: () => _handleSignOut(context, ref),
@@ -227,7 +229,7 @@ class ProfileScreen extends ConsumerWidget {
                       children: [
                         Text(
                           profile.displayName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
@@ -235,7 +237,7 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                         const SizedBox(width: 6),
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.edit_outlined,
                             size: 18,
                             color: AppColors.tealDark,
@@ -254,7 +256,7 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     Text(
                       profile.email,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         color: AppColors.textSecondary,
                       ),
@@ -283,7 +285,7 @@ class ProfileScreen extends ConsumerWidget {
               const SizedBox(height: 20),
 
               // Module 4 & 11 Quick Actions: Customers, Scanner, and Inbox
-              const Text(
+              Text(
                 'Customer & Support Management',
                 style: TextStyle(
                   fontSize: 12,
@@ -302,7 +304,7 @@ class ProfileScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.qr_code_2_rounded,
+                      leading: Icon(Icons.qr_code_2_rounded,
                           color: AppColors.tealDark),
                       title: const Text('Customer & Reseller QR Directory'),
                       subtitle: const Text(
@@ -310,7 +312,7 @@ class ProfileScreen extends ConsumerWidget {
                       trailing: const Icon(Icons.chevron_right_rounded),
                       onTap: () => context.push('/profile/customers'),
                     ),
-                    const Divider(height: 1, color: AppColors.borderLight),
+                    Divider(height: 1, color: AppColors.borderLight),
                     ListTile(
                       leading: const Icon(Icons.qr_code_scanner_rounded,
                           color: AppColors.shopeeOrange),
@@ -320,9 +322,9 @@ class ProfileScreen extends ConsumerWidget {
                       trailing: const Icon(Icons.chevron_right_rounded),
                       onTap: () => context.push('/profile/reseller-scanner'),
                     ),
-                    const Divider(height: 1, color: AppColors.borderLight),
+                    Divider(height: 1, color: AppColors.borderLight),
                     ListTile(
-                      leading: const Icon(Icons.support_agent_rounded,
+                      leading: Icon(Icons.support_agent_rounded,
                           color: AppColors.statusInTransit),
                       title: const Text('Customer Support Inbox'),
                       subtitle:
@@ -337,7 +339,7 @@ class ProfileScreen extends ConsumerWidget {
 
               // Owner/Admin-only staff registration approvals
               if (profile.isAdmin) ...[
-                const Text(
+                Text(
                   'Administration',
                   style: TextStyle(
                     fontSize: 14,
@@ -353,7 +355,7 @@ class ProfileScreen extends ConsumerWidget {
                     border: Border.all(color: AppColors.borderLight),
                   ),
                   child: ListTile(
-                    leading: const Icon(
+                    leading: Icon(
                       Icons.admin_panel_settings_rounded,
                       color: AppColors.warningStrong,
                     ),
@@ -399,8 +401,83 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 20),
               ],
 
+              // Appearance: Light / Dark / Follow device
+              Text(
+                'Appearance',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textMuted,
+                  letterSpacing: 0.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceWhite,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.borderLight),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          themeMode == ThemeMode.dark
+                              ? Icons.dark_mode_rounded
+                              : Icons.light_mode_rounded,
+                          color: AppColors.tealDark,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Theme',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<ThemeMode>(
+                        segments: const [
+                          ButtonSegment(
+                            value: ThemeMode.system,
+                            label: Text('System'),
+                          ),
+                          ButtonSegment(
+                            value: ThemeMode.light,
+                            label: Text('Light'),
+                          ),
+                          ButtonSegment(
+                            value: ThemeMode.dark,
+                            label: Text('Dark'),
+                          ),
+                        ],
+                        selected: {themeMode},
+                        showSelectedIcon: false,
+                        onSelectionChanged: (selection) {
+                          ref
+                              .read(themeModeProvider.notifier)
+                              .setMode(selection.first);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
               // System & Legal Section
-              const Text(
+              Text(
                 'App & Compliance',
                 style: TextStyle(
                   fontSize: 12,
@@ -417,7 +494,7 @@ class ProfileScreen extends ConsumerWidget {
                   border: Border.all(color: AppColors.borderLight),
                 ),
                 child: ListTile(
-                  leading: const Icon(Icons.privacy_tip_outlined,
+                  leading: Icon(Icons.privacy_tip_outlined,
                       color: AppColors.navyPrimary),
                   title: const Text('Privacy Policy & Terms',
                       style: TextStyle(fontWeight: FontWeight.w600)),
@@ -435,7 +512,7 @@ class ProfileScreen extends ConsumerWidget {
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.statusReturned,
-                    side: const BorderSide(
+                    side: BorderSide(
                         color: AppColors.dangerBorder, width: 1.5),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
@@ -467,9 +544,9 @@ class _PrivacyPolicySheet extends StatelessWidget {
 
     return Container(
       height: screenHeight * 0.85,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         children: [
@@ -482,8 +559,8 @@ class _PrivacyPolicySheet extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10)),
           ),
           const SizedBox(height: 16),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Text(
               'Terms of Service & Data Privacy Act (RA 10173)',
               textAlign: TextAlign.center,
@@ -494,9 +571,9 @@ class _PrivacyPolicySheet extends StatelessWidget {
             ),
           ),
           const Divider(height: 32),
-          const Expanded(
+          Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Text(
                 '''DATA PRIVACY CONSENT & COMPLIANCE
 Pursuant to the Data Privacy Act of 2012 (Republic Act No. 10173), GJandAsher ShipTracker enforces organizational, technical, and physical security measures to protect outbound customer data, dispatch manifests, return logs, and sales metrics.

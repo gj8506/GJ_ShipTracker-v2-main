@@ -66,10 +66,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.mark_email_read_rounded,
+                          Icon(Icons.mark_email_read_rounded,
                               size: 64, color: AppColors.statusDelivered),
                           const SizedBox(height: 16),
-                          const Text(
+                          Text(
                             'Password Reset Email Sent',
                             style: TextStyle(
                                 fontSize: 18,
@@ -77,7 +77,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                 color: AppColors.navyPrimary),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
+                          Text(
                             'If an account exists for this email, you will receive instructions to reset your password.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -85,7 +85,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           ),
                           if (_usedFallback) ...[
                             const SizedBox(height: 12),
-                            const Text(
+                            Text(
                               'Tip: this email is sent by Firebase and can land in '
                               'your Spam folder. If you do not see it in your inbox, '
                               'check Spam and mark it as "Not spam".',
@@ -104,7 +104,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Forgot your password?',
                             style: TextStyle(
                                 fontSize: 20,
@@ -112,7 +112,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                 color: AppColors.navyPrimary),
                           ),
                           const SizedBox(height: 6),
-                          const Text(
+                          Text(
                             'Enter your registered email address and we will send you a reset link.',
                             style: TextStyle(
                                 color: AppColors.textSecondary, fontSize: 13),

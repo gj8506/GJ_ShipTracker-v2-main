@@ -69,11 +69,11 @@ class _AdminInboxScreenState extends ConsumerState<AdminInboxScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.mark_email_read_outlined,
+                        Icon(Icons.mark_email_read_outlined,
                             size: 64, color: AppColors.textMuted),
                         const SizedBox(height: 16),
                         Text('No $_filter support tickets.',
-                            style: const TextStyle(
+                            style: TextStyle(
                                 color: AppColors.textSecondary)),
                       ],
                     ),
@@ -89,10 +89,10 @@ class _AdminInboxScreenState extends ConsumerState<AdminInboxScreen> {
                     final hasUnread = thread.unreadForAdmin > 0;
 
                     return ListTile(
-                      tileColor: Colors.white,
+                      tileColor: AppColors.surfaceWhite,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: const BorderSide(color: AppColors.borderLight)),
+                          side: BorderSide(color: AppColors.borderLight)),
                       leading: CircleAvatar(
                         backgroundColor: hasUnread
                             ? AppColors.shopeeOrange
@@ -115,7 +115,7 @@ class _AdminInboxScreenState extends ConsumerState<AdminInboxScreen> {
                           ? Text(
                               DateFormat('MMM dd')
                                   .format(thread.lastMessageAt!),
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontSize: 12, color: AppColors.textSecondary))
                           : null,
                       onTap: () {

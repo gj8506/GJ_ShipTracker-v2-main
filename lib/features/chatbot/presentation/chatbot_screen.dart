@@ -42,11 +42,11 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
             Icon(Icons.smart_toy_rounded, color: AppColors.navyPrimary),
-            SizedBox(width: 8),
-            Text('Assistant'),
+            const SizedBox(width: 8),
+            const Text('Assistant'),
           ],
         ),
       ),
@@ -139,7 +139,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
               children: msg.quickReplies!.map<Widget>((reply) {
                 return ActionChip(
                   label: Text(reply,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 12, color: AppColors.navyPrimary)),
                   backgroundColor: AppColors.tealContainer,
                   side: BorderSide.none,
@@ -156,7 +156,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
   Widget _buildInputArea() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surfaceWhite,
         border: Border(top: BorderSide(color: AppColors.borderLight)),
       ),

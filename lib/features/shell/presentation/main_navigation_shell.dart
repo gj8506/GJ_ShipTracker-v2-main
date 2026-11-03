@@ -80,7 +80,7 @@ class MainNavigationShell extends ConsumerWidget {
         },
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.chromeBlue,
           border: Border(
             top: BorderSide(color: AppColors.borderStrong, width: 1),

@@ -85,8 +85,8 @@ class CustomerListScreen extends ConsumerWidget {
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('All customers are already synced.'),
+            SnackBar(
+              content: const Text('All customers are already synced.'),
               backgroundColor: AppColors.statusCancelled,
             ),
           );
@@ -142,7 +142,7 @@ class CustomerListScreen extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: 'Sync Missing Accounts',
-            icon: const Icon(Icons.sync_rounded, color: AppColors.navyPrimary),
+            icon: Icon(Icons.sync_rounded, color: AppColors.navyPrimary),
             onPressed: () => _syncOldCustomers(context),
           ),
         ],
@@ -168,21 +168,21 @@ class CustomerListScreen extends ConsumerWidget {
                   ref.read(customerSearchProvider.notifier).state = val,
               decoration: InputDecoration(
                 hintText: 'Search by name, contact, shop...',
-                hintStyle: const TextStyle(
+                hintStyle: TextStyle(
                     fontSize: 14, color: AppColors.textSecondary),
                 prefixIcon:
-                    const Icon(Icons.search, color: AppColors.textSecondary),
+                    Icon(Icons.search, color: AppColors.textSecondary),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.surfaceWhite,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: AppColors.borderLight),
+                  borderSide: BorderSide(color: AppColors.borderLight),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: AppColors.borderLight),
+                  borderSide: BorderSide(color: AppColors.borderLight),
                 ),
               ),
             ),
@@ -197,7 +197,7 @@ class CustomerListScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(24.0),
                   child: Text(
                     'Error loading customers: $err',
-                    style: const TextStyle(color: AppColors.statusReturned),
+                    style: TextStyle(color: AppColors.statusReturned),
                   ),
                 ),
               ),
@@ -211,18 +211,18 @@ class CustomerListScreen extends ConsumerWidget {
                         children: [
                           Container(
                             padding: const EdgeInsets.all(20),
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: AppColors.tealContainer,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.people_outline_rounded,
                               size: 48,
                               color: AppColors.tealDark,
                             ),
                           ),
                           const SizedBox(height: 18),
-                          const Text(
+                          Text(
                             'No Customers Found',
                             style: TextStyle(
                               fontSize: 18,
@@ -231,7 +231,7 @@ class CustomerListScreen extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
+                          Text(
                             'Add repeat buyers or motorcycle shop resellers to generate custom QR codes for quick dispatching.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -244,7 +244,7 @@ class CustomerListScreen extends ConsumerWidget {
                           OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.navyPrimary,
-                              side: const BorderSide(
+                              side: BorderSide(
                                   color: AppColors.navyPrimary),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12)),
@@ -275,10 +275,10 @@ class CustomerListScreen extends ConsumerWidget {
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
-                        side: const BorderSide(color: AppColors.borderLight),
+                        side: BorderSide(color: AppColors.borderLight),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(14.0),
+                        padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
                         child: Row(
                           children: [
                             // Avatar Icon
@@ -309,30 +309,21 @@ class CustomerListScreen extends ConsumerWidget {
                                       Expanded(
                                         child: Text(
                                           customer.name,
-                                          style: const TextStyle(
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.bold,
                                             color: AppColors.navyPrimary,
                                           ),
                                         ),
                                       ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 3),
-                                        decoration: BoxDecoration(
-                                          color: _getBadgeColor(customer.type),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          customer.type.toUpperCase(),
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                            color: _getBadgeTextColor(
-                                                customer.type),
-                                          ),
-                                        ),
+                                      const SizedBox(width: 8),
+                                      _TypeBadge(
+                                        type: customer.type,
+                                        background: _getBadgeColor(customer.type),
+                                        foreground:
+                                            _getBadgeTextColor(customer.type),
                                       ),
                                     ],
                                   ),
@@ -341,30 +332,35 @@ class CustomerListScreen extends ConsumerWidget {
                                     customer.contactNumber.isNotEmpty
                                         ? customer.contactNumber
                                         : 'No contact provided',
-                                    style: const TextStyle(
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
                                         fontSize: 13,
                                         color: AppColors.navyMuted),
                                   ),
-                                  if (customer.address.isNotEmpty) ...[
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      customer.address,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                          fontSize: 12,
-                                          color: AppColors.textMutedAlt),
-                                    ),
-                                  ],
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    customer.address.isNotEmpty
+                                        ? customer.address
+                                        : 'No address on file',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textMutedAlt),
+                                  ),
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 4),
 
                             // QR Dialog Button
                             IconButton(
-                              icon: const Icon(Icons.qr_code_2_rounded,
-                                  color: AppColors.tealDark, size: 26),
+                              visualDensity: VisualDensity.compact,
+                              constraints: const BoxConstraints.tightFor(
+                                  width: 40, height: 40),
+                              icon: Icon(Icons.qr_code_2_rounded,
+                                  color: AppColors.tealDark, size: 24),
                               tooltip: 'View QR Code',
                               onPressed: () {
                                 showDialog(
@@ -377,7 +373,10 @@ class CustomerListScreen extends ConsumerWidget {
 
                             // Edit Button
                             IconButton(
-                              icon: const Icon(Icons.edit_outlined,
+                              visualDensity: VisualDensity.compact,
+                              constraints: const BoxConstraints.tightFor(
+                                  width: 40, height: 40),
+                              icon: Icon(Icons.edit_outlined,
                                   color: AppColors.textSecondary, size: 20),
                               tooltip: 'Edit Customer',
                               onPressed: () =>
@@ -393,6 +392,48 @@ class CustomerListScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Fixed-width customer-type chip.
+///
+/// Every row uses the same width so the name column ends at the same place,
+/// which keeps the list visually aligned even when the types differ in length.
+class _TypeBadge extends StatelessWidget {
+  const _TypeBadge({
+    required this.type,
+    required this.background,
+    required this.foreground,
+  });
+
+  final String type;
+  final Color background;
+  final Color foreground;
+
+  static const double _width = 86;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: _width,
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        type.toUpperCase(),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 10.5,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.2,
+          color: foreground,
+        ),
       ),
     );
   }
@@ -447,8 +488,8 @@ class _AddEditCustomerDialogState
 
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter the customer name'),
+        SnackBar(
+          content: const Text('Please enter the customer name'),
           backgroundColor: AppColors.statusReturned,
         ),
       );
@@ -597,7 +638,7 @@ class _AddEditCustomerDialogState
       actions: [
         TextButton(
           onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel',
+          child: Text('Cancel',
               style: TextStyle(color: AppColors.textSecondary)),
         ),
         ElevatedButton(

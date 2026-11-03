@@ -308,13 +308,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const AppLogo(
+                    AppLogo(
                       size: 92,
                       circular: true,
                       borderColor: AppColors.primary,
                     ),
                     const SizedBox(height: 16),
-                    const Text(
+                    Text(
                       AppConstants.appName,
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -324,7 +324,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       AppConstants.appSubtitle,
                       style: TextStyle(
                           fontSize: 13, color: AppColors.textSecondary),
@@ -351,7 +351,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     const EdgeInsets.symmetric(vertical: 9),
                                 decoration: BoxDecoration(
                                   color: !_isCustomerPortal
-                                      ? Colors.white
+                                      ? AppColors.surfaceWhite
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(9),
                                   boxShadow: !_isCustomerPortal
@@ -403,7 +403,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     const EdgeInsets.symmetric(vertical: 9),
                                 decoration: BoxDecoration(
                                   color: _isCustomerPortal
-                                      ? Colors.white
+                                      ? AppColors.surfaceWhite
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(9),
                                   boxShadow: _isCustomerPortal
@@ -511,7 +511,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: _showForgotPasswordDialog,
-                        child: const Text(
+                        child: Text(
                           'Forgot Password?',
                           style: TextStyle(
                             color: AppColors.tealDark,
@@ -557,11 +557,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 24),
 
                     // 5. Divider
-                    const Row(
+                    Row(
                       children: [
                         Expanded(child: Divider(color: AppColors.borderSubtle)),
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           child: Text(
                             'Or continue with',
                             style: TextStyle(
@@ -581,7 +581,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         onPressed:
                             _isGoogleLoading ? null : _handleGoogleSignIn,
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppColors.borderLight),
+                          side: BorderSide(color: AppColors.borderLight),
                           foregroundColor: AppColors.navyPrimary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -606,7 +606,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         width: 1.5,
                                       ),
                                     ),
-                                    child: const Text(
+                                    child: Text(
                                       'G',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
@@ -620,7 +620,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     _isCustomerPortal
                                         ? 'Continue with Google'
                                         : 'Continue with Google',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: AppColors.textPrimary,
                                       fontSize: 15,
                                       fontWeight: FontWeight.w600,
@@ -636,15 +636,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
+                        Text(
                           "Don't have an account? ",
                           style: TextStyle(color: AppColors.textSecondary),
                         ),
                         InkWell(
                           onTap: _navigateToSignUp,
                           borderRadius: BorderRadius.circular(6),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 6.0, vertical: 8.0),
                             child: Text(
                               'Sign Up',
@@ -747,7 +747,7 @@ class _ForgotPasswordDialogState extends ConsumerState<_ForgotPasswordDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Enter your registered email address and we will send you a password reset link.',
             style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),

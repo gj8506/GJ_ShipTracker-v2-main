@@ -44,9 +44,9 @@ class _AdminExcelExportDialogState
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             backgroundColor: AppColors.successGreen,
-            content: Text('Workbook generated and ready to share!'),
+            content: const Text('Workbook generated and ready to share!'),
           ),
         );
       }
@@ -67,7 +67,7 @@ class _AdminExcelExportDialogState
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surfaceWhite,
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: ConstrainedBox(
         // CRITICAL: Finite constraints to prevent RenderBox was not laid out exception
@@ -90,15 +90,15 @@ class _AdminExcelExportDialogState
                       color: AppColors.statusDelivered.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.table_chart,
+                    child: Icon(Icons.table_chart,
                         color: AppColors.statusDelivered, size: 24),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Export Organized Excel',
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
@@ -161,7 +161,7 @@ class _AdminExcelExportDialogState
                 const SizedBox(height: 12),
                 Text(
                   _errorMessage!,
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: AppColors.statusReturned, fontSize: 12),
                 ),
               ],

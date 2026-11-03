@@ -17,9 +17,9 @@ class PrivacyPolicySheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
       child: Column(
@@ -36,11 +36,11 @@ class PrivacyPolicySheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          const Row(
+          Row(
             children: [
               Icon(Icons.security_rounded,
                   color: AppColors.tealAccent, size: 28),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'Data Privacy Act Consent Notice',
@@ -54,7 +54,7 @@ class PrivacyPolicySheet extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'In compliance with Republic Act No. 10173 (Data Privacy Act of 2012)',
             style: TextStyle(
                 fontSize: 12,
@@ -112,13 +112,13 @@ class PrivacyPolicySheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title,
-              style: const TextStyle(
+              style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                   color: AppColors.navyPrimary)),
           const SizedBox(height: 4),
           Text(content,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 13, height: 1.45, color: AppColors.textPrimary)),
         ],
       ),

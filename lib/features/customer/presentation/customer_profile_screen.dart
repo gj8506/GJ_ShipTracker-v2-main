@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_mode_provider.dart';
 import '../../../core/widgets/app_avatar.dart';
 import '../../auth/presentation/auth_providers.dart';
 
@@ -32,7 +33,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
+            child: Text('Cancel',
                 style: TextStyle(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
@@ -66,6 +67,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(userProfileProvider);
+    final themeMode = ref.watch(themeModeProvider);
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
@@ -73,7 +75,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
       appBar: AppBar(
         title: const Text(
           'My Profile',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
         ),
       ),
       body: profileAsync.when(
@@ -104,7 +106,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
                     const SizedBox(height: 16),
                     Text(
                       displayName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                         color: AppColors.navyPrimary,
@@ -113,7 +115,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
                     const SizedBox(height: 4),
                     Text(
                       email,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         color: AppColors.textSecondary,
                       ),
@@ -126,7 +128,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
                         color: AppColors.tealContainer,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text(
+                      child: Text(
                         'CUSTOMER ACCOUNT',
                         style: TextStyle(
                             fontSize: 11,
@@ -138,8 +140,8 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Padding(
-                padding: EdgeInsets.only(left: 8, bottom: 8),
+              Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 8),
                 child: Text(
                   'ACCOUNT SETTINGS',
                   style: TextStyle(
@@ -159,23 +161,96 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.edit_outlined,
+                      leading: Icon(Icons.edit_outlined,
                           color: AppColors.navyPrimary),
                       title: const Text('Edit Display Name',
                           style: TextStyle(fontWeight: FontWeight.w600)),
-                      trailing: const Icon(Icons.chevron_right_rounded,
+                      trailing: Icon(Icons.chevron_right_rounded,
                           color: AppColors.textMuted),
                       onTap: () => _showEditNameDialog(displayName),
                     ),
                     const Divider(height: 1),
                     ListTile(
-                      leading: const Icon(Icons.privacy_tip_outlined,
+                      leading: Icon(Icons.privacy_tip_outlined,
                           color: AppColors.navyPrimary),
                       title: const Text('Privacy Policy & Terms',
                           style: TextStyle(fontWeight: FontWeight.w600)),
-                      trailing: const Icon(Icons.chevron_right_rounded,
+                      trailing: Icon(Icons.chevron_right_rounded,
                           color: AppColors.textMuted),
                       onTap: _showPrivacyPolicy,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 8),
+                child: Text(
+                  'APPEARANCE',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textMuted,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceWhite,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: AppColors.borderLight),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          themeMode == ThemeMode.dark
+                              ? Icons.dark_mode_rounded
+                              : Icons.light_mode_rounded,
+                          color: AppColors.tealDark,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Theme',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<ThemeMode>(
+                        segments: const [
+                          ButtonSegment(
+                            value: ThemeMode.system,
+                            label: Text('System'),
+                          ),
+                          ButtonSegment(
+                            value: ThemeMode.light,
+                            label: Text('Light'),
+                          ),
+                          ButtonSegment(
+                            value: ThemeMode.dark,
+                            label: Text('Dark'),
+                          ),
+                        ],
+                        selected: {themeMode},
+                        showSelectedIcon: false,
+                        onSelectionChanged: (selection) {
+                          ref
+                              .read(themeModeProvider.notifier)
+                              .setMode(selection.first);
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -186,7 +261,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.statusReturned,
-                    side: const BorderSide(color: AppColors.statusReturned),
+                    side: BorderSide(color: AppColors.statusReturned),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
@@ -204,7 +279,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(ctx, false),
-                            child: const Text('Cancel',
+                            child: Text('Cancel',
                                 style:
                                     TextStyle(color: AppColors.textSecondary)),
                           ),
@@ -243,9 +318,9 @@ class _PrivacyPolicySheet extends StatelessWidget {
 
     return Container(
       height: screenHeight * 0.85,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         children: [
@@ -258,8 +333,8 @@ class _PrivacyPolicySheet extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10)),
           ),
           const SizedBox(height: 16),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Text(
               'Terms of Service & Data Privacy Act (RA 10173)',
               textAlign: TextAlign.center,
@@ -270,9 +345,9 @@ class _PrivacyPolicySheet extends StatelessWidget {
             ),
           ),
           const Divider(height: 32),
-          const Expanded(
+          Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Text(
                 '''DATA PRIVACY CONSENT FORM
 Pursuant to the Data Privacy Act of 2012 (Republic Act No. 10173), we are committed to protecting your personal information. By checking the "I Agree" checkbox, you explicitly consent to the collection, processing, and storage of your personal data by GJandAsher ShipTracker.

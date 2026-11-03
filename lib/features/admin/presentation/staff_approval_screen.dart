@@ -282,12 +282,12 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: AppColors.warningBorder),
                     ),
-                    child: const Row(
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Icon(Icons.mark_email_unread_outlined,
                             color: AppColors.warningStrong),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             'Approval emails are disabled in this build. '
@@ -314,7 +314,7 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline_rounded,
+                      Icon(Icons.info_outline_rounded,
                           color: AppColors.infoBlue),
                       const SizedBox(width: 10),
                       Expanded(
@@ -322,7 +322,7 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
                           '${staff.length} staff registration'
                           '${staff.length == 1 ? '' : 's'} waiting for review. '
                           'Approving sends an email to the staff member.',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             color: AppColors.navySecondary,
                             height: 1.35,
@@ -390,7 +390,7 @@ class _StaffCard extends StatelessWidget {
                 backgroundColor: AppColors.warningSurface,
                 child: Text(
                   initials,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.warningStrong,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -412,7 +412,7 @@ class _StaffCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       staff.email,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         color: AppColors.navyMuted,
                       ),
@@ -428,7 +428,7 @@ class _StaffCard extends StatelessWidget {
                       ),
                       child: Text(
                         'PENDING • ${staff.role.toUpperCase()}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: AppColors.warningStrong,
@@ -460,7 +460,7 @@ class _StaffCard extends StatelessWidget {
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.errorRed,
-                    side: const BorderSide(color: AppColors.dangerBorder),
+                    side: BorderSide(color: AppColors.dangerBorder),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -518,7 +518,7 @@ class _InfoRow extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(fontSize: 13, color: AppColors.navyMuted),
+            style: TextStyle(fontSize: 13, color: AppColors.navyMuted),
           ),
         ),
       ],
@@ -545,11 +545,11 @@ class _ErrorState extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(18),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.statusReturnedContainer,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.lock_outline_rounded,
                 size: 38,
                 color: AppColors.errorRed,
@@ -569,7 +569,7 @@ class _ErrorState extends StatelessWidget {
                       'sure your profile role is "admin".'
                   : error.toString(),
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: AppColors.navyMuted),
+              style: TextStyle(fontSize: 13, color: AppColors.navyMuted),
             ),
             const SizedBox(height: 18),
             OutlinedButton.icon(
@@ -597,11 +597,11 @@ class _EmptyState extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.statusDeliveredContainer,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.verified_user_outlined,
                 size: 44,
                 color: AppColors.statusDelivered,
@@ -613,7 +613,7 @@ class _EmptyState extends StatelessWidget {
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'New staff sign-ups will appear here for your review.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.navyMuted),

@@ -148,8 +148,8 @@ class _OrderRequestFormScreenState
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please log in to submit a plate order request.'),
+        SnackBar(
+          content: const Text('Please log in to submit a plate order request.'),
           backgroundColor: AppColors.errorRed,
         ),
       );
@@ -192,9 +192,9 @@ class _OrderRequestFormScreenState
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content:
-                Text('Plate order request submitted! Awaiting staff review.'),
+                const Text('Plate order request submitted! Awaiting staff review.'),
             backgroundColor: AppColors.tealDark,
           ),
         );
@@ -236,7 +236,7 @@ class _OrderRequestFormScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Live Plate Visual Preview',
                 style: TextStyle(
                   fontSize: 14,
@@ -301,14 +301,15 @@ class _OrderRequestFormScreenState
       height: plateHeight,
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
       decoration: BoxDecoration(
+        // The plate mockup mimics a real white LTO plate in both themes.
         color: Colors.white,
         borderRadius: isHexagon ? null : BorderRadius.circular(16),
         border: Border.all(color: AppColors.navyPrimary, width: 3.5),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: AppColors.scrimLight,
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -319,7 +320,7 @@ class _OrderRequestFormScreenState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildMountSlot(),
-              const Text(
+              Text(
                 'REGISTERED',
                 style: TextStyle(
                   fontSize: 14,
@@ -337,7 +338,7 @@ class _OrderRequestFormScreenState
               _plateNumberCtrl.text.trim().isEmpty
                   ? 'ABC 1234'
                   : _plateNumberCtrl.text.trim().toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 52,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 3.0,
@@ -353,7 +354,7 @@ class _OrderRequestFormScreenState
                 child: Text(
                   _selectedRegion,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.8,
@@ -364,7 +365,7 @@ class _OrderRequestFormScreenState
               const SizedBox(width: 8),
               Text(
                 _selectedMake,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.2,
@@ -411,7 +412,7 @@ class _OrderRequestFormScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Plate Specification',
             style: TextStyle(
               fontSize: 15,
@@ -428,7 +429,7 @@ class _OrderRequestFormScreenState
               labelText: 'Plate Number / Inscription *',
               hintText: 'e.g. M221NH or MV FILE #',
               prefixIcon:
-                  const Icon(Icons.pin_outlined, color: AppColors.navyPrimary),
+                  Icon(Icons.pin_outlined, color: AppColors.navyPrimary),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               contentPadding:
@@ -443,7 +444,7 @@ class _OrderRequestFormScreenState
             isExpanded: true,
             decoration: InputDecoration(
               labelText: 'Plate Shape / Style *',
-              prefixIcon: const Icon(Icons.style_outlined,
+              prefixIcon: Icon(Icons.style_outlined,
                   color: AppColors.navyPrimary),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -469,7 +470,7 @@ class _OrderRequestFormScreenState
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: 'Region *',
-                    prefixIcon: const Icon(Icons.map_outlined,
+                    prefixIcon: Icon(Icons.map_outlined,
                         color: AppColors.navyPrimary),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -496,7 +497,7 @@ class _OrderRequestFormScreenState
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: 'Motorcycle Make *',
-                    prefixIcon: const Icon(Icons.two_wheeler_outlined,
+                    prefixIcon: Icon(Icons.two_wheeler_outlined,
                         color: AppColors.navyPrimary),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -534,7 +535,7 @@ class _OrderRequestFormScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Recipient & Delivery Address',
             style: TextStyle(
               fontSize: 15,
@@ -548,7 +549,7 @@ class _OrderRequestFormScreenState
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(
               labelText: 'Full Name *',
-              prefixIcon: const Icon(Icons.person_outline,
+              prefixIcon: Icon(Icons.person_outline,
                   color: AppColors.navyPrimary),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -566,7 +567,7 @@ class _OrderRequestFormScreenState
             inputFormatters: contactNumberInputFormatters,
             decoration: InputDecoration(
               labelText: 'Mobile Phone Number *',
-              prefixIcon: const Icon(Icons.phone_outlined,
+              prefixIcon: Icon(Icons.phone_outlined,
                   color: AppColors.navyPrimary),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -581,7 +582,7 @@ class _OrderRequestFormScreenState
             isExpanded: true,
             decoration: InputDecoration(
               labelText: 'Delivery Area *',
-              prefixIcon: const Icon(Icons.location_on_outlined,
+              prefixIcon: Icon(Icons.location_on_outlined,
                   color: AppColors.navyPrimary),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -614,7 +615,7 @@ class _OrderRequestFormScreenState
                   : 'e.g. 123 Rizal St., Brgy. Poblacion',
               alignLabelWithHint: _isOtherArea,
               prefixIcon:
-                  const Icon(Icons.home_outlined, color: AppColors.navyPrimary),
+                  Icon(Icons.home_outlined, color: AppColors.navyPrimary),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               contentPadding:
@@ -631,7 +632,7 @@ class _OrderRequestFormScreenState
               labelText: 'Special Notes / Conduction Details',
               hintText: 'e.g. Free bracket, hole spacing, or rush',
               prefixIcon:
-                  const Icon(Icons.notes_rounded, color: AppColors.navyPrimary),
+                  Icon(Icons.notes_rounded, color: AppColors.navyPrimary),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               contentPadding:

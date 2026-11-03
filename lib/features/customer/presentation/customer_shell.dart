@@ -73,7 +73,7 @@ class _CustomerShellState extends ConsumerState<CustomerShell> {
         },
       ),
       bottomNavigationBar: DecoratedBox(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.chromeBlue,
           border: Border(
             top: BorderSide(color: AppColors.borderStrong, width: 1),

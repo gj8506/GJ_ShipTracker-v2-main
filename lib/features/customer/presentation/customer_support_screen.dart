@@ -117,13 +117,13 @@ class CustomerSupportScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.support_agent_rounded,
                     size: 80,
                     color: AppColors.textMuted,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'No active support tickets.',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
@@ -132,7 +132,7 @@ class CustomerSupportScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Tap the button below or the + icon above\nto chat with Admin.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppColors.textSecondary),
@@ -172,7 +172,7 @@ class CustomerSupportScreen extends ConsumerWidget {
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
-                  side: const BorderSide(color: AppColors.borderLight),
+                  side: BorderSide(color: AppColors.borderLight),
                 ),
                 leading: CircleAvatar(
                   backgroundColor: thread.status == 'resolved'
@@ -199,7 +199,7 @@ class CustomerSupportScreen extends ConsumerWidget {
                 trailing: thread.lastMessageAt != null
                     ? Text(
                         DateFormat('MMM dd').format(thread.lastMessageAt!),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textMuted,
                         ),

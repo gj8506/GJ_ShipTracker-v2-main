@@ -32,7 +32,7 @@ class CustomerQrDialog extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'GJandAsher ID Card',
                       style: TextStyle(
                         fontSize: 16,
@@ -64,6 +64,8 @@ class CustomerQrDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
+                // QR codes must stay on a light surface so scanners can read
+                // them in either app theme.
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.borderLight),
@@ -72,11 +74,11 @@ class CustomerQrDialog extends StatelessWidget {
                 data: customer.qrPayload,
                 version: QrVersions.auto,
                 size: 200.0,
-                eyeStyle: const QrEyeStyle(
+                eyeStyle: QrEyeStyle(
                   eyeShape: QrEyeShape.square,
                   color: AppColors.navyPrimary,
                 ),
-                dataModuleStyle: const QrDataModuleStyle(
+                dataModuleStyle: QrDataModuleStyle(
                   dataModuleShape: QrDataModuleShape.square,
                   color: AppColors.navyPrimary,
                 ),
@@ -87,7 +89,7 @@ class CustomerQrDialog extends StatelessWidget {
             // Customer Details
             Text(
               customer.name,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppColors.navyPrimary,
@@ -100,7 +102,7 @@ class CustomerQrDialog extends StatelessWidget {
                   ? customer.contactNumber
                   : 'No contact provided',
               style:
-                  const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 6),
             Container(
@@ -111,7 +113,7 @@ class CustomerQrDialog extends StatelessWidget {
               ),
               child: Text(
                 'CODE: ${customer.qrPayload}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   color: AppColors.tealDark,

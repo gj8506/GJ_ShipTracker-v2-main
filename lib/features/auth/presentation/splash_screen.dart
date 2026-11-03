@@ -35,7 +35,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: Center(
         child: Column(
@@ -46,7 +46,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               circular: true,
               borderColor: AppColors.navyPrimary,
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             Text(
               AppConstants.appName,
               textAlign: TextAlign.center,
@@ -57,7 +57,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 letterSpacing: -0.3,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               AppConstants.appSubtitle,
               style: TextStyle(
@@ -66,8 +66,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 letterSpacing: 0.5,
               ),
             ),
-            SizedBox(height: 48),
-            SizedBox(
+            const SizedBox(height: 48),
+            const SizedBox(
               width: 32,
               height: 32,
               child: CircularProgressIndicator(

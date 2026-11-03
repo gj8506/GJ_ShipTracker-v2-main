@@ -37,9 +37,9 @@ class ParcelDetailScreen extends ConsumerWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceWhite,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         child: SafeArea(
@@ -59,7 +59,7 @@ class ParcelDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Update Delivery Status',
                 style: TextStyle(
                   fontSize: 18,
@@ -156,7 +156,7 @@ class ParcelDetailScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Text('Error loading parcel: $err',
-                style: const TextStyle(color: AppColors.statusReturned)),
+                style: TextStyle(color: AppColors.statusReturned)),
           ),
         ),
         data: (parcel) {
@@ -175,7 +175,7 @@ class ParcelDetailScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(18.0),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surfaceWhite,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.borderLight),
                 ),
@@ -187,7 +187,7 @@ class ParcelDetailScreen extends ConsumerWidget {
                       children: [
                         Text(
                           parcel.platform.toUpperCase(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1.1,
@@ -213,7 +213,7 @@ class ParcelDetailScreen extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    const Text('Tracking Number',
+                    Text('Tracking Number',
                         style: TextStyle(
                             fontSize: 13, color: AppColors.textSecondary)),
                     const SizedBox(height: 4),
@@ -222,7 +222,7 @@ class ParcelDetailScreen extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             parcel.trackingNumber,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
@@ -231,7 +231,7 @@ class ParcelDetailScreen extends ConsumerWidget {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.copy_rounded,
+                          icon: Icon(Icons.copy_rounded,
                               size: 20, color: AppColors.tealDark),
                           onPressed: () {
                             Clipboard.setData(
@@ -244,16 +244,16 @@ class ParcelDetailScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const Divider(height: 24, color: AppColors.borderLight),
+                    Divider(height: 24, color: AppColors.borderLight),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Courier',
+                        Text('Courier',
                             style: TextStyle(
                                 fontSize: 14, color: AppColors.textSecondary)),
                         Text(
                           parcel.courier,
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: AppColors.navyPrimary),
@@ -269,14 +269,14 @@ class ParcelDetailScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(18.0),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surfaceWhite,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.borderLight),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Customer & Delivery Information',
                       style: TextStyle(
                           fontSize: 15,
@@ -303,16 +303,16 @@ class ParcelDetailScreen extends ConsumerWidget {
                       _buildInfoRow(Icons.two_wheeler_rounded, 'Custom Plates',
                           parcel.items!),
                     ],
-                    const Divider(height: 24, color: AppColors.borderLight),
+                    Divider(height: 24, color: AppColors.borderLight),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Declared Amount',
+                        Text('Declared Amount',
                             style: TextStyle(
                                 fontSize: 14, color: AppColors.textSecondary)),
                         Text(
                           '₱${parcel.amount.toStringAsFixed(2)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.bold,
                               color: AppColors.tealDark),
@@ -328,14 +328,14 @@ class ParcelDetailScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(18.0),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surfaceWhite,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.borderLight),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Timeline & Dispatch Details',
                       style: TextStyle(
                           fontSize: 15,
@@ -396,13 +396,13 @@ class ParcelDetailScreen extends ConsumerWidget {
           width: 90,
           child: Text(
             label,
-            style: const TextStyle(fontSize: 13, color: AppColors.textTertiary),
+            style: TextStyle(fontSize: 13, color: AppColors.textTertiary),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppColors.navyPrimary),

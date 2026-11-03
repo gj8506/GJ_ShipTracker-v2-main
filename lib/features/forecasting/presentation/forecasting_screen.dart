@@ -75,8 +75,8 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
 
       if (mounted) {
         scaffold.showSnackBar(
-          const SnackBar(
-            content: Text(
+          SnackBar(
+            content: const Text(
                 'Injected 14 months of historical shipments! All forecast horizons unlocked.'),
             backgroundColor: AppColors.statusDelivered,
           ),
@@ -163,7 +163,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Forecast Horizon',
             style: TextStyle(
                 fontSize: 13,
@@ -223,7 +223,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
             }).toList(),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Sales Channel',
             style: TextStyle(
                 fontSize: 13,
@@ -299,11 +299,11 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(Icons.info_outline_rounded,
                   color: AppColors.statusPending, size: 22),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
                 'Insufficient Historical Shipments',
                 style: TextStyle(
@@ -316,7 +316,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
           const SizedBox(height: 10),
           Text(
             result.insightSummary,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 13, color: AppColors.warningDeepest, height: 1.4),
           ),
           const SizedBox(height: 16),
@@ -346,7 +346,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
             child: OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.navyPrimary,
-                side: const BorderSide(color: AppColors.navyPrimary),
+                side: BorderSide(color: AppColors.navyPrimary),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
@@ -379,7 +379,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surfaceWhite,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: AppColors.borderLight),
             ),
@@ -394,11 +394,11 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
                         color: AppColors.tealContainer,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.trending_up_rounded,
+                      child: Icon(Icons.trending_up_rounded,
                           size: 16, color: AppColors.navyPrimary),
                     ),
                     const SizedBox(width: 8),
-                    const Text('Projected Sales',
+                    Text('Projected Sales',
                         style: TextStyle(
                             fontSize: 12, color: AppColors.textSecondary)),
                   ],
@@ -406,7 +406,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
                 const SizedBox(height: 10),
                 Text(
                   currencyFmt.format(result.totalProjectedRevenue),
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
                       color: AppColors.navyPrimary),
@@ -416,7 +416,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
                 Text(
                   '${horizon.fullTitle} Total',
                   style:
-                      const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                      TextStyle(fontSize: 11, color: AppColors.textMuted),
                 ),
               ],
             ),
@@ -427,7 +427,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surfaceWhite,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: AppColors.borderLight),
             ),
@@ -442,11 +442,11 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
                         color: AppColors.statusDeliveredContainer,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.local_shipping_outlined,
+                      child: Icon(Icons.local_shipping_outlined,
                           size: 16, color: AppColors.statusDelivered),
                     ),
                     const SizedBox(width: 8),
-                    const Text('Est. Volume',
+                    Text('Est. Volume',
                         style: TextStyle(
                             fontSize: 12, color: AppColors.textSecondary)),
                   ],
@@ -454,7 +454,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
                 const SizedBox(height: 10),
                 Text(
                   '${NumberFormat('#,##0').format(result.totalProjectedParcels)} pkgs',
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
                       color: AppColors.navyPrimary),
@@ -484,7 +484,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderLight),
       ),
@@ -494,7 +494,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Monthly Projections',
                 style: TextStyle(
                     fontSize: 14,
@@ -509,7 +509,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
                 ),
                 child: Text(
                   result.confidence.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: AppColors.navyMuted),
@@ -537,7 +537,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
                     children: [
                       Text(
                         monthName,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                             color: AppColors.navySecondary),
@@ -545,14 +545,14 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
                       const SizedBox(height: 2),
                       Text(
                         'Estimated: ${pt.projectedParcels} dispatched orders',
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 11, color: AppColors.textSecondary),
                       ),
                     ],
                   ),
                   Text(
                     currencyFmt.format(pt.projectedRevenue),
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                         color: AppColors.navyPrimary),
@@ -577,14 +577,14 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.lightbulb_outline_rounded,
+          Icon(Icons.lightbulb_outline_rounded,
               color: AppColors.navyPrimary, size: 22),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Operational Forecast Strategy',
                   style: TextStyle(
                       fontSize: 13,
@@ -594,7 +594,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
                 const SizedBox(height: 4),
                 Text(
                   result.insightSummary,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 12, color: AppColors.tealDark, height: 1.35),
                 ),
               ],

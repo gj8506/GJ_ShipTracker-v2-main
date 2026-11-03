@@ -67,7 +67,7 @@ class AppLogo extends StatelessWidget {
           width: size,
           height: size,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               colors: [AppColors.navyPrimary, AppColors.navySecondary],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -84,7 +84,7 @@ class AppLogo extends StatelessWidget {
         ),
         if (showText) ...[
           const SizedBox(width: 12),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [

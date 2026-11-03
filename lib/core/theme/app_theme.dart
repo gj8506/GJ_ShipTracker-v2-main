@@ -10,9 +10,24 @@ import 'app_colors.dart';
 /// Widget-level styling lives here so Admin/Staff screens and the Customer
 /// Portal stay visually consistent without changing any business logic.
 class AppTheme {
-  static ThemeData get lightTheme {
-    const colorScheme = ColorScheme(
-      brightness: Brightness.light,
+  /// Resolves the palette for [brightness] and builds the matching theme.
+  ///
+  /// The app root calls this once per build, so every widget-level
+  /// [AppColors] lookup resolves against the theme that is actually installed.
+  static ThemeData themeFor(Brightness brightness) {
+    AppColors.applyBrightness(brightness);
+    return _buildTheme(brightness);
+  }
+
+  /// Light theme.
+  static ThemeData get lightTheme => themeFor(Brightness.light);
+
+  /// Dark theme.
+  static ThemeData get darkTheme => themeFor(Brightness.dark);
+
+  static ThemeData _buildTheme(Brightness brightness) {
+    final colorScheme = ColorScheme(
+      brightness: brightness,
       primary: AppColors.navyPrimary,
       onPrimary: AppColors.textOnPrimary,
       primaryContainer: AppColors.tealContainer,
@@ -30,8 +45,8 @@ class AppTheme {
       onSurfaceVariant: AppColors.textSecondary,
       outline: AppColors.borderLight,
       outlineVariant: AppColors.borderSubtle,
-      shadow: Color(0x1A0A4763),
-      scrim: Color(0x800A4763),
+      shadow: const Color(0x1A0A4763),
+      scrim: const Color(0x800A4763),
       inverseSurface: AppColors.navyPrimary,
       onInverseSurface: AppColors.textOnDark,
       inversePrimary: AppColors.tealSecondary,
@@ -123,17 +138,19 @@ class AppTheme {
         shadowColor: AppColors.borderStrong,
         centerTitle: false,
         titleSpacing: 16,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        systemOverlayStyle: AppColors.isDark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
         titleTextStyle: textTheme.titleLarge?.copyWith(
-          fontSize: 18,
+          fontSize: 20,
           fontWeight: FontWeight.w700,
           color: AppColors.navyDark,
         ),
-        iconTheme: const IconThemeData(
+        iconTheme: IconThemeData(
           color: AppColors.navyDark,
           size: 22,
         ),
-        actionsIconTheme: const IconThemeData(
+        actionsIconTheme: IconThemeData(
           color: AppColors.navyDark,
           size: 22,
         ),
@@ -164,7 +181,7 @@ class AppTheme {
           );
         }),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColors.chromeBlue,
         selectedItemColor: AppColors.navyDark,
         unselectedItemColor: AppColors.navyMuted,
@@ -172,13 +189,13 @@ class AppTheme {
         elevation: 0,
         showUnselectedLabels: true,
       ),
-      cardTheme: const CardThemeData(
+      cardTheme: CardThemeData(
         color: AppColors.surfaceWhite,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(16.0)),
           side: BorderSide(color: AppColors.borderSubtle, width: 1.0),
         ),
       ),
@@ -222,7 +239,7 @@ class AppTheme {
           backgroundColor: AppColors.surfaceWhite,
           minimumSize: const Size.fromHeight(48),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          side: const BorderSide(color: AppColors.borderLight),
+          side: BorderSide(color: AppColors.borderLight),
           textStyle: textTheme.labelLarge?.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -292,27 +309,27 @@ class AppTheme {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderLight),
+          borderSide: BorderSide(color: AppColors.borderLight),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderLight),
+          borderSide: BorderSide(color: AppColors.borderLight),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderSubtle),
+          borderSide: BorderSide(color: AppColors.borderSubtle),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.tealAccent, width: 1.6),
+          borderSide: BorderSide(color: AppColors.tealAccent, width: 1.6),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.errorRed),
+          borderSide: BorderSide(color: AppColors.errorRed),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.errorRed, width: 1.6),
+          borderSide: BorderSide(color: AppColors.errorRed, width: 1.6),
         ),
       ),
       chipTheme: ChipThemeData(
@@ -321,7 +338,7 @@ class AppTheme {
         disabledColor: AppColors.surfaceMuted,
         checkmarkColor: AppColors.textOnPrimary,
         showCheckmark: false,
-        side: const BorderSide(color: AppColors.borderLight),
+        side: BorderSide(color: AppColors.borderLight),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -354,7 +371,7 @@ class AppTheme {
           height: 1.5,
         ),
       ),
-      bottomSheetTheme: const BottomSheetThemeData(
+      bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: AppColors.surfaceWhite,
         modalBackgroundColor: AppColors.surfaceWhite,
         surfaceTintColor: Colors.transparent,
@@ -362,7 +379,7 @@ class AppTheme {
         modalElevation: 0,
         showDragHandle: true,
         dragHandleColor: AppColors.borderStrong,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
       ),
@@ -395,12 +412,12 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-      dividerTheme: const DividerThemeData(
+      dividerTheme: DividerThemeData(
         color: AppColors.borderSubtle,
         thickness: 1,
         space: 1,
       ),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
+      progressIndicatorTheme: ProgressIndicatorThemeData(
         color: AppColors.tealAccent,
         linearTrackColor: AppColors.surfaceMuted,
         circularTrackColor: AppColors.surfaceMuted,
@@ -413,7 +430,7 @@ class AppTheme {
           return Colors.transparent;
         }),
         checkColor: const WidgetStatePropertyAll(AppColors.textOnPrimary),
-        side: const BorderSide(color: AppColors.borderStrong, width: 1.4),
+        side: BorderSide(color: AppColors.borderStrong, width: 1.4),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
         ),
@@ -439,7 +456,7 @@ class AppTheme {
           }
           return AppColors.surfaceVariant;
         }),
-        trackOutlineColor: const WidgetStatePropertyAll(
+        trackOutlineColor: WidgetStatePropertyAll(
           AppColors.borderLight,
         ),
       ),
@@ -459,14 +476,14 @@ class AppTheme {
           color: AppColors.textPrimary,
         ),
         menuStyle: MenuStyle(
-          backgroundColor: const WidgetStatePropertyAll(
+          backgroundColor: WidgetStatePropertyAll(
             AppColors.surfaceWhite,
           ),
           surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
           shape: WidgetStatePropertyAll(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
-              side: const BorderSide(color: AppColors.borderSubtle),
+              side: BorderSide(color: AppColors.borderSubtle),
             ),
           ),
         ),
@@ -493,7 +510,7 @@ class AppTheme {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       ),
-      iconTheme: const IconThemeData(
+      iconTheme: IconThemeData(
         color: AppColors.navyMuted,
         size: 22,
       ),

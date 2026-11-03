@@ -79,7 +79,7 @@ class _CustomerMyOrdersScreenState
               error: (err, _) => Center(
                 child: Text(
                   'Error loading orders: $err',
-                  style: const TextStyle(color: AppColors.errorRed),
+                  style: TextStyle(color: AppColors.errorRed),
                 ),
               ),
               data: (orders) {
@@ -91,7 +91,7 @@ class _CustomerMyOrdersScreenState
                 }).toList();
 
                 if (filtered.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -100,7 +100,7 @@ class _CustomerMyOrdersScreenState
                           size: 64,
                           color: AppColors.textMuted,
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         Text(
                           'No orders match this filter',
                           style: TextStyle(
@@ -190,7 +190,7 @@ class _CustomerMyOrdersScreenState
             const SizedBox(height: 12),
             Text(
               order['plateStyle'] ?? 'Custom Plate',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
                 color: AppColors.textPrimary,
@@ -199,7 +199,7 @@ class _CustomerMyOrdersScreenState
             const SizedBox(height: 4),
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.location_on_outlined,
                   size: 14,
                   color: AppColors.textSecondary,
@@ -210,7 +210,7 @@ class _CustomerMyOrdersScreenState
                     order['deliveryAddress'] ?? 'No Address',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
                     ),
@@ -224,7 +224,7 @@ class _CustomerMyOrdersScreenState
               children: [
                 Text(
                   'Order Date: ${_formatDate(order['createdAt'] as Timestamp?)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     color: AppColors.textMuted,
                   ),
@@ -232,7 +232,7 @@ class _CustomerMyOrdersScreenState
                 if (tracking.isNotEmpty)
                   Text(
                     'Track: $tracking',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       color: AppColors.tealDark,
@@ -282,7 +282,7 @@ class _CustomerMyOrdersScreenState
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Order Details',
                     style: TextStyle(
                       fontSize: 18,
@@ -327,7 +327,7 @@ class _CustomerMyOrdersScreenState
             width: 130,
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
                 color: AppColors.textSecondary,
@@ -337,7 +337,7 @@ class _CustomerMyOrdersScreenState
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 color: AppColors.textPrimary,
               ),

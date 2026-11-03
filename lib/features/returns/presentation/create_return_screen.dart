@@ -116,8 +116,8 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You must be logged in to log return tickets.'),
+        SnackBar(
+          content: const Text('You must be logged in to log return tickets.'),
           backgroundColor: AppColors.statusReturned,
         ),
       );
@@ -191,7 +191,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(title: const Text('Log Return / Defect Ticket')),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -211,7 +211,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                     labelText: 'Original Tracking Number *',
                     hintText: 'e.g. SPX1234567890PH',
                     prefixIcon:
-                        const Icon(Icons.qr_code, color: AppColors.navyPrimary),
+                        Icon(Icons.qr_code, color: AppColors.navyPrimary),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
@@ -287,7 +287,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                   textCapitalization: TextCapitalization.words,
                   decoration: InputDecoration(
                     labelText: 'Customer / Buyer Name *',
-                    prefixIcon: const Icon(Icons.person_outline,
+                    prefixIcon: Icon(Icons.person_outline,
                         color: AppColors.navyPrimary),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -309,7 +309,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                   inputFormatters: contactNumberInputFormatters,
                   decoration: InputDecoration(
                     labelText: 'Contact Number (Optional)',
-                    prefixIcon: const Icon(Icons.phone_outlined,
+                    prefixIcon: Icon(Icons.phone_outlined,
                         color: AppColors.navyPrimary),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -325,7 +325,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                   decoration: InputDecoration(
                     labelText: 'Motorcycle Plate Specifications',
                     hintText: 'e.g. White plate, embossed, 4x7 with bracket',
-                    prefixIcon: const Icon(Icons.two_wheeler_outlined,
+                    prefixIcon: Icon(Icons.two_wheeler_outlined,
                         color: AppColors.navyPrimary),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -339,7 +339,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: 'Defect Category *',
-                    prefixIcon: const Icon(Icons.warning_amber_rounded,
+                    prefixIcon: Icon(Icons.warning_amber_rounded,
                         color: AppColors.statusReturned),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -376,18 +376,18 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surfaceWhite,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppColors.borderLight),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
                           Icon(Icons.photo_library_outlined,
                               size: 20, color: AppColors.navyPrimary),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
                             'Photo Evidence',
                             style: TextStyle(
@@ -442,13 +442,13 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                                     const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)),
-                                side: const BorderSide(
+                                side: BorderSide(
                                     color: AppColors.textMuted),
                               ),
                               onPressed: () => _pickImage(ImageSource.camera),
-                              icon: const Icon(Icons.camera_alt_outlined,
+                              icon: Icon(Icons.camera_alt_outlined,
                                   color: AppColors.navyPrimary),
-                              label: const Text(
+                              label: Text(
                                 'Camera',
                                 style: TextStyle(
                                     color: AppColors.navyPrimary,
@@ -464,13 +464,13 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                                     const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)),
-                                side: const BorderSide(
+                                side: BorderSide(
                                     color: AppColors.textMuted),
                               ),
                               onPressed: () => _pickImage(ImageSource.gallery),
-                              icon: const Icon(Icons.photo_outlined,
+                              icon: Icon(Icons.photo_outlined,
                                   color: AppColors.navyPrimary),
-                              label: const Text(
+                              label: Text(
                                 'Gallery',
                                 style: TextStyle(
                                     color: AppColors.navyPrimary,

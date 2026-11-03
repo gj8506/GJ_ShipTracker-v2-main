@@ -154,7 +154,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
             Text(
               widget.subject,
               style:
-                  const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -168,7 +168,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Marked as Resolved')));
               },
-              child: const Text('Resolve',
+              child: Text('Resolve',
                   style: TextStyle(
                       color: AppColors.statusDelivered,
                       fontWeight: FontWeight.bold)),
@@ -190,7 +190,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 });
 
                 if (messages.isEmpty) {
-                  return const Center(
+                  return Center(
                       child: Text('No messages yet. Send a message to start.',
                           style: TextStyle(color: AppColors.textSecondary)));
                 }
@@ -243,7 +243,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                             if (!isMe) ...[
                               Text(
                                 msg.senderRole.toUpperCase(),
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.statusInTransit),
@@ -299,10 +299,10 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.surfaceWhite,
               border: Border(top: BorderSide(color: AppColors.borderLight)),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                     color: Colors.black12,
                     blurRadius: 10,
@@ -318,7 +318,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.add_photo_alternate_outlined,
+                        : Icon(Icons.add_photo_alternate_outlined,
                             color: AppColors.tealDark),
                     onPressed: _isUploadingImage ? null : _pickAndUploadImage,
                   ),

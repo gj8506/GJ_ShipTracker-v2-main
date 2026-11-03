@@ -11,9 +11,28 @@ import 'package:flutter/material.dart';
 ///   • 20% — logo-blue interface elements (app bars, primary buttons, nav).
 ///   • 5%  — deep ink-blue text and small azure accents for emphasis.
 ///
-/// Keeping the tokens here means both the Admin/Staff experience and the
-/// Customer Portal share one consistent, professional visual language.
+/// Every token resolves against the active [Brightness], which the app root
+/// sets before building the widget tree. That keeps one set of semantic names
+/// working for both the light and the dark theme instead of duplicating the
+/// palette in every screen.
 class AppColors {
+  AppColors._();
+
+  static Brightness _brightness = Brightness.light;
+
+  /// Brightness the palette currently resolves against.
+  static Brightness get brightness => _brightness;
+
+  /// True when the dark palette is active.
+  static bool get isDark => _brightness == Brightness.dark;
+
+  /// Called by the app root (and by [AppTheme]) before a theme is built.
+  static void applyBrightness(Brightness brightness) {
+    _brightness = brightness;
+  }
+
+  static Color _pick(Color light, Color dark) => isDark ? dark : light;
+
   // ---------------------------------------------------------------------------
   // BRAND SOURCE (sampled directly from the GJandAsher logo)
   // ---------------------------------------------------------------------------
@@ -27,131 +46,197 @@ class AppColors {
   // ---------------------------------------------------------------------------
   // 75% — BACKGROUND & SURFACE (the dominant, calming layer)
   // ---------------------------------------------------------------------------
-  static const Color backgroundLight = Color(0xFFF6FAFE);
-  static const Color backgroundElevated = Color(0xFFFCFEFF);
-  static const Color surfaceWhite = Color(0xFFFFFFFF);
-  static const Color surfaceMuted = Color(0xFFEDF4FA);
-  static const Color surfaceVariant = Color(0xFFE1EDF6);
-  static const Color background = backgroundLight;
-  static const Color surface = surfaceWhite;
+  static Color get backgroundLight =>
+      _pick(const Color(0xFFF6FAFE), const Color(0xFF0A141D));
+  static Color get backgroundElevated =>
+      _pick(const Color(0xFFFCFEFF), const Color(0xFF0F1C27));
+  static Color get surfaceWhite =>
+      _pick(const Color(0xFFFFFFFF), const Color(0xFF13212E));
+  static Color get surfaceMuted =>
+      _pick(const Color(0xFFEDF4FA), const Color(0xFF172937));
+  static Color get surfaceVariant =>
+      _pick(const Color(0xFFE1EDF6), const Color(0xFF1E3446));
+  static Color get background => backgroundLight;
+  static Color get surface => surfaceWhite;
 
   // ---------------------------------------------------------------------------
   // 20% — INTERFACE, NAVIGATION & BUTTONS
   // ---------------------------------------------------------------------------
-  static const Color navyPrimary = Color(0xFF0079AC);
-  static const Color navySecondary = Color(0xFF075E85);
-  static const Color navyDark = Color(0xFF0A4763);
-  static const Color navyMuted = Color(0xFF3E718C);
-  static const Color navyLight = Color(0xFF82AFC6);
-  static const Color primary = navyPrimary;
-  static const Color interface = navyPrimary;
-  static const Color interfaceMuted = navySecondary;
+  static Color get navyPrimary =>
+      _pick(const Color(0xFF0079AC), const Color(0xFF3AA7DA));
+  static Color get navySecondary =>
+      _pick(const Color(0xFF075E85), const Color(0xFF2F8FBE));
+  static Color get navyDark =>
+      _pick(const Color(0xFF0A4763), const Color(0xFFE7F2F9));
+  static Color get navyMuted =>
+      _pick(const Color(0xFF3E718C), const Color(0xFFA3BFD0));
+  static Color get navyLight =>
+      _pick(const Color(0xFF82AFC6), const Color(0xFF5B7C91));
+  static Color get primary => navyPrimary;
+  static Color get interface => navyPrimary;
+  static Color get interfaceMuted => navySecondary;
 
   /// Light azure used for the app header and bottom navigation chrome.
-  static const Color chromeBlue = Color(0xFFBEDEFF);
+  static Color get chromeBlue =>
+      _pick(const Color(0xFFBEDEFF), const Color(0xFF0E1F2C));
 
   // Small accents (use sparingly — roughly 5% of the screen)
-  static const Color tealAccent = Color(0xFF0093CE);
-  static const Color tealSecondary = Color(0xFF6FD0F5);
-  static const Color tealDark = Color(0xFF075E85);
-  static const Color tealContainer = Color(0xFFEAF8FE);
-  static const Color tealMuted = Color(0xFF82C6E0);
+  static Color get tealAccent =>
+      _pick(const Color(0xFF0093CE), const Color(0xFF45B8E8));
+  static Color get tealSecondary =>
+      _pick(const Color(0xFF6FD0F5), const Color(0xFF86D6F6));
+  static Color get tealDark =>
+      _pick(const Color(0xFF075E85), const Color(0xFF8FD5F1));
+  static Color get tealContainer =>
+      _pick(const Color(0xFFEAF8FE), const Color(0xFF113347));
+  static Color get tealMuted =>
+      _pick(const Color(0xFF82C6E0), const Color(0xFF4E87A0));
 
   /// Slightly deeper azure tint for selected navigation indicators and
   /// interactive surfaces that need to read clearly on white.
-  static const Color accentSoft = Color(0xFFDCF2FD);
-  static const Color accent = tealAccent;
+  static Color get accentSoft =>
+      _pick(const Color(0xFFDCF2FD), const Color(0xFF14374C));
+  static Color get accent => tealAccent;
 
   // ---------------------------------------------------------------------------
   // 5% — TEXT (high contrast, never pure black)
   // ---------------------------------------------------------------------------
-  static const Color textPrimary = Color(0xFF0A2436);
-  static const Color textSecondary = Color(0xFF47657A);
-  static const Color textMuted = Color(0xFF5C7488);
+  static Color get textPrimary =>
+      _pick(const Color(0xFF0A2436), const Color(0xFFE9F3FA));
+  static Color get textSecondary =>
+      _pick(const Color(0xFF47657A), const Color(0xFFB3C9D8));
+  static Color get textMuted =>
+      _pick(const Color(0xFF5C7488), const Color(0xFF93AEBF));
   static const Color textOnPrimary = Colors.white;
   static const Color textOnDark = Color(0xFFF0F8FD);
 
   // ---------------------------------------------------------------------------
   // BORDERS & DIVIDERS
   // ---------------------------------------------------------------------------
-  static const Color borderSubtle = Color(0xFFE4EEF6);
-  static const Color borderLight = Color(0xFFD4E4F0);
-  static const Color borderStrong = Color(0xFFBBD3E4);
-  static const Color border = borderSubtle;
+  static Color get borderSubtle =>
+      _pick(const Color(0xFFE4EEF6), const Color(0xFF1D3141));
+  static Color get borderLight =>
+      _pick(const Color(0xFFD4E4F0), const Color(0xFF294556));
+  static Color get borderStrong =>
+      _pick(const Color(0xFFBBD3E4), const Color(0xFF3A5B71));
+  static Color get border => borderSubtle;
 
   // ---------------------------------------------------------------------------
   // PLATFORM BRAND COLORS
   // ---------------------------------------------------------------------------
   static const Color shopeeOrange = Color(0xFFEE4D2D);
-  static const Color shopeeContainer = Color(0xFFFBEDEA);
-  static const Color lazadaBlue = Color(0xFF0F146D);
-  static const Color lazadaContainer = Color(0xFFE8EEF6);
-  static const Color tikTokBlack = Color(0xFF010101);
-  static const Color tikTokContainer = Color(0xFFEDF2F7);
-  static const Color tiktokBlack = Color(0xFF010101);
-  static const Color tiktokContainer = Color(0xFFEDF2F7);
+  static Color get shopeeContainer =>
+      _pick(const Color(0xFFFBEDEA), const Color(0xFF3B211B));
+  static Color get lazadaBlue =>
+      _pick(const Color(0xFF0F146D), const Color(0xFFA9B6FF));
+  static Color get lazadaContainer =>
+      _pick(const Color(0xFFE8EEF6), const Color(0xFF1C2440));
+  static Color get tikTokBlack =>
+      _pick(const Color(0xFF010101), const Color(0xFFE9F0F5));
+  static Color get tikTokContainer =>
+      _pick(const Color(0xFFEDF2F7), const Color(0xFF212B33));
+  static Color get tiktokBlack => tikTokBlack;
+  static Color get tiktokContainer => tikTokContainer;
   static const Color tikTokRed = Color(0xFFFE2C55);
   static const Color tikTokCyan = Color(0xFF25F4EE);
 
   // ---------------------------------------------------------------------------
   // PARCEL & RETURN STATUS COLORS (functional, semantic)
   // ---------------------------------------------------------------------------
-  static const Color statusDelivered = Color(0xFF1E7A46);
-  static const Color statusDeliveredContainer = Color(0xFFE7F5EC);
-  static const Color statusReturned = Color(0xFFC0392B);
-  static const Color statusReturnedContainer = Color(0xFFFDECEC);
-  static const Color statusPending = Color(0xFFB26A00);
-  static const Color statusPendingContainer = Color(0xFFFFF4DB);
-  static const Color statusInTransit = Color(0xFF0079AC);
-  static const Color statusInTransitContainer = Color(0xFFEAF8FE);
-  static const Color statusDispatched = Color(0xFF0079AC);
-  static const Color statusDispatchedContainer = Color(0xFFEAF8FE);
-  static const Color statusCancelled = Color(0xFF5F6B7A);
-  static const Color statusCancelledContainer = Color(0xFFEDF1F5);
-  static const Color statusApproved = Color(0xFF1E7A46);
-  static const Color statusReplacementDispatched = Color(0xFF6D28D9);
-  static const Color statusRefunded = Color(0xFF5B4B8A);
-  static const Color statusRejected = Color(0xFFC0392B);
-  static const Color statusProcessing = Color(0xFF075E85);
-  static const Color statusFailed = Color(0xFFC0392B);
+  static Color get statusDelivered =>
+      _pick(const Color(0xFF1E7A46), const Color(0xFF6FD6A1));
+  static Color get statusDeliveredContainer =>
+      _pick(const Color(0xFFE7F5EC), const Color(0xFF12301F));
+  static Color get statusReturned =>
+      _pick(const Color(0xFFC0392B), const Color(0xFFF58B7F));
+  static Color get statusReturnedContainer =>
+      _pick(const Color(0xFFFDECEC), const Color(0xFF3A1D1B));
+  static Color get statusPending =>
+      _pick(const Color(0xFFB26A00), const Color(0xFFF2BE6A));
+  static Color get statusPendingContainer =>
+      _pick(const Color(0xFFFFF4DB), const Color(0xFF36280F));
+  static Color get statusInTransit =>
+      _pick(const Color(0xFF0079AC), const Color(0xFF58BEEA));
+  static Color get statusInTransitContainer =>
+      _pick(const Color(0xFFEAF8FE), const Color(0xFF103040));
+  static Color get statusDispatched =>
+      _pick(const Color(0xFF0079AC), const Color(0xFF58BEEA));
+  static Color get statusDispatchedContainer =>
+      _pick(const Color(0xFFEAF8FE), const Color(0xFF103040));
+  static Color get statusCancelled =>
+      _pick(const Color(0xFF5F6B7A), const Color(0xFFA9B8C6));
+  static Color get statusCancelledContainer =>
+      _pick(const Color(0xFFEDF1F5), const Color(0xFF232F3A));
+  static Color get statusApproved =>
+      _pick(const Color(0xFF1E7A46), const Color(0xFF6FD6A1));
+  static Color get statusReplacementDispatched =>
+      _pick(const Color(0xFF6D28D9), const Color(0xFFC4A9FF));
+  static Color get statusRefunded =>
+      _pick(const Color(0xFF5B4B8A), const Color(0xFFBFAEE8));
+  static Color get statusRejected =>
+      _pick(const Color(0xFFC0392B), const Color(0xFFF58B7F));
+  static Color get statusProcessing =>
+      _pick(const Color(0xFF075E85), const Color(0xFF8FD5F1));
+  static Color get statusFailed =>
+      _pick(const Color(0xFFC0392B), const Color(0xFFF58B7F));
 
   // ---------------------------------------------------------------------------
   // SEMANTIC COLORS
   // ---------------------------------------------------------------------------
-  static const Color successGreen = Color(0xFF1E7A46);
-  static const Color errorRed = Color(0xFFC0392B);
-  static const Color warningOrange = Color(0xFFB26A00);
-  static const Color infoBlue = Color(0xFF0079AC);
-  static const Color error = errorRed;
-  static const Color success = successGreen;
-  static const Color warning = warningOrange;
-  static const Color info = infoBlue;
+  static Color get successGreen =>
+      _pick(const Color(0xFF1E7A46), const Color(0xFF6FD6A1));
+  static Color get errorRed =>
+      _pick(const Color(0xFFC0392B), const Color(0xFFF58B7F));
+  static Color get warningOrange =>
+      _pick(const Color(0xFFB26A00), const Color(0xFFF2BE6A));
+  static Color get infoBlue =>
+      _pick(const Color(0xFF0079AC), const Color(0xFF58BEEA));
+  static Color get error => errorRed;
+  static Color get success => successGreen;
+  static Color get warning => warningOrange;
+  static Color get info => infoBlue;
 
   // Supporting shades for semantic surfaces, borders and deep text.
   // These keep every screen inside the same 75 / 20 / 5 system.
-  static const Color warningSurface = Color(0xFFFFF8E8);
-  static const Color warningBorder = Color(0xFFF2D9A6);
-  static const Color warningDeep = Color(0xFF8A5200);
-  static const Color warningDeepest = Color(0xFF6B3F00);
-  static const Color warningStrong = Color(0xFFB45309);
+  static Color get warningSurface =>
+      _pick(const Color(0xFFFFF8E8), const Color(0xFF33280F));
+  static Color get warningBorder =>
+      _pick(const Color(0xFFF2D9A6), const Color(0xFF6B5324));
+  static Color get warningDeep =>
+      _pick(const Color(0xFF8A5200), const Color(0xFFF2C98A));
+  static Color get warningDeepest =>
+      _pick(const Color(0xFF6B3F00), const Color(0xFFF7DCAF));
+  static Color get warningStrong =>
+      _pick(const Color(0xFFB45309), const Color(0xFFF2BE6A));
 
-  static const Color dangerDeep = Color(0xFF9B2C2C);
-  static const Color dangerBorder = Color(0xFFE7A9A9);
-  static const Color successBorder = Color(0xFFA7DDB8);
-  static const Color successDeep = Color(0xFF14532D);
+  static Color get dangerDeep =>
+      _pick(const Color(0xFF9B2C2C), const Color(0xFFF3A9A9));
+  static Color get dangerBorder =>
+      _pick(const Color(0xFFE7A9A9), const Color(0xFF6E3A3A));
+  static Color get successBorder =>
+      _pick(const Color(0xFFA7DDB8), const Color(0xFF2E6444));
+  static Color get successDeep =>
+      _pick(const Color(0xFF14532D), const Color(0xFFA6E8C2));
 
-  static const Color tealBorder = Color(0xFFB7E2F5);
-  static const Color borderCool = Color(0xFFD6E8F5);
+  static Color get tealBorder =>
+      _pick(const Color(0xFFB7E2F5), const Color(0xFF24596E));
+  static Color get borderCool =>
+      _pick(const Color(0xFFD6E8F5), const Color(0xFF2B4A5E));
 
-  static const Color textTertiary = Color(0xFF55707F);
-  static const Color textMutedAlt = Color(0xFF5C7488);
-  static const Color purpleContainer = Color(0xFFEDE7F6);
+  static Color get textTertiary =>
+      _pick(const Color(0xFF55707F), const Color(0xFF9DB6C6));
+  static Color get textMutedAlt =>
+      _pick(const Color(0xFF5C7488), const Color(0xFF93AEBF));
+  static Color get purpleContainer =>
+      _pick(const Color(0xFFEDE7F6), const Color(0xFF2B2545));
 
   // Microsoft Excel export branding (kept literal so the export action reads
   // instantly as "Excel" while still living in the palette).
   static const Color excelGreen = Color(0xFF107C41);
   static const Color excelGreenTint = Color(0x1F107C41);
 
-  static const Color scrimLight = Color(0x14000000);
-  static const Color scrimFaint = Color(0x06000000);
+  static Color get scrimLight =>
+      _pick(const Color(0x14000000), const Color(0x33000000));
+  static Color get scrimFaint =>
+      _pick(const Color(0x06000000), const Color(0x1A000000));
 }
