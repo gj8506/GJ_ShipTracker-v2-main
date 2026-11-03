@@ -8,14 +8,21 @@ const int kTrackingNumberLength = 15;
 const int kContactNumberLength = 11;
 
 /// Shipping addresses are capped so a long address cannot break the dispatch
-/// and customer-list row layouts.
-const int kShippingAddressMaxLength = 35;
+/// and customer-list row layouts. 100 characters comfortably fits a complete
+/// Philippine address (`House/Unit No., Street, Barangay, City, Province`).
+const int kShippingAddressMaxLength = 100;
 
-/// Items / plate specification summaries share the same short-form limit.
-const int kItemSpecsMaxLength = 35;
+/// Items / plate specification summaries share the same generous limit so a
+/// generated summary (`STANDARD (IRREGULAR HEXAGON) | Reg: ... | Make: ...`)
+/// is never cut off when it is loaded into the dispatch form.
+const int kItemSpecsMaxLength = 100;
 
 /// Optional order notes are capped so they never overflow a parcel card.
 const int kOrderNotesMaxLength = 30;
+
+/// Defect descriptions on return tickets need more room than order notes: the
+/// photo alone rarely explains the problem.
+const int kReturnNotesMaxLength = 150;
 
 /// Keeps the tracking-number fields at the courier's 15-character format and
 /// blocks characters that can never appear in a tracking code.
@@ -39,15 +46,20 @@ final List<TextInputFormatter> shippingAddressInputFormatters =
 ];
 
 /// Caps an items / plate-specs summary at [kItemSpecsMaxLength] characters.
-final List<TextInputFormatter> itemSpecsInputFormatters =
-    <TextInputFormatter>[
+final List<TextInputFormatter> itemSpecsInputFormatters = <TextInputFormatter>[
   LengthLimitingTextInputFormatter(kItemSpecsMaxLength),
 ];
 
 /// Caps optional order notes at [kOrderNotesMaxLength] characters.
-final List<TextInputFormatter> orderNotesInputFormatters =
-    <TextInputFormatter>[
+final List<TextInputFormatter> orderNotesInputFormatters = <TextInputFormatter>[
   LengthLimitingTextInputFormatter(kOrderNotesMaxLength),
+];
+
+/// Caps return-ticket defect descriptions at [kReturnNotesMaxLength]
+/// characters.
+final List<TextInputFormatter> returnNotesInputFormatters =
+    <TextInputFormatter>[
+  LengthLimitingTextInputFormatter(kReturnNotesMaxLength),
 ];
 
 /// Trims [value] down to [maxLength] characters.
@@ -128,6 +140,21 @@ String? validateOrderNotes(String? value) {
   if (notes.isEmpty) return null;
   if (notes.length > kOrderNotesMaxLength) {
     return 'Notes must be $kOrderNotesMaxLength characters or fewer';
+  }
+  return null;
+}
+
+/// Validates a return-ticket defect description against
+/// [kReturnNotesMaxLength].
+///
+/// Set [required] to true where the description must not be blank.
+String? validateReturnNotes(String? value, {bool required = false}) {
+  final notes = (value ?? '').trim();
+  if (notes.isEmpty) {
+    return required ? 'Enter defect description' : null;
+  }
+  if (notes.length > kReturnNotesMaxLength) {
+    return 'Defect description must be $kReturnNotesMaxLength characters or fewer';
   }
   return null;
 }

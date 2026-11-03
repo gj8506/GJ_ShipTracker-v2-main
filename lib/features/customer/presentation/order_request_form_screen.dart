@@ -606,7 +606,7 @@ class _OrderRequestFormScreenState
             controller: _addressDetailCtrl,
             maxLines: _isOtherArea ? 2 : 1,
             textCapitalization: TextCapitalization.words,
-            // Shipping addresses are capped at 35 characters.
+            // Shipping addresses are capped by the shared length limit.
             inputFormatters: shippingAddressInputFormatters,
             decoration: InputDecoration(
               labelText: _isOtherArea

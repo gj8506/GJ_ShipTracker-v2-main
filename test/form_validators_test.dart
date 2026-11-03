@@ -86,7 +86,7 @@ void main() {
   });
 
   group('validateShippingAddress', () {
-    test('accepts an address at the 35-character limit', () {
+    test('accepts an address at the configured character limit', () {
       expect(validateShippingAddress('a' * kShippingAddressMaxLength), isNull);
     });
 
@@ -100,23 +100,42 @@ void main() {
           'Enter delivery address');
     });
 
-    test('rejects an address longer than 35 characters', () {
+    test('accepts a full Philippine address', () {
+      expect(
+        validateShippingAddress(
+          '123 Rizal St., Brgy. Poblacion, Nagcarlan, Laguna',
+          required: true,
+        ),
+        isNull,
+      );
+    });
+
+    test('rejects an address longer than the configured limit', () {
       expect(
         validateShippingAddress('a' * (kShippingAddressMaxLength + 1)),
-        'Address must be 35 characters or fewer',
+        'Address must be $kShippingAddressMaxLength characters or fewer',
       );
     });
   });
 
   group('validateItemSpecs', () {
-    test('accepts specs at the 35-character limit', () {
+    test('accepts specs at the configured limit', () {
       expect(validateItemSpecs('a' * kItemSpecsMaxLength), isNull);
     });
 
-    test('rejects specs longer than 35 characters', () {
+    test('accepts a generated plate summary', () {
+      expect(
+        validateItemSpecs(
+          'STANDARD (IRREGULAR HEXAGON) | Reg: REGION 12 | Make: HONDA',
+        ),
+        isNull,
+      );
+    });
+
+    test('rejects specs longer than the configured limit', () {
       expect(
         validateItemSpecs('a' * (kItemSpecsMaxLength + 1)),
-        'Items / plate specs must be 35 characters or fewer',
+        'Items / plate specs must be $kItemSpecsMaxLength characters or fewer',
       );
     });
 
@@ -155,10 +174,33 @@ void main() {
     });
   });
 
+  group('validateReturnNotes', () {
+    test('accepts a description at the configured limit', () {
+      expect(validateReturnNotes('a' * kReturnNotesMaxLength), isNull);
+    });
+
+    test('allows an empty optional description', () {
+      expect(validateReturnNotes(''), isNull);
+      expect(validateReturnNotes(null), isNull);
+    });
+
+    test('requires a description when asked', () {
+      expect(validateReturnNotes('  ', required: true),
+          'Enter defect description');
+    });
+
+    test('rejects a description longer than the configured limit', () {
+      expect(
+        validateReturnNotes('a' * (kReturnNotesMaxLength + 1)),
+        'Defect description must be $kReturnNotesMaxLength characters or fewer',
+      );
+    });
+  });
+
   group('input formatter limits', () {
     test('contact numbers stay numeric and stop at 11 digits', () {
-      expect(_apply(contactNumberInputFormatters, '0917-123-4567'),
-          '09171234567');
+      expect(
+          _apply(contactNumberInputFormatters, '0917-123-4567'), '09171234567');
       expect(_apply(contactNumberInputFormatters, '0917123456789012'),
           '09171234567');
     });
@@ -168,16 +210,29 @@ void main() {
           'SPX4572829R9E88');
     });
 
-    test('shipping addresses stop at 35 characters', () {
-      expect(_apply(shippingAddressInputFormatters, 'a' * 60), 'a' * 35);
+    test('shipping addresses stop at the configured limit', () {
+      expect(
+        _apply(shippingAddressInputFormatters, 'a' * 150),
+        'a' * kShippingAddressMaxLength,
+      );
     });
 
-    test('items and plate specs stop at 35 characters', () {
-      expect(_apply(itemSpecsInputFormatters, 'b' * 60), 'b' * 35);
+    test('items and plate specs stop at the configured limit', () {
+      expect(
+        _apply(itemSpecsInputFormatters, 'b' * 150),
+        'b' * kItemSpecsMaxLength,
+      );
     });
 
     test('order notes stop at 30 characters', () {
       expect(_apply(orderNotesInputFormatters, 'c' * 60), 'c' * 30);
+    });
+
+    test('return descriptions stop at the configured limit', () {
+      expect(
+        _apply(returnNotesInputFormatters, 'd' * 200),
+        'd' * kReturnNotesMaxLength,
+      );
     });
   });
 }

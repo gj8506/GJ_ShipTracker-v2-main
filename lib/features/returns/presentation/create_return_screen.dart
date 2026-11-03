@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/image_storage_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/form_validators.dart';
 import 'returns_providers.dart';
@@ -25,6 +26,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
   final _contactController = TextEditingController();
   final _specsController = TextEditingController();
   final _notesController = TextEditingController();
+  final _otherIssueController = TextEditingController();
 
   static const List<String> _platforms = [
     'Shopee',
@@ -46,8 +48,11 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
     'Wrong Item Delivered',
     'Missing Components',
     'Customer Remorse / Cancelled',
-    'Other Issues',
+    _otherIssueOption,
   ];
+
+  /// Choosing this reason reveals a required free-text specification.
+  static const String _otherIssueOption = 'Other Issues';
 
   String _selectedPlatform = 'Shopee';
   String _selectedResolution = 'Replacement';
@@ -55,6 +60,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
 
   File? _selectedImage;
   bool _isLoading = false;
+  String? _photoError;
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -64,6 +70,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
     _contactController.dispose();
     _specsController.dispose();
     _notesController.dispose();
+    _otherIssueController.dispose();
     super.dispose();
   }
 
@@ -80,6 +87,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
       if (pickedFile != null) {
         setState(() {
           _selectedImage = File(pickedFile.path);
+          _photoError = null;
         });
       }
     } on PlatformException catch (e) {
@@ -107,11 +115,32 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
   void _removeSelectedImage() {
     setState(() {
       _selectedImage = null;
+      _photoError = 'Attach at least one photo of the defect';
     });
   }
 
   Future<void> _submitReturnTicket() async {
-    if (!_formKey.currentState!.validate()) return;
+    // Validate every required field at once so the user sees all errors.
+    final formIsValid = _formKey.currentState!.validate();
+    final hasPhoto = _selectedImage != null;
+
+    if (!hasPhoto) {
+      setState(() => _photoError = 'Attach at least one photo of the defect');
+    }
+
+    if (!formIsValid || !hasPhoto) {
+      if (!hasPhoto && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'A photo of the defect is required before submitting.',
+            ),
+            backgroundColor: AppColors.statusReturned,
+          ),
+        );
+      }
+      return;
+    }
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -127,20 +156,27 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
     setState(() => _isLoading = true);
 
     try {
+      // Photo evidence is required, so upload it before writing the ticket.
+      final photoUrl = await ref
+          .read(imageStorageServiceProvider)
+          .uploadImage(_selectedImage!, folder: 'returns');
+
       // Combine Plate Specs and Photo details into notes
       final specs = _specsController.text.trim();
       final userNotes = _notesController.text.trim();
+      final otherIssue = _selectedDefectReason == _otherIssueOption
+          ? _otherIssueController.text.trim()
+          : '';
       final buffer = StringBuffer();
 
       if (specs.isNotEmpty) {
         buffer.writeln('Plate Specs: $specs');
       }
+      if (otherIssue.isNotEmpty) {
+        buffer.writeln('Other Issue: $otherIssue');
+      }
       if (userNotes.isNotEmpty) {
         buffer.writeln(userNotes);
-      }
-      if (_selectedImage != null) {
-        buffer.writeln(
-            '[Photo Attached: ${_selectedImage!.path.split('/').last}]');
       }
 
       final combinedNotes = buffer.toString().trim();
@@ -150,6 +186,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
       await FirebaseFirestore.instance.collection('returns').add({
         'trackingNumber': trackingNum,
         'defectReason': _selectedDefectReason,
+        'defectDetails': otherIssue.isEmpty ? null : otherIssue,
         'platform': _selectedPlatform,
         'resolutionType': _selectedResolution,
         'customerName': _customerNameController.text.trim(),
@@ -157,6 +194,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
             ? null
             : _contactController.text.trim(),
         'notes': combinedNotes.isEmpty ? null : combinedNotes,
+        'photoUrls': <String>[photoUrl],
         'status': AppConstants.returnStatusPending,
         'createdAt': FieldValue.serverTimestamp(),
       });
@@ -322,17 +360,17 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                 // Motorcycle Plate Specifications
                 TextFormField(
                   controller: _specsController,
-                  // Plate specs are capped at 35 characters.
+                  // Plate specs are capped by the shared length limit.
                   inputFormatters: itemSpecsInputFormatters,
                   decoration: InputDecoration(
-                    labelText: 'Motorcycle Plate Specifications',
+                    labelText: 'Motorcycle Plate Specifications *',
                     hintText: 'e.g. White plate, embossed, 4x7 with bracket',
                     prefixIcon: Icon(Icons.two_wheeler_outlined,
                         color: AppColors.navyPrimary),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  validator: (val) => validateItemSpecs(val, required: false),
+                  validator: (val) => validateItemSpecs(val, required: true),
                 ),
                 const SizedBox(height: 16),
 
@@ -361,20 +399,45 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                 ),
                 const SizedBox(height: 16),
 
+                // "Other Issues" needs its own specification, and it is
+                // required whenever that category is selected.
+                if (_selectedDefectReason == _otherIssueOption) ...[
+                  TextFormField(
+                    controller: _otherIssueController,
+                    textCapitalization: TextCapitalization.sentences,
+                    inputFormatters: returnNotesInputFormatters,
+                    decoration: InputDecoration(
+                      labelText: 'Specify the Other Issue *',
+                      hintText: 'Describe the issue not covered above...',
+                      prefixIcon: Icon(Icons.edit_note_rounded,
+                          color: AppColors.statusReturned),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) {
+                        return 'Describe the other issue';
+                      }
+                      return validateReturnNotes(val);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
                 // Defect Description / Notes
                 TextFormField(
                   controller: _notesController,
                   maxLines: 3,
-                  // Optional notes are capped at 30 characters.
-                  inputFormatters: orderNotesInputFormatters,
+                  // Defect descriptions are capped at 150 characters.
+                  inputFormatters: returnNotesInputFormatters,
                   decoration: InputDecoration(
-                    labelText: 'Defect Description / Notes',
+                    labelText: 'Defect Description / Notes *',
                     hintText: 'Describe damage or defect details...',
                     alignLabelWithHint: true,
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  validator: validateOrderNotes,
+                  validator: (val) => validateReturnNotes(val, required: true),
                 ),
                 const SizedBox(height: 20),
 
@@ -384,7 +447,12 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                   decoration: BoxDecoration(
                     color: AppColors.surfaceWhite,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.borderLight),
+                    border: Border.all(
+                      color: _photoError == null
+                          ? AppColors.borderLight
+                          : AppColors.statusReturned,
+                      width: _photoError == null ? 1 : 1.5,
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -395,7 +463,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                               size: 20, color: AppColors.navyPrimary),
                           const SizedBox(width: 8),
                           Text(
-                            'Photo Evidence',
+                            'Photo Evidence *',
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
@@ -448,8 +516,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                                     const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)),
-                                side: BorderSide(
-                                    color: AppColors.textMuted),
+                                side: BorderSide(color: AppColors.textMuted),
                               ),
                               onPressed: () => _pickImage(ImageSource.camera),
                               icon: Icon(Icons.camera_alt_outlined,
@@ -470,8 +537,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                                     const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10)),
-                                side: BorderSide(
-                                    color: AppColors.textMuted),
+                                side: BorderSide(color: AppColors.textMuted),
                               ),
                               onPressed: () => _pickImage(ImageSource.gallery),
                               icon: Icon(Icons.photo_outlined,
@@ -486,6 +552,17 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                           ),
                         ],
                       ),
+                      if (_photoError != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          _photoError!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.statusReturned,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

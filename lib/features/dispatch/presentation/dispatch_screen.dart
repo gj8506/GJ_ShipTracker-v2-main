@@ -375,7 +375,7 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
               TextFormField(
                 controller: _addressController,
                 maxLines: 2,
-                // Shipping addresses are capped at 35 characters.
+                // Shipping addresses are capped by the shared length limit.
                 inputFormatters: shippingAddressInputFormatters,
                 decoration: const InputDecoration(
                   labelText: 'Delivery Address',
@@ -388,7 +388,7 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
               TextFormField(
                 controller: _itemsController,
                 maxLines: 2,
-                // Items / plate specs are capped at 35 characters.
+                // Items / plate specs are capped by the shared length limit.
                 inputFormatters: itemSpecsInputFormatters,
                 decoration: const InputDecoration(
                   labelText: 'Items / Plate Specs',

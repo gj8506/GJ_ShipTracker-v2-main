@@ -465,7 +465,7 @@ class _AddEditCustomerDialogState
     _contactCtrl = TextEditingController(
         text: normalizeContactNumber(widget.existing?.contactNumber));
     _addressCtrl = TextEditingController(
-      // Existing records may predate the 35-character limit.
+      // Existing records may predate the shared address limit.
       text: limitLength(widget.existing?.address, kShippingAddressMaxLength),
     );
 
@@ -601,7 +601,7 @@ class _AddEditCustomerDialogState
               controller: _addressCtrl,
               enabled: !_isSaving,
               maxLines: 2,
-              // Shipping addresses are capped at 35 characters.
+              // Shipping addresses are capped by the shared length limit.
               inputFormatters: shippingAddressInputFormatters,
               decoration: const InputDecoration(
                 labelText: 'Delivery Address',
