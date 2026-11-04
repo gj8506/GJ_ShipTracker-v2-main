@@ -29,7 +29,8 @@ class ChatbotNotifier extends StateNotifier<List<ChatMessage>> {
     state = [
       ChatMessage(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        text: "Hi! I'm the GJandAsher Assistant. How can I help you today?",
+        text:
+            "Hi! I'm the GJandAsher Assistant. I can guide you around the app, but I can't access your records. How can I help you today?",
         isUser: false,
         timestamp: DateTime.now(),
         quickReplies: defaultReplies,
@@ -60,6 +61,26 @@ class ChatbotNotifier extends StateNotifier<List<ChatMessage>> {
 
   void _processIntent(String input) {
     final lowerInput = input.toLowerCase();
+
+    // Boundary: this assistant is a static guide. It never reads Firestore, so
+    // requests for live records get a clear refusal instead of a guess.
+    if (ChatbotKnowledge.isDataAccessRequest(lowerInput)) {
+      state = [
+        ...state,
+        ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          text: ChatbotKnowledge.dataAccessRefusalResponse,
+          isUser: false,
+          timestamp: DateTime.now(),
+          quickReplies: userRole == 'customer'
+              ? ['How to order?', 'Track my order', 'Report a defect']
+              : ['Open Search Summary', 'Dispatch', 'Scan QR'],
+          actionLabel: userRole == 'customer' ? null : 'Search Summary',
+          actionRoute: userRole == 'customer' ? null : '/search-summary',
+        ),
+      ];
+      return;
+    }
 
     ChatIntent? bestMatch;
     int maxMatches = 0;
