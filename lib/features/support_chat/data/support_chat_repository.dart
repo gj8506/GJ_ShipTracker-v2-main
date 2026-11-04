@@ -117,7 +117,7 @@ class SupportChatRepository {
       String threadId, ChatMessageModel msg, bool isAdmin) async {
     try {
       List<String> targetTokens = [];
-      String title = isAdmin ? 'Support Reply' : 'New Defect Report';
+      String title = isAdmin ? 'Support Reply' : 'New Support Message';
       String body = msg.imageUrl != null ? '🖼️ [Image Attached]' : msg.text;
 
       if (isAdmin) {
@@ -132,10 +132,11 @@ class SupportChatRepository {
           if (token != null) targetTokens.add(token as String);
         }
       } else {
-        // Customer sending -> fetch all admin/staff tokens
+        // Customer sending -> notify the owner/admin only. Staff must never
+        // receive customer support conversations.
         final adminQuery = await _firestore
             .collection('users')
-            .where('role', whereIn: ['admin', 'staff']).get();
+            .where('role', whereIn: ['admin', 'Admin']).get();
         for (var doc in adminQuery.docs) {
           final token = doc.data()['fcmToken'];
           if (token != null) targetTokens.add(token as String);

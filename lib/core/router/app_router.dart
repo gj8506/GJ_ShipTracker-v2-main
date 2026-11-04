@@ -150,6 +150,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return '/parcels';
       }
 
+      // Customer support chat is exclusive to the owner/admin account. Staff
+      // must not be able to open the inbox or a customer conversation.
+      if (currentLoc.startsWith('/profile/support-inbox') && !isAdmin) {
+        return '/parcels';
+      }
+
       if (isCustomer) {
         if (!currentLoc.startsWith('/customer')) {
           return AppConstants.homeRouteForRole(role);

@@ -287,7 +287,9 @@ class ProfileScreen extends ConsumerWidget {
 
               // Module 4 & 11 Quick Actions: Customers, Scanner, and Inbox
               Text(
-                'Customer & Support Management',
+                profile.isAdmin
+                    ? 'Customer & Support Management'
+                    : 'Customer Management',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -333,16 +335,19 @@ class ProfileScreen extends ConsumerWidget {
                       trailing: const Icon(Icons.chevron_right_rounded),
                       onTap: () => context.push('/profile/reseller-scanner'),
                     ),
-                    Divider(height: 1, color: AppColors.borderLight),
-                    ListTile(
-                      leading: Icon(Icons.support_agent_rounded,
-                          color: AppColors.statusInTransit),
-                      title: const Text('Customer Support Inbox'),
-                      subtitle:
-                          const Text('Handle defect reports and inquiries'),
-                      trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: () => context.push('/profile/support-inbox'),
-                    ),
+                    // Customer conversations are exclusive to the owner/admin.
+                    if (profile.isAdmin) ...[
+                      Divider(height: 1, color: AppColors.borderLight),
+                      ListTile(
+                        leading: Icon(Icons.support_agent_rounded,
+                            color: AppColors.statusInTransit),
+                        title: const Text('Customer Support Inbox'),
+                        subtitle:
+                            const Text('Handle defect reports and inquiries'),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => context.push('/profile/support-inbox'),
+                      ),
+                    ],
                   ],
                 ),
               ),

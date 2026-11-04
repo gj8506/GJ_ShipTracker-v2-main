@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../auth/presentation/auth_providers.dart';
 import 'support_chat_providers.dart';
 
 class AdminInboxScreen extends ConsumerStatefulWidget {
@@ -17,6 +19,40 @@ class _AdminInboxScreenState extends ConsumerState<AdminInboxScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final role = ref.watch(userProfileProvider).value?.role;
+    final isStaffOnly = AppConstants.isStaffOrAdminRole(role) &&
+        !AppConstants.isAdminRole(role);
+
+    if (isStaffOnly) {
+      return Scaffold(
+        backgroundColor: AppColors.backgroundLight,
+        appBar: AppBar(title: const Text('Support Inbox')),
+        body: const Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.lock_outline_rounded, size: 56),
+                SizedBox(height: 16),
+                Text(
+                  'Restricted to the owner/admin account',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Customer support conversations are private. Staff accounts '
+                  'can use Dispatch, Returns, and Analytics instead.',
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final threadsAsync = ref.watch(adminThreadsProvider);
 
     return Scaffold(

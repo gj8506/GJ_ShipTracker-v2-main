@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/services/image_storage_service.dart';
 import '../../auth/presentation/auth_providers.dart';
@@ -31,12 +32,11 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
   @override
   void initState() {
     super.initState();
-    _isAdmin = ref.read(userProfileProvider).value?.role == 'admin';
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(supportChatRepositoryProvider)
-          .markAsRead(widget.threadId, _isAdmin);
-    });
+    _isAdmin = AppConstants.isAdminRole(
+      ref.read(userProfileProvider).value?.role,
+    );
+    // Read receipts are marked from the build path once the role is known, so
+    // a staff account never touches the support repository.
   }
 
   @override
@@ -140,6 +140,44 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final role = ref.watch(userProfileProvider).value?.role;
+    final isAdmin = AppConstants.isAdminRole(role);
+    final isStaffOnly = AppConstants.isStaffOrAdminRole(role) && !isAdmin;
+
+    // Keep the send/mark-as-read path in step with the live profile. A staff
+    // account must never post into a customer conversation.
+    _isAdmin = isAdmin;
+
+    if (isStaffOnly) {
+      return Scaffold(
+        backgroundColor: AppColors.backgroundLight,
+        appBar: AppBar(title: const Text('Support Chat')),
+        body: const Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.lock_outline_rounded, size: 56),
+                SizedBox(height: 16),
+                Text(
+                  'Restricted to the owner/admin account',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Staff accounts cannot read or reply to customer support '
+                  'conversations.',
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final messagesAsync = ref.watch(chatMessagesProvider(widget.threadId));
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
 
@@ -159,7 +197,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
           ],
         ),
         actions: [
-          if (_isAdmin)
+          if (isAdmin)
             TextButton(
               onPressed: () {
                 ref
@@ -185,7 +223,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   ref
                       .read(supportChatRepositoryProvider)
-                      .markAsRead(widget.threadId, _isAdmin);
+                      .markAsRead(widget.threadId, isAdmin);
                   _scrollToBottom();
                 });
 

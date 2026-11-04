@@ -5,6 +5,11 @@ import '../data/chatbot_knowledge.dart';
 
 final isTypingProvider = StateProvider<bool>((ref) => false);
 
+/// Static, offline app guide.
+///
+/// This provider never reads Firestore or any other database. The only
+/// user-specific value it consumes is the signed-in role, which selects which
+/// static help topics to show. Live records always live in their own screens.
 final chatbotControllerProvider =
     StateNotifierProvider.autoDispose<ChatbotNotifier, List<ChatMessage>>(
         (ref) {
@@ -30,7 +35,7 @@ class ChatbotNotifier extends StateNotifier<List<ChatMessage>> {
       ChatMessage(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         text:
-            "Hi! I'm the GJandAsher Assistant. I can guide you around the app, but I can't access your records. How can I help you today?",
+            "Hi! I'm the GJandAsher Assistant, a static app guide. I can explain how screens work, but I can't access Firebase, your account, or live records. How can I help you today?",
         isUser: false,
         timestamp: DateTime.now(),
         quickReplies: defaultReplies,

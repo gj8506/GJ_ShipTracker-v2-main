@@ -135,14 +135,17 @@ service cloud.firestore {
       allow update, delete: if isStaffOrAdmin();
     }
 
+    // Customer support chat is owner/admin-only. Staff accounts can run
+    // dispatch, returns, and analytics, but they must never read or reply to
+    // customer conversations. Customers can only reach their own thread.
     match /support_chats/{chatId} {
-      allow read: if isStaffOrAdmin() || (isSignedIn() && resource.data.customerUid == request.auth.uid);
+      allow read: if isAdmin() || (isSignedIn() && resource.data.customerUid == request.auth.uid);
       allow create: if isSignedIn() && request.resource.data.customerUid == request.auth.uid;
-      allow update: if isStaffOrAdmin() || (isSignedIn() && resource.data.customerUid == request.auth.uid);
+      allow update: if isAdmin() || (isSignedIn() && resource.data.customerUid == request.auth.uid);
 
       match /messages/{messageId} {
-        allow read: if isStaffOrAdmin() || (isSignedIn() && get(/databases/$(database)/documents/support_chats/$(chatId)).data.customerUid == request.auth.uid);
-        allow create: if isStaffOrAdmin() || (isSignedIn() && get(/databases/$(database)/documents/support_chats/$(chatId)).data.customerUid == request.auth.uid);
+        allow read: if isAdmin() || (isSignedIn() && get(/databases/$(database)/documents/support_chats/$(chatId)).data.customerUid == request.auth.uid);
+        allow create: if isAdmin() || (isSignedIn() && get(/databases/$(database)/documents/support_chats/$(chatId)).data.customerUid == request.auth.uid);
       }
     }
   }
