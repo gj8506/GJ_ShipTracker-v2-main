@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gjandasher_shiptracker/app.dart';
 import 'package:gjandasher_shiptracker/core/constants/app_constants.dart';
+import 'package:gjandasher_shiptracker/core/services/dpa_service.dart';
 import 'package:gjandasher_shiptracker/features/auth/presentation/auth_providers.dart';
 
 void main() {
@@ -14,8 +15,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         // 2. Avoid touching Firebase in widget tests: simulate a signed-out user.
+        //    Also treat the Data Privacy agreement as accepted so the smoke
+        //    test reaches the login screen instead of stopping at the DPA gate.
         overrides: [
           authStateProvider.overrideWith((ref) => Stream<User?>.value(null)),
+          dpaAcceptedStatusProvider.overrideWith((ref) async => true),
         ],
         // 3. Pass the test key to the app
         child: ShipTrackerApp(scaffoldMessengerKey: testMessengerKey),

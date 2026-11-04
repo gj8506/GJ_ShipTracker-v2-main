@@ -576,3 +576,17 @@ If you did not request a password reset, you can safely ignore this email. Your 
 
 This is a transactional message from ${appName}.`;
 }
+
+// Exported for the unit tests in `test/`. The Worker itself uses the default
+// export above; keeping these helpers testable guards the deliverability rules
+// that keep reset mail out of Spam.
+export {
+  BLOCKED_SENDER_DOMAINS,
+  assertDeliverableFrom,
+  describeDeliverability,
+  isBlockedSenderDomain,
+  normalizeEmail,
+  sanitizeName,
+  senderAddress,
+  senderDomain,
+};

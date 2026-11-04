@@ -22,6 +22,30 @@ class CustomerModel {
   // Secure QR payload: contains ONLY the prefixed ID
   String get qrPayload => 'GJAS1:$id';
 
+  /// Registry row created when a customer account is registered.
+  ///
+  /// The document id is the Firebase uid, so the auto-generated QR payload
+  /// (`GJAS1:<uid>`) is stable across retries and the Dispatch registry can
+  /// resolve the row from the scanned code immediately.
+  factory CustomerModel.forAccount({
+    required String uid,
+    required String name,
+    String contactNumber = '',
+    String address = '',
+    String type = 'regular',
+    DateTime? createdAt,
+  }) {
+    return CustomerModel(
+      id: uid,
+      name: name.trim().isEmpty ? 'Customer' : name.trim(),
+      contactNumber: contactNumber.trim(),
+      address: address.trim(),
+      type: type,
+      linkedUid: uid,
+      createdAt: createdAt ?? DateTime.now(),
+    );
+  }
+
   factory CustomerModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
     return CustomerModel(
@@ -43,6 +67,9 @@ class CustomerModel {
       'type': type,
       'linkedUid': linkedUid,
       'createdAt': Timestamp.fromDate(createdAt),
+      // Stored for admin/dispatch tooling. The app always derives the payload
+      // from the document id, so a missing value is not a problem.
+      if (id.isNotEmpty) 'qrPayload': qrPayload,
     };
   }
 

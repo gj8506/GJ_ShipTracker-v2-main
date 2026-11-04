@@ -266,17 +266,37 @@ class AuthRepository {
 
     // Sync to Customer Registry & QR system if role is customer
     if (assignedRole == AppConstants.roleCustomer) {
-      final newCustomer = CustomerModel(
-        name: displayName.isNotEmpty ? displayName : 'Customer',
-        contactNumber: profile.phoneNumber ?? '',
-        address: '',
-        type: 'regular',
-        linkedUid: user.uid,
-        createdAt: DateTime.now(),
-      );
-
-      await _firestore.collection('customers').add(newCustomer.toFirestore());
+      await _syncCustomerRegistry(user.uid, profile);
     }
+  }
+
+  /// Creates the Customer Registry row for a newly registered customer.
+  ///
+  /// The document id is the Firebase uid, which makes the sync idempotent and
+  /// gives the customer a stable QR payload (`GJAS1:<uid>`). The registry
+  /// streams the `customers` collection, so the row — and its QR — appears in
+  /// the Admin/Dispatch Customer Registry as soon as this write lands.
+  ///
+  /// If a row already exists it is left untouched: an admin may have already
+  /// edited the address or category, and a retried sign-up must not reset it.
+  Future<void> _syncCustomerRegistry(
+    String uid,
+    UserProfileModel profile,
+  ) async {
+    final docRef = _firestore
+        .collection(AppConstants.collectionCustomers)
+        .doc(uid);
+
+    final existing = await docRef.get();
+    if (existing.exists) return;
+
+    final customer = CustomerModel.forAccount(
+      uid: uid,
+      name: profile.fullName,
+      contactNumber: profile.phoneNumber ?? '',
+    );
+
+    await docRef.set(customer.toFirestore());
   }
 
   /// Returns the Firestore profile for [uid], or null when no account exists.
@@ -380,16 +400,7 @@ class AuthRepository {
 
       // Sync to Customer Registry & QR system if role is customer
       if (assignedRole == AppConstants.roleCustomer) {
-        final newCustomer = CustomerModel(
-          name: displayName.isNotEmpty ? displayName : 'Customer',
-          contactNumber: normalizedPhone ?? '',
-          address: '',
-          type: 'regular',
-          linkedUid: user.uid,
-          createdAt: DateTime.now(),
-        );
-
-        await _firestore.collection('customers').add(newCustomer.toFirestore());
+        await _syncCustomerRegistry(user.uid, profile);
       }
     }
 
@@ -456,8 +467,56 @@ class AuthRepository {
         .doc(targetUid)
         .set(updateData, SetOptions(merge: true));
 
+    // Keep the Admin/Dispatch Customer Registry in step with customer profile
+    // edits (the registry streams the `customers` collection).
+    await _mirrorCustomerRegistryRow(
+      targetUid,
+      name: name,
+      phoneNumber: phoneNumber,
+    );
+
     if (name != null && name.isNotEmpty && _auth.currentUser != null) {
       await _auth.currentUser!.updateDisplayName(name);
+    }
+  }
+
+  /// Mirrors a customer's name/phone into their registry row.
+  ///
+  /// Only the deterministic `customers/{uid}` row created at sign-up is
+  /// updated. Legacy rows with generated ids are handled by the registry's
+  /// "Sync Missing Accounts" action. Failures are swallowed because the
+  /// profile update itself already succeeded.
+  Future<void> _mirrorCustomerRegistryRow(
+    String uid, {
+    String? name,
+    String? phoneNumber,
+  }) async {
+    if ((name == null || name.trim().isEmpty) && phoneNumber == null) return;
+    try {
+      final userDoc = await _firestore
+          .collection(AppConstants.collectionUsers)
+          .doc(uid)
+          .get();
+      final role =
+          (userDoc.data()?['role'] as String? ?? '').trim().toLowerCase();
+      if (role != AppConstants.roleCustomer) return;
+
+      final customerRef = _firestore
+          .collection(AppConstants.collectionCustomers)
+          .doc(uid);
+      final customerDoc = await customerRef.get();
+      if (!customerDoc.exists) return;
+
+      await customerRef.set(
+        {
+          if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
+          if (phoneNumber != null) 'contactNumber': phoneNumber.trim(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+    } catch (_) {
+      // Non-fatal: the customer can still be matched by uid in the registry.
     }
   }
 

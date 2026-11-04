@@ -28,6 +28,24 @@ class AppConstants {
   static const String roleStaff = 'staff';
   static const String roleCustomer = 'customer';
 
+  /// True when [role] may open the staff/admin portal.
+  ///
+  /// Stored roles are normalised here because older profiles used "Admin",
+  /// "STAFF " and other variants.
+  static bool isStaffOrAdminRole(String? role) {
+    final normalized = (role ?? '').trim().toLowerCase();
+    return normalized == roleAdmin || normalized == roleStaff;
+  }
+
+  /// True when [role] is an owner/admin account.
+  static bool isAdminRole(String? role) =>
+      (role ?? '').trim().toLowerCase() == roleAdmin;
+
+  /// The landing route for [role]: owners and staff go to the Admin Dashboard,
+  /// buyers go to the Customer Interface.
+  static String homeRouteForRole(String? role) =>
+      isStaffOrAdminRole(role) ? '/parcels' : '/customer';
+
   // Platforms
   static const String platformShopee = 'Shopee';
   static const String platformLazada = 'Lazada';

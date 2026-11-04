@@ -18,8 +18,18 @@
     The DKIM selector Resend shows on the Domains page. Resend uses `resend`
     by default.
 
+.PARAMETER WorkerUrl
+    Optional. The deployed email worker URL, e.g.
+    https://gjandasher-email.example.workers.dev. When supplied, the script
+    also calls `GET /health` and fails if the worker's MAIL_FROM is still on a
+    spam-filtered domain.
+
 .EXAMPLE
     powershell -ExecutionPolicy Bypass -File tools\check-email-dns.ps1 -Domain gjandasher.ph
+
+.EXAMPLE
+    powershell -ExecutionPolicy Bypass -File tools\check-email-dns.ps1 `
+        -Domain gjandasher.ph -WorkerUrl https://gjandasher-email.example.workers.dev
 #>
 [CmdletBinding()]
 param(
@@ -28,7 +38,9 @@ param(
 
     [string]$DkimSelector = 'resend',
 
-    [string]$DnsServer = '8.8.8.8'
+    [string]$DnsServer = '8.8.8.8',
+
+    [string]$WorkerUrl = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -119,6 +131,41 @@ Add-Check -Label 'DMARC' `
     -Validate { param($v) $v -match '^"?v=DMARC1' } `
     -Hint ("Add a TXT record on _dmarc with `"v=DMARC1; p=none; rua=mailto:dmarc@$Domain`". Move to p=quarantine once everything passes.")
 
+# 5. Deployed worker - proves MAIL_FROM is not still a Firebase/free-mailbox
+#    sender, which is the remaining reason reset mail lands in Spam even when
+#    DNS is perfect. Only runs when -WorkerUrl is supplied.
+if ($WorkerUrl) {
+    $healthUrl = "$($WorkerUrl.Trim().TrimEnd('/'))/health"
+    $workerOk = $false
+    $workerDetail = ''
+
+    try {
+        $health = Invoke-RestMethod -Uri $healthUrl -Method Get -TimeoutSec 20
+        $deliverability = $health.deliverability
+        $workerOk = [bool]$health.ok -and [bool]$deliverability.mailFromUsable
+        if ($workerOk) {
+            $workerDetail = "MAIL_FROM domain: $($deliverability.mailFromDomain)"
+        }
+        elseif ($deliverability.mailFromProblem) {
+            $workerDetail = $deliverability.mailFromProblem
+        }
+        else {
+            $workerDetail = 'worker responded but deliverability is not configured'
+        }
+    }
+    catch {
+        $workerDetail = "health check failed: $($_.Exception.Message)"
+    }
+
+    $checks += [pscustomobject]@{
+        Check  = 'Worker /health'
+        Record = $healthUrl
+        Status = if ($workerOk) { 'PASS' } else { 'FAIL' }
+        Detail = $workerDetail
+        Hint   = if ($workerOk) { '' } else { 'Deploy backend/email-worker with MAIL_FROM set to an address on your verified domain, then re-run with -WorkerUrl.' }
+    }
+}
+
 $checks | Format-Table -Property Check, Status, Record -AutoSize | Out-String | Write-Host
 
 foreach ($check in $checks) {
@@ -146,6 +193,9 @@ if ($failures.Count -eq 0) {
 }
 else {
     Write-Host "$($failures.Count) record(s) still need attention. See the hints above." -ForegroundColor Yellow
+    Write-Host ""
+    # Non-zero exit so CI / build scripts can gate on a broken sending domain.
+    exit 1
 }
 
 Write-Host ""

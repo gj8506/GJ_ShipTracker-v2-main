@@ -55,17 +55,20 @@ class CustomerListScreen extends ConsumerWidget {
         final name = data['fullName'] ?? data['displayName'] ?? 'Customer';
         final normalizedName = name.toString().toLowerCase().trim();
 
-        // Only add if BOTH the UID and the Name are missing from the registry
+        // Only add if BOTH the UID and the Name are missing from the registry.
+        // The doc id is the uid so the row keeps the same stable QR payload
+        // (`GJAS1:<uid>`) that sign-up creates, and retries cannot duplicate it.
         if (uid != null &&
             !existingLinkedUids.contains(uid) &&
             !existingNames.contains(normalizedName)) {
-          final newDoc = firestore.collection('customers').doc();
-          batch.set(newDoc, {
+          final customerRef = firestore.collection('customers').doc(uid);
+          batch.set(customerRef, {
             'name': name,
             'contactNumber': data['phone'] ?? data['phoneNumber'] ?? '',
             'address': '',
             'type': 'regular',
             'linkedUid': uid,
+            'qrPayload': 'GJAS1:$uid',
             'createdAt': FieldValue.serverTimestamp(),
           });
           added++;

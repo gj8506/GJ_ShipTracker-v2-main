@@ -80,6 +80,18 @@ email can be branded and sent from your own authenticated domain instead of
    exact record to add for anything that fails. Re-run it until all four pass.
    Records usually appear within minutes but can take up to 48 hours.
 
+   After deploying the worker, add `-WorkerUrl` to also verify the deployed
+   sender. The script then calls `GET /health` and fails if `MAIL_FROM` is
+   still a Firebase/free-mailbox address:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File tools\check-email-dns.ps1 `
+       -Domain gjandasher.ph -WorkerUrl https://gjandasher-email.your-subdomain.workers.dev
+   ```
+
+   The script exits non-zero when any check fails, so it can gate CI and
+   release builds.
+
 A reasonable DMARC starter record:
 
 ```text
@@ -223,6 +235,19 @@ curl.exe -X POST "https://gjandasher-email.your-subdomain.workers.dev/password-r
 
 Check the Resend dashboard for delivery events. If Resend accepts the message
 but it lands in spam, work through the checklist below.
+
+## Run the worker tests
+
+The deliverability helpers (sender parsing, blocked-domain checks, email
+normalisation) have a `node --test` suite so a regression cannot silently
+reintroduce a spam-filtered sender:
+
+```powershell
+cd backend/email-worker
+npm test
+```
+
+The suite needs no secrets and no network access.
 
 ---
 

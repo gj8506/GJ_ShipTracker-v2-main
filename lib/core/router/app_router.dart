@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../constants/app_constants.dart';
+import '../services/dpa_service.dart';
 
 import '../../features/auth/presentation/auth_providers.dart';
+import '../../features/auth/presentation/dpa_gate_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/signup_screen.dart';
 import '../../features/auth/presentation/signup_prefill.dart';
@@ -37,6 +39,9 @@ class RouterRefreshNotifier extends ChangeNotifier {
     ref.listen(authStateProvider, (_, __) => notifyListeners());
     ref.listen(userProfileProvider, (_, __) => notifyListeners());
     ref.listen(authFlowInProgressProvider, (_, __) => notifyListeners());
+    // Re-run the redirect when the stored Data Privacy consent resolves or is
+    // accepted, so the gate is shown before any portal.
+    ref.listen(dpaAcceptedStatusProvider, (_, __) => notifyListeners());
   }
 }
 
@@ -51,6 +56,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     refreshListenable: refreshNotifier,
     redirect: (context, state) {
       final currentLoc = state.uri.path;
+
+      // Data Privacy Act consent is required before anything else, including the
+      // login screen. While the stored answer is loading we stay on the splash
+      // so the app never flashes a portal before the gate is checked.
+      final dpaStatus = ref.read(dpaAcceptedStatusProvider);
+      if (dpaStatus.isLoading) {
+        return null;
+      }
+      final dpaAccepted = dpaStatus.value ?? false;
+      if (!dpaAccepted) {
+        return currentLoc == '/dpa' ? null : '/dpa';
+      }
 
       // Keep the login screen visible while credentials are being verified so
       // the router cannot jump to a portal before the profile is checked.
@@ -117,12 +134,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return '/login';
       }
 
-      final rawRole = userProfile.value!.role.trim().toLowerCase();
-      final isAdmin =
-          rawRole == 'admin' || rawRole == AppConstants.roleAdmin.toLowerCase();
-      final isStaff =
-          rawRole == 'staff' || rawRole == AppConstants.roleStaff.toLowerCase();
-      final isCustomer = !isAdmin && !isStaff;
+      final role = userProfile.value!.role;
+      final isAdmin = AppConstants.isAdminRole(role);
+      final isStaffOrAdmin = AppConstants.isStaffOrAdminRole(role);
+      final isCustomer = !isStaffOrAdmin;
 
       // Staff registration approvals are owner/admin-only.
       if (currentLoc.startsWith('/profile/staff-approvals') && !isAdmin) {
@@ -131,17 +146,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       if (isCustomer) {
         if (!currentLoc.startsWith('/customer')) {
-          return '/customer';
+          return AppConstants.homeRouteForRole(role);
         }
         return null;
       }
 
-      if (isAdmin || isStaff) {
+      if (isStaffOrAdmin) {
         if (currentLoc == '/splash' ||
             currentLoc == '/login' ||
             currentLoc == '/signup' ||
+            currentLoc == '/dpa' ||
             currentLoc.startsWith('/customer')) {
-          return '/parcels';
+          return AppConstants.homeRouteForRole(role);
         }
 
         if (currentLoc.startsWith('/analytics') && !isAdmin) {
@@ -171,6 +187,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             prefill: extra is SignupPrefill ? extra : null,
           );
         },
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/dpa',
+        builder: (context, state) => const DpaGateScreen(),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

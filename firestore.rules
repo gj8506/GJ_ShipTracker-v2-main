@@ -92,9 +92,34 @@ service cloud.firestore {
       allow read, write: if isStaffOrAdmin();
     }
 
+    // Customer Registry / QR codes.
+    //
+    // Staff and admins manage every row (Dispatch registry). A customer may
+    // read and create only their own deterministic row, `customers/{uid}`, and
+    // may edit only the contact fields — never `linkedUid`, `type`, or the
+    // QR payload. The `customerId == request.auth.uid` check comes first so a
+    // missing document (no `resource.data`) still evaluates safely.
     match /customers/{customerId} {
-      allow read: if isStaffOrAdmin() || (isSignedIn() && resource.data.linkedUid == request.auth.uid);
-      allow write: if isSignedIn();
+      allow read: if isStaffOrAdmin()
+                  || (isSignedIn() && customerId == request.auth.uid);
+
+      allow create: if isStaffOrAdmin()
+                    || (
+                      isSignedIn()
+                      && customerId == request.auth.uid
+                      && request.resource.data.linkedUid == request.auth.uid
+                    );
+
+      allow update: if isStaffOrAdmin()
+                    || (
+                      isSignedIn()
+                      && customerId == request.auth.uid
+                      && resource.data.linkedUid == request.auth.uid
+                      && !request.resource.data.diff(resource.data).affectedKeys()
+                            .hasAny(['linkedUid', 'type', 'createdAt'])
+                    );
+
+      allow delete: if isStaffOrAdmin();
     }
 
     match /order_requests/{requestId} {

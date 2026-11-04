@@ -26,7 +26,12 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
   void _onAccept() async {
     await ref.read(dpaServiceProvider).acceptPolicy();
     ref.invalidate(dpaAcceptedStatusProvider);
+    // Wait for the provider to report the new value before navigating, so the
+    // router cannot see a loading gate and bounce the user back here.
+    await ref.read(dpaAcceptedStatusProvider.future);
     if (mounted) {
+      // The router decides the portal: logged-out users go to /login, signed-in
+      // owners/staff to the Admin Dashboard and buyers to the Customer UI.
       context.go('/login');
     }
   }
