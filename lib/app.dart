@@ -23,6 +23,10 @@ class _ShipTrackerAppState extends ConsumerState<ShipTrackerApp>
   /// [ThemeMode.system].
   late Brightness _platformBrightness;
 
+  /// Brightness the visible tree was last built with, so a change can trigger
+  /// the one-time repaint pass described in [_rebuildAllElements].
+  Brightness? _paintedBrightness;
+
   @override
   void initState() {
     super.initState();
@@ -39,8 +43,7 @@ class _ShipTrackerAppState extends ConsumerState<ShipTrackerApp>
 
   @override
   void didChangePlatformBrightness() {
-    final next =
-        WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    final next = WidgetsBinding.instance.platformDispatcher.platformBrightness;
     if (next != _platformBrightness) {
       setState(() => _platformBrightness = next);
     }
@@ -58,9 +61,23 @@ class _ShipTrackerAppState extends ConsumerState<ShipTrackerApp>
     };
 
     // Selecting the palette here keeps every widget-level `AppColors` lookup in
-    // sync with the theme below. Rebuilding the app makes the navigator refresh
-    // its routes, so already-built screens repaint with the new palette.
+    // sync with the theme below.
     final theme = AppTheme.themeFor(brightness);
+
+    // `AppColors` is a static palette, so widgets that read it directly do not
+    // depend on `Theme` and are not marked dirty when only the theme changes.
+    // Without help, cards would switch surface colours while their text kept
+    // the old palette until each screen was rebuilt by navigation. Repainting
+    // every element once after a brightness change applies the new palette to
+    // the whole app immediately, without remounting it or restarting.
+    final brightnessChanged =
+        _paintedBrightness != null && _paintedBrightness != brightness;
+    _paintedBrightness = brightness;
+    if (brightnessChanged) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _rebuildAllElements();
+      });
+    }
 
     return MaterialApp.router(
       title: AppConstants.appName,
@@ -72,5 +89,17 @@ class _ShipTrackerAppState extends ConsumerState<ShipTrackerApp>
       themeAnimationDuration: Duration.zero,
       routerConfig: router,
     );
+  }
+
+  /// Marks every live element dirty so all visible widgets re-read [AppColors]
+  /// in the next frame. Widget state, scroll positions and the router location
+  /// are preserved; only build methods run again.
+  void _rebuildAllElements() {
+    void visit(Element element) {
+      element.markNeedsBuild();
+      element.visitChildren(visit);
+    }
+
+    WidgetsBinding.instance.rootElement?.visitChildren(visit);
   }
 }
