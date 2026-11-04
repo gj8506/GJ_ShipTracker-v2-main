@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gjandasher_shiptracker/core/services/dpa_service.dart';
 import 'package:gjandasher_shiptracker/features/auth/presentation/signup_prefill.dart';
 import 'package:gjandasher_shiptracker/features/auth/presentation/signup_screen.dart';
 
@@ -9,8 +10,14 @@ void main() {
     'a Google sign-in with no account opens the form pre-filled',
     (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
+        ProviderScope(
+          // Keep the sign-up form off Firestore; the live DPA card is covered
+          // by the policy unit tests.
+          overrides: [
+            dpaPolicyProvider
+                .overrideWith((ref) => Stream.value(DpaPolicy.defaults)),
+          ],
+          child: const MaterialApp(
             home: SignupScreen(
               prefill: SignupPrefill(
                 email: 'tester@example.com',
@@ -50,7 +57,13 @@ void main() {
 
   testWidgets('a normal sign-up keeps the password form', (tester) async {
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: SignupScreen())),
+      ProviderScope(
+        overrides: [
+          dpaPolicyProvider
+              .overrideWith((ref) => Stream.value(DpaPolicy.defaults)),
+        ],
+        child: const MaterialApp(home: SignupScreen()),
+      ),
     );
 
     expect(find.text('Create Account'), findsOneWidget);

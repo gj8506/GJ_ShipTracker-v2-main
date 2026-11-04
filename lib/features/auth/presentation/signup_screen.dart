@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/dpa_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/form_validators.dart';
 import 'auth_providers.dart';
@@ -83,7 +84,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   void _showTermsAndPrivacyModal() {
-    showModalBottomSheet(
+    showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       isDismissible: false,
@@ -93,11 +94,28 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => const _TermsAndPrivacySheet(),
-    ).then((agreed) {
-      if (agreed == true) {
+    ).then((agreed) async {
+      if (agreed != true) return;
+      await _recordDpaConsent();
+      if (mounted) {
         setState(() => _agreedToTerms = true);
       }
     });
+  }
+
+  /// Persists the version of the agreement the user just read, so the launch
+  /// gate does not ask again unless an admin publishes a newer revision.
+  Future<void> _recordDpaConsent() async {
+    var policy = DpaPolicy.defaults;
+    try {
+      policy = await ref
+          .read(dpaPolicyProvider.future)
+          .timeout(const Duration(seconds: 5));
+    } catch (_) {
+      // Offline or no published document: fall back to the seed version.
+    }
+    await ref.read(dpaServiceProvider).acceptPolicy(policy.version);
+    ref.invalidate(dpaAcceptedStatusProvider);
   }
 
   Future<void> _handleSignUp() async {
@@ -494,6 +512,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ],
                 const SizedBox(height: 16),
 
+                // Live Data Privacy Act summary: updates as soon as an admin
+                // saves a new revision in Profile > Data Privacy Editor.
+                const _DpaPolicyCard(),
+                const SizedBox(height: 8),
+
                 // Terms & Privacy Checkbox
                 InkWell(
                   onTap: () {
@@ -523,7 +546,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         ),
                         Expanded(
                           child: Text(
-                            'I agree to the Terms of Service &\nPrivacy Policy',
+                            'I agree to the Terms of Service &\nData Privacy Agreement',
                             style: TextStyle(
                                 fontSize: 13,
                                 color: AppColors.textSecondary,
@@ -868,14 +891,15 @@ class _GoogleAccountBanner extends StatelessWidget {
 }
 
 /// DPA & Terms Bottom Sheet with Scroll-to-Bottom Enforcement
-class _TermsAndPrivacySheet extends StatefulWidget {
+class _TermsAndPrivacySheet extends ConsumerStatefulWidget {
   const _TermsAndPrivacySheet();
 
   @override
-  State<_TermsAndPrivacySheet> createState() => _TermsAndPrivacySheetState();
+  ConsumerState<_TermsAndPrivacySheet> createState() =>
+      _TermsAndPrivacySheetState();
 }
 
-class _TermsAndPrivacySheetState extends State<_TermsAndPrivacySheet> {
+class _TermsAndPrivacySheetState extends ConsumerState<_TermsAndPrivacySheet> {
   final ScrollController _scrollController = ScrollController();
   bool _isBottomReached = false;
 
@@ -909,6 +933,9 @@ class _TermsAndPrivacySheetState extends State<_TermsAndPrivacySheet> {
 
   @override
   Widget build(BuildContext context) {
+    final policy =
+        ref.watch(dpaPolicyProvider).value ?? DpaPolicy.defaults;
+
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.85,
       child: Column(
@@ -942,29 +969,14 @@ class _TermsAndPrivacySheetState extends State<_TermsAndPrivacySheet> {
                 controller: _scrollController,
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Text(
-                  '''DATA PRIVACY CONSENT FORM
-Pursuant to the Data Privacy Act of 2012 (Republic Act No. 10173), we are committed to protecting your personal information. By checking the "I Agree" checkbox, you explicitly consent to the collection, processing, and storage of your personal data by GJandAsher ShipTracker.
-
-1. DATA COLLECTION
-We collect your full name, email address, contact number, and delivery address. We do not collect highly sensitive personal information or financial data within this application.
-
-2. PURPOSE OF PROCESSING
-Your personal data will be used exclusively for:
-• Fulfilling and delivering your customized motorcycle plate orders.
-• Communicating order updates, dispatch tracking numbers, and customer support.
-• Generating customer QR codes to expedite future walk-in orders.
-• Maintaining a secure and verified internal registry for order analytics and forecasting.
-
-3. DATA PROTECTION & SHARING
-We implement secure technical and organizational measures to safeguard your data. Your data is restricted to authorized staff and the administrative owner. We do not sell, rent, or trade your data. Data is only shared with standard courier services strictly for the purpose of package delivery.
-
-4. YOUR RIGHTS
-Under RA 10173, you possess the right to be informed, to access, to object, to erasure or blocking, to correct your personal data, and to file a complaint. You may request account deletion at any time by contacting our support channel.
+                  '''${policy.body}
 
 TERMS OF SERVICE
 1. Custom plates are novelty/temporary replacements. You hold GJandAsher harmless from legal liabilities arising from improper use on public roads.
 2. Estimated prices may adjust based on final courier fees.
 3. Order cancellations must be made before the production stage begins.
+
+Policy Version ${policy.version}.0 • ${policy.updatedLabel}
 
 Scroll to the bottom to agree.''',
                   style: TextStyle(
@@ -1015,5 +1027,76 @@ Scroll to the bottom to agree.''',
         ],
       ),
     );
+  }
+}
+
+/// Compact live summary of the Data Privacy Act shown on the sign-up form.
+///
+/// It watches [dpaPolicyProvider], so when an admin saves new text in the
+/// profile editor the title, version, and preview change immediately for the
+/// next user who opens sign-up.
+class _DpaPolicyCard extends ConsumerWidget {
+  const _DpaPolicyCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final policy = ref.watch(dpaPolicyProvider).value ?? DpaPolicy.defaults;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.privacy_tip_outlined,
+              color: AppColors.navyPrimary, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  policy.title,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.navyPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Version ${policy.version}.0 • ${policy.updatedLabel}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  _preview(policy.body),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    height: 1.4,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _preview(String body) {
+    final flat = body.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (flat.length <= 180) return flat;
+    return '${flat.substring(0, 180)}…';
   }
 }

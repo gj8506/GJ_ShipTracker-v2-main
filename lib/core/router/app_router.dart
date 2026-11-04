@@ -19,6 +19,7 @@ import '../../features/dispatch/presentation/dispatch_screen.dart';
 import '../../features/returns/presentation/returns_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/admin/presentation/staff_approval_screen.dart';
+import '../../features/admin/presentation/dpa_editor_screen.dart';
 import '../../features/qr_customers/presentation/customer_list_screen.dart';
 import '../../features/qr_customers/presentation/reseller_scanner_screen.dart';
 import '../../features/analytics/presentation/analytics_screen.dart';
@@ -141,6 +142,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // Staff registration approvals are owner/admin-only.
       if (currentLoc.startsWith('/profile/staff-approvals') && !isAdmin) {
+        return '/parcels';
+      }
+
+      // The Data Privacy Act editor is owner/admin-only.
+      if (currentLoc.startsWith('/profile/dpa-editor') && !isAdmin) {
         return '/parcels';
       }
 
@@ -301,6 +307,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: _rootNavigatorKey,
                     path: 'staff-approvals',
                     builder: (context, state) => const StaffApprovalScreen(),
+                  ),
+                  // Admin/owner-only Data Privacy Act editor.
+                  GoRoute(
+                    parentNavigatorKey: _rootNavigatorKey,
+                    path: 'dpa-editor',
+                    builder: (context, state) => const DpaEditorScreen(),
                   ),
                   // NEW: Admin Support Inbox Route
                   GoRoute(

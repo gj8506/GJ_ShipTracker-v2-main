@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/services/dpa_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_mode_provider.dart';
 import '../../../core/utils/form_validators.dart';
@@ -364,48 +365,68 @@ class ProfileScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: AppColors.borderLight),
                   ),
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.admin_panel_settings_rounded,
-                      color: AppColors.warningStrong,
-                    ),
-                    title: const Text(
-                      'Staff Registration Approvals',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: Text(
-                      pendingStaffCount > 0
-                          ? '$pendingStaffCount registration'
-                              '${pendingStaffCount == 1 ? '' : 's'} awaiting review'
-                          : 'Review staff sign-ups before they can access the app',
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (pendingStaffCount > 0)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.warningStrong,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              '$pendingStaffCount',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: Icon(
+                          Icons.admin_panel_settings_rounded,
+                          color: AppColors.warningStrong,
+                        ),
+                        title: const Text(
+                          'Staff Registration Approvals',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: Text(
+                          pendingStaffCount > 0
+                              ? '$pendingStaffCount registration'
+                                  '${pendingStaffCount == 1 ? '' : 's'} awaiting review'
+                              : 'Review staff sign-ups before they can access the app',
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (pendingStaffCount > 0)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.warningStrong,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  '$pendingStaffCount',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.chevron_right_rounded),
-                      ],
-                    ),
-                    onTap: () => context.push('/profile/staff-approvals'),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.chevron_right_rounded),
+                          ],
+                        ),
+                        onTap: () => context.push('/profile/staff-approvals'),
+                      ),
+                      Divider(height: 1, color: AppColors.borderLight),
+                      ListTile(
+                        leading: Icon(
+                          Icons.edit_document,
+                          color: AppColors.navyPrimary,
+                        ),
+                        title: const Text(
+                          'Data Privacy Editor',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: const Text(
+                          'Edit the DPA text shown at launch and sign-up',
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => context.push('/profile/dpa-editor'),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -545,11 +566,12 @@ class ProfileScreen extends ConsumerWidget {
 }
 
 /// DPA & Terms Bottom Sheet (Read-Only version for Staff/Admin Profile)
-class _PrivacyPolicySheet extends StatelessWidget {
+class _PrivacyPolicySheet extends ConsumerWidget {
   const _PrivacyPolicySheet();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final policy = ref.watch(dpaPolicyProvider).value ?? DpaPolicy.defaults;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
@@ -585,20 +607,16 @@ class _PrivacyPolicySheet extends StatelessWidget {
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Text(
-                '''DATA PRIVACY CONSENT & COMPLIANCE
-Pursuant to the Data Privacy Act of 2012 (Republic Act No. 10173), GJandAsher ShipTracker enforces organizational, technical, and physical security measures to protect outbound customer data, dispatch manifests, return logs, and sales metrics.
+                '''${policy.body}
 
-1. INTERNAL DATA USAGE
+INTERNAL HANDLING NOTES
 Staff and Admin personnel are granted role-based access strictly to process motorcycle plate dispatches, manage courier tracking, handle defect logs, and consult analytics.
 
-2. CONFIDENTIALITY OBLIGATION
 Customer addresses, phone numbers, and custom plate details are strictly confidential and must not be exported, disclosed, or shared with unauthorized third parties outside of assigned standard couriers (Shopee, Lazada, TikTok Shop, J&T, SPX, Flash).
 
-3. AUDIT TRAILS & INTEGRITY
 All dispatch actions, status updates, and returns logged are stamped with staff user credentials for administrative audit trails.
 
-4. USER RIGHTS
-Data subjects retain all rights guaranteed under RA 10173, including access, correction, and account deletion requests via administration.''',
+Policy Version ${policy.version}.0 • ${policy.updatedLabel}''',
                 style: TextStyle(
                     fontSize: 14, color: AppColors.textPrimary, height: 1.6),
               ),

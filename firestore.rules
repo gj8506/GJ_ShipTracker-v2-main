@@ -92,6 +92,13 @@ service cloud.firestore {
       allow read, write: if isStaffOrAdmin();
     }
 
+    // Data Privacy Act policy. Publicly readable because the consent gate runs
+    // before sign-in; only an owner/admin may publish changes.
+    match /app_settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Customer Registry / QR codes.
     //
     // Staff and admins manage every row (Dispatch registry). A customer may

@@ -23,8 +23,11 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
     super.dispose();
   }
 
-  void _onAccept() async {
-    await ref.read(dpaServiceProvider).acceptPolicy();
+  Future<void> _onAccept() async {
+    // Accept the version that is live right now, not a hard-coded constant.
+    final policy =
+        ref.read(dpaPolicyProvider).value ?? DpaPolicy.defaults;
+    await ref.read(dpaServiceProvider).acceptPolicy(policy.version);
     ref.invalidate(dpaAcceptedStatusProvider);
     // Wait for the provider to report the new value before navigating, so the
     // router cannot see a loading gate and bounce the user back here.
@@ -72,6 +75,9 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Streams the admin-edited policy; falls back to the seed text while the
+    // document loads or when the device is offline.
+    final policy = ref.watch(dpaPolicyProvider).value ?? DpaPolicy.defaults;
 
     return Scaffold(
       appBar: AppBar(
@@ -104,7 +110,7 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
                         Text('Republic Act No. 10173',
                             style: theme.textTheme.titleMedium
                                 ?.copyWith(fontWeight: FontWeight.bold)),
-                        Text('Philippine Data Privacy Act (DPA)',
+                        Text(policy.title,
                             style: theme.textTheme.bodySmall
                                 ?.copyWith(color: AppColors.textSecondary)),
                       ],
@@ -127,48 +133,16 @@ class _DpaGateScreenState extends ConsumerState<DpaGateScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '1. Information We Collect',
-                          style: theme.textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'We collect personal and transactional information including your full name, contact numbers, delivery addresses, plate customization details, and parcel tracking numbers.',
-                        ),
-                        const SizedBox(height: 14),
-                        Text(
-                          '2. Purpose of Processing',
-                          style: theme.textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'Your data is collected strictly to fulfill parcel deliveries, custom plate manufacturing, customer support verification, and reseller QR code scanning in accordance with our operations.',
-                        ),
-                        const SizedBox(height: 14),
-                        Text(
-                          '3. Security & Storage',
-                          style: theme.textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'All information is stored in encrypted cloud databases protected by role-based security rules. We do not sell or lease personal data to any external marketing entities.',
-                        ),
-                        const SizedBox(height: 14),
-                        Text(
-                          '4. Your Rights Under RA 10173',
-                          style: theme.textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'As a Data Subject, you have the right to be informed, access, rectify, object, or request deletion of your records subject to ongoing transactional compliance.',
+                          policy.body,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            height: 1.55,
+                          ),
                         ),
                         const SizedBox(height: 20),
                         Center(
                           child: Text(
-                            'Policy Version: $kDpaPolicyVersion.0 • Effective 2026',
+                            'Policy Version: ${policy.version}.0 • ${policy.updatedLabel}',
+                            textAlign: TextAlign.center,
                             style: theme.textTheme.labelSmall
                                 ?.copyWith(color: AppColors.textSecondary),
                           ),

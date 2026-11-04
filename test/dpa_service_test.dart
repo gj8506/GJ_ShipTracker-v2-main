@@ -68,5 +68,23 @@ void main() {
 
       expect(await service.isPolicyAccepted(), isTrue);
     });
+
+    test('a newer published version requires consent again', () async {
+      final service = DpaService();
+      await service.acceptPolicy(2);
+
+      expect(await service.isPolicyAccepted(2), isTrue);
+      expect(await service.isPolicyAccepted(3), isFalse);
+    });
+
+    test('accepting a newer version upgrades the stored consent', () async {
+      final service = DpaService();
+      await service.acceptPolicy(2);
+      await service.acceptPolicy(4);
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getInt('dpa_accepted_version'), 4);
+      expect(await service.isPolicyAccepted(4), isTrue);
+    });
   });
 }
