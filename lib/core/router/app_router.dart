@@ -20,6 +20,7 @@ import '../../features/returns/presentation/returns_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/admin/presentation/staff_approval_screen.dart';
 import '../../features/admin/presentation/dpa_editor_screen.dart';
+import '../../features/admin/presentation/admin_order_requests_screen.dart';
 import '../../features/qr_customers/presentation/customer_list_screen.dart';
 import '../../features/qr_customers/presentation/reseller_scanner_screen.dart';
 import '../../features/analytics/presentation/analytics_screen.dart';
@@ -147,6 +148,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // The Data Privacy Act editor is owner/admin-only.
       if (currentLoc.startsWith('/profile/dpa-editor') && !isAdmin) {
+        return '/parcels';
+      }
+
+      // Final pricing is an owner/admin decision; staff must not override the
+      // amount customers are shown.
+      if (currentLoc.startsWith('/profile/order-requests') && !isAdmin) {
         return '/parcels';
       }
 
@@ -319,6 +326,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: _rootNavigatorKey,
                     path: 'dpa-editor',
                     builder: (context, state) => const DpaEditorScreen(),
+                  ),
+                  // Admin/owner-only order queue with final-price override.
+                  GoRoute(
+                    parentNavigatorKey: _rootNavigatorKey,
+                    path: 'order-requests',
+                    builder: (context, state) =>
+                        const AdminOrderRequestsScreen(),
                   ),
                   // NEW: Admin Support Inbox Route
                   GoRoute(

@@ -138,8 +138,7 @@ class ProfileScreen extends ConsumerWidget {
               if (nameCtrl.text.trim().isEmpty) return;
 
               final phone = phoneCtrl.text.trim();
-              final phoneError =
-                  validateContactNumber(phone, required: false);
+              final phoneError = validateContactNumber(phone, required: false);
               if (phoneError != null) {
                 ScaffoldMessenger.of(ctx).showSnackBar(
                   SnackBar(
@@ -186,8 +185,7 @@ class ProfileScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout_rounded,
-                color: AppColors.statusReturned),
+            icon: Icon(Icons.logout_rounded, color: AppColors.statusReturned),
             tooltip: 'Sign Out',
             onPressed: () => _handleSignOut(context, ref),
           ),
@@ -374,6 +372,22 @@ class ProfileScreen extends ConsumerWidget {
                     children: [
                       ListTile(
                         leading: Icon(
+                          Icons.price_change_rounded,
+                          color: AppColors.tealDark,
+                        ),
+                        title: const Text(
+                          'Order Requests & Final Pricing',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: const Text(
+                          'Review plate requests and set the final price',
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => context.push('/profile/order-requests'),
+                      ),
+                      Divider(height: 1, color: AppColors.borderLight),
+                      ListTile(
+                        leading: Icon(
                           Icons.admin_panel_settings_rounded,
                           color: AppColors.warningStrong,
                         ),
@@ -548,8 +562,7 @@ class ProfileScreen extends ConsumerWidget {
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.statusReturned,
-                    side: BorderSide(
-                        color: AppColors.dangerBorder, width: 1.5),
+                    side: BorderSide(color: AppColors.dangerBorder, width: 1.5),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
