@@ -45,9 +45,10 @@ class ParcelsDashboardScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
+        toolbarHeight: 64,
         title: const Text(
           'Parcels Dashboard',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
         ),
         actions: [
           IconButton(

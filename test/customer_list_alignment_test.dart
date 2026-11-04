@@ -110,4 +110,43 @@ void main() {
     expect(find.byType(Card), findsNWidgets(3));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('no manual add-customer actions are offered', (tester) async {
+    await _pumpList(tester, Brightness.light);
+
+    // Customers self-register, so the registry must not expose a manual add
+    // button or floating action button.
+    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.text('Add Customer'), findsNothing);
+    expect(find.text('Add First Customer'), findsNothing);
+  });
+
+  testWidgets('empty registry explains that sign-ups populate the list',
+      (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    AppColors.applyBrightness(Brightness.light);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          customersStreamProvider.overrideWith(
+            (ref) => Stream<List<CustomerModel>>.value(
+              const <CustomerModel>[],
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: CustomerListScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('No Customers Yet'), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.text('Add First Customer'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 }

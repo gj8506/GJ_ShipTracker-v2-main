@@ -150,17 +150,6 @@ class CustomerListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.navyPrimary,
-        foregroundColor: Colors.white,
-        elevation: 3,
-        icon: const Icon(Icons.person_add_rounded),
-        label: const Text(
-          'Add Customer',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-        ),
-        onPressed: () => _showAddEditCustomerDialog(context),
-      ),
       body: Column(
         children: [
           // Search Bar
@@ -226,7 +215,7 @@ class CustomerListScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 18),
                           Text(
-                            'No Customers Found',
+                            'No Customers Yet',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -235,29 +224,15 @@ class CustomerListScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Add repeat buyers or motorcycle shop resellers to generate custom QR codes for quick dispatching.',
+                            'New customers appear here automatically after '
+                            'they sign up, and their QR code is generated for '
+                            'them. No manual entry is needed.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 14,
                               height: 1.4,
                               color: AppColors.textTertiary,
                             ),
-                          ),
-                          const SizedBox(height: 20),
-                          OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.navyPrimary,
-                              side: BorderSide(
-                                  color: AppColors.navyPrimary),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 18, vertical: 12),
-                            ),
-                            icon: const Icon(Icons.add),
-                            label: const Text('Add First Customer'),
-                            onPressed: () =>
-                                _showAddEditCustomerDialog(context),
                           ),
                         ],
                       ),
@@ -276,116 +251,144 @@ class CustomerListScreen extends ConsumerWidget {
 
                     return Card(
                       elevation: 0,
+                      margin: EdgeInsets.zero,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                         side: BorderSide(color: AppColors.borderLight),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
-                        child: Row(
-                          children: [
-                            // Avatar Icon
-                            CircleAvatar(
-                              radius: 22,
-                              backgroundColor: isReseller
-                                  ? AppColors.tealContainer
-                                  : AppColors.borderLight,
-                              child: Icon(
-                                isReseller
-                                    ? Icons.storefront_rounded
-                                    : Icons.person_rounded,
-                                color: isReseller
-                                    ? AppColors.tealDark
-                                    : AppColors.navyPrimary,
-                                size: 22,
+                      child: ConstrainedBox(
+                        // Every row occupies the same height, whether or not it
+                        // has a contact number and address.
+                        constraints: const BoxConstraints(minHeight: 80),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Avatar Icon
+                              CircleAvatar(
+                                radius: 22,
+                                backgroundColor: isReseller
+                                    ? AppColors.tealContainer
+                                    : AppColors.borderLight,
+                                child: Icon(
+                                  isReseller
+                                      ? Icons.storefront_rounded
+                                      : Icons.person_rounded,
+                                  color: isReseller
+                                      ? AppColors.tealDark
+                                      : AppColors.navyPrimary,
+                                  size: 22,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 14),
+                              const SizedBox(width: 14),
 
-                            // Customer Details
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          customer.name,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.navyPrimary,
+                              // Customer Details
+                              Expanded(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            customer.name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              height: 1.2,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.navyPrimary,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      _TypeBadge(
-                                        type: customer.type,
-                                        background: _getBadgeColor(customer.type),
-                                        foreground:
-                                            _getBadgeTextColor(customer.type),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    customer.contactNumber.isNotEmpty
-                                        ? customer.contactNumber
-                                        : 'No contact provided',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        fontSize: 13,
-                                        color: AppColors.navyMuted),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    customer.address.isNotEmpty
-                                        ? customer.address
-                                        : 'No address on file',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        color: AppColors.textMutedAlt),
-                                  ),
-                                ],
+                                        const SizedBox(width: 8),
+                                        _TypeBadge(
+                                          type: customer.type,
+                                          background:
+                                              _getBadgeColor(customer.type),
+                                          foreground:
+                                              _getBadgeTextColor(customer.type),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      customer.contactNumber.isNotEmpty
+                                          ? customer.contactNumber
+                                          : 'No contact provided',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          height: 1.2,
+                                          color: AppColors.navyMuted),
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      customer.address.isNotEmpty
+                                          ? customer.address
+                                          : 'No address on file',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          height: 1.2,
+                                          color: AppColors.textMutedAlt),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 4),
+                              const SizedBox(width: 6),
 
-                            // QR Dialog Button
-                            IconButton(
-                              visualDensity: VisualDensity.compact,
-                              constraints: const BoxConstraints.tightFor(
-                                  width: 40, height: 40),
-                              icon: Icon(Icons.qr_code_2_rounded,
-                                  color: AppColors.tealDark, size: 24),
-                              tooltip: 'View QR Code',
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (ctx) =>
-                                      CustomerQrDialog(customer: customer),
-                                );
-                              },
-                            ),
+                              // Fixed-width action group so every row ends at
+                              // the same right edge.
+                              SizedBox(
+                                width: 84,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    // QR Dialog Button
+                                    IconButton(
+                                      visualDensity: VisualDensity.compact,
+                                      constraints:
+                                          const BoxConstraints.tightFor(
+                                              width: 40, height: 40),
+                                      icon: Icon(Icons.qr_code_2_rounded,
+                                          color: AppColors.tealDark, size: 24),
+                                      tooltip: 'View QR Code',
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (ctx) => CustomerQrDialog(
+                                              customer: customer),
+                                        );
+                                      },
+                                    ),
 
-                            // Edit Button
-                            IconButton(
-                              visualDensity: VisualDensity.compact,
-                              constraints: const BoxConstraints.tightFor(
-                                  width: 40, height: 40),
-                              icon: Icon(Icons.edit_outlined,
-                                  color: AppColors.textSecondary, size: 20),
-                              tooltip: 'Edit Customer',
-                              onPressed: () =>
-                                  _showAddEditCustomerDialog(context, customer),
-                            ),
-                          ],
+                                    // Edit Button
+                                    IconButton(
+                                      visualDensity: VisualDensity.compact,
+                                      constraints:
+                                          const BoxConstraints.tightFor(
+                                              width: 40, height: 40),
+                                      icon: Icon(Icons.edit_outlined,
+                                          color: AppColors.textSecondary,
+                                          size: 20),
+                                      tooltip: 'Edit Customer',
+                                      onPressed: () =>
+                                          _showAddEditCustomerDialog(
+                                              context, customer),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
