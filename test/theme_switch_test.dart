@@ -40,6 +40,31 @@ class _PaletteProbe extends StatelessWidget {
   }
 }
 
+class _RouteProbe extends StatelessWidget {
+  const _RouteProbe(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label, style: TextStyle(color: AppColors.textPrimary)),
+            Text(
+              AppColors.isDark ? 'dark' : 'light',
+              style: TextStyle(color: AppColors.textPrimary),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 double _contrastRatio(Color foreground, Color background) {
   final fg = foreground.computeLuminance();
   final bg = background.computeLuminance();
@@ -119,5 +144,55 @@ void main() {
       greaterThan(4.5),
       reason: 'light-mode body text must stay readable',
     );
+  });
+
+  testWidgets('rapid switches during a route transition never throw',
+      (tester) async {
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const _RouteProbe('route one'),
+        ),
+        GoRoute(
+          path: '/next',
+          builder: (context, state) => const _RouteProbe('route two'),
+        ),
+      ],
+    );
+    final container = ProviderContainer(
+      overrides: [appRouterProvider.overrideWithValue(router)],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: ShipTrackerApp(
+          scaffoldMessengerKey: GlobalKey<ScaffoldMessengerState>(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Start a route transition, then change the palette while it is still
+    // animating. The repaint pass must not mark a route that is mid-transition.
+    router.push('/next');
+    await tester.pump(const Duration(milliseconds: 40));
+
+    await container.read(themeModeProvider.notifier).setMode(ThemeMode.dark);
+    await tester.pump();
+
+    await container.read(themeModeProvider.notifier).setMode(ThemeMode.light);
+    await tester.pump();
+
+    await container.read(themeModeProvider.notifier).setMode(ThemeMode.dark);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('route two'), findsOneWidget);
+    expect(find.text('dark'), findsWidgets,
+        reason: 'the visible route still receives the final palette');
   });
 }
