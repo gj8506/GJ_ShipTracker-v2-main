@@ -27,8 +27,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isGoogleLoading = false;
   bool _obscurePassword = true;
 
-  // Toggle between Staff / Operations login and Customer Portal login
-  bool _isCustomerPortal = false;
+  // Toggle between Customer Portal login and Staff / Operations login.
+  // Customer is the first (left) tab and the default selection.
+  bool _isCustomerPortal = true;
 
   @override
   void dispose() {
@@ -331,7 +332,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Portal Mode Switcher: Staff vs Customer
+                    // Portal Mode Switcher: Customer (left) vs Staff (right)
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
@@ -341,58 +342,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       child: Row(
                         children: [
-                          Expanded(
-                            child: InkWell(
-                              onTap: () =>
-                                  setState(() => _isCustomerPortal = false),
-                              borderRadius: BorderRadius.circular(9),
-                              child: Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 9),
-                                decoration: BoxDecoration(
-                                  color: !_isCustomerPortal
-                                      ? AppColors.surfaceWhite
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(9),
-                                  boxShadow: !_isCustomerPortal
-                                      ? [
-                                          BoxShadow(
-                                            color: Colors.black
-                                                .withValues(alpha: 0.06),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 2),
-                                          )
-                                        ]
-                                      : null,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.badge_outlined,
-                                      size: 16,
-                                      color: !_isCustomerPortal
-                                          ? AppColors.navyPrimary
-                                          : AppColors.textSecondary,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'Staff Portal',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: !_isCustomerPortal
-                                            ? FontWeight.bold
-                                            : FontWeight.w500,
-                                        color: !_isCustomerPortal
-                                            ? AppColors.navyPrimary
-                                            : AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
                           Expanded(
                             child: InkWell(
                               onTap: () =>
@@ -436,6 +385,58 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                             ? FontWeight.bold
                                             : FontWeight.w500,
                                         color: _isCustomerPortal
+                                            ? AppColors.navyPrimary
+                                            : AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () =>
+                                  setState(() => _isCustomerPortal = false),
+                              borderRadius: BorderRadius.circular(9),
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 9),
+                                decoration: BoxDecoration(
+                                  color: !_isCustomerPortal
+                                      ? AppColors.surfaceWhite
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(9),
+                                  boxShadow: !_isCustomerPortal
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.black
+                                                .withValues(alpha: 0.06),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          )
+                                        ]
+                                      : null,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.badge_outlined,
+                                      size: 16,
+                                      color: !_isCustomerPortal
+                                          ? AppColors.navyPrimary
+                                          : AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Staff Portal',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: !_isCustomerPortal
+                                            ? FontWeight.bold
+                                            : FontWeight.w500,
+                                        color: !_isCustomerPortal
                                             ? AppColors.navyPrimary
                                             : AppColors.textSecondary,
                                       ),
