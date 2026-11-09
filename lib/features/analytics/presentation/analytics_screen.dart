@@ -493,8 +493,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.navyPrimary,
+          // Deep callout surface keeps the white text readable in dark mode,
+          // where navyPrimary becomes a light blue.
+          color: AppColors.calloutSurface,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.calloutBorder.withValues(alpha: 0.55),
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.15),
@@ -508,15 +513,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.navySecondary,
+                color: AppColors.calloutBorder.withValues(alpha: 0.22),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppColors.tealAccent.withValues(alpha: 0.3),
+                  color: AppColors.calloutBorder.withValues(alpha: 0.65),
                 ),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.auto_graph_rounded,
-                color: AppColors.tealSecondary,
+                color: AppColors.onCallout,
                 size: 24,
               ),
             ),
@@ -530,7 +535,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       const Text(
                         'Sales Forecasting',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.onCallout,
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                         ),
@@ -548,10 +553,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                 .withValues(alpha: 0.4),
                           ),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Admin',
                           style: TextStyle(
-                            color: AppColors.tealSecondary,
+                            color: AppColors.onCallout,
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                           ),
@@ -563,10 +568,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   Text(
                     '1, 3, 6 & 12-month predictive trends & revenue projections',
                     style: TextStyle(
-                      color: AppColors.textMuted,
+                      // Was textMuted, which blended into the banner in dark
+                      // mode. A near-white tone keeps it legible in both themes.
+                      color: AppColors.onCallout.withValues(alpha: 0.88),
                       fontSize: 11,
+                      height: 1.25,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -574,7 +582,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ),
             Icon(
               Icons.chevron_right_rounded,
-              color: AppColors.textMuted,
+              color: AppColors.onCallout.withValues(alpha: 0.85),
               size: 20,
             ),
           ],

@@ -44,6 +44,11 @@ class _CustomerShellState extends ConsumerState<CustomerShell> {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
+      // Each tab is its own full Scaffold. Letting this outer Scaffold also
+      // resize for the keyboard shrinks the inner Scaffold twice, which leaves
+      // a large blank band above the keyboard. The inner screens handle the
+      // inset themselves, so the shell must not resize.
+      resizeToAvoidBottomInset: false,
       body: Column(
         children: [
           const OfflineBanner(),

@@ -98,6 +98,18 @@ class AppColors {
       _pick(const Color(0xFFDCF2FD), const Color(0xFF14374C));
   static Color get accent => tealAccent;
 
+  /// Deep azure surface for promotional callouts (e.g. the Sales Forecasting
+  /// banner). It stays dark in both themes so white text keeps its contrast;
+  /// [navyPrimary] is deliberately light in dark mode and would wash the text
+  /// out when used as a banner background.
+  static Color get calloutSurface =>
+      _pick(const Color(0xFF075E85), const Color(0xFF0D3A52));
+  static Color get calloutBorder =>
+      _pick(const Color(0xFF1E8DBF), const Color(0xFF2A6F91));
+
+  /// Primary text/icon colour on [calloutSurface].
+  static const Color onCallout = Color(0xFFF2FAFF);
+
   // ---------------------------------------------------------------------------
   // 5% — TEXT (high contrast, never pure black)
   // ---------------------------------------------------------------------------

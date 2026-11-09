@@ -29,6 +29,9 @@ class _OrderRequestFormScreenState
   final _addressDetailCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
 
+  /// Free-text brand, only used when "Other" is chosen in the make dropdown.
+  final _otherMakeCtrl = TextEditingController();
+
   // ---------------------------------------------------------------------
   // Plate styles and their estimated fixed prices.
   //
@@ -95,6 +98,8 @@ class _OrderRequestFormScreenState
     'BARMM',
   ];
 
+  static const String _otherMakeOption = 'OTHER';
+
   static const List<String> _motorcycleMakes = [
     'HONDA',
     'YAMAHA',
@@ -105,7 +110,7 @@ class _OrderRequestFormScreenState
     'RUSI',
     'BAJAJ',
     'CFMOTO',
-    'OTHER',
+    _otherMakeOption,
   ];
 
   String _selectedRegion = 'REGION 12';
@@ -113,6 +118,18 @@ class _OrderRequestFormScreenState
   String? _selectedArea;
 
   bool get _isOtherArea => _selectedArea == _otherAreaOption;
+
+  /// True when the customer needs to type a brand that is not in the list.
+  bool get _isOtherMake => _selectedMake == _otherMakeOption;
+
+  /// Brand shown on the plate preview and saved with the order. When "Other"
+  /// is selected this returns what the customer typed, so the preview updates
+  /// live instead of showing the placeholder "OTHER".
+  String get _resolvedMake {
+    if (!_isOtherMake) return _selectedMake;
+    final typed = _otherMakeCtrl.text.trim();
+    return typed.isEmpty ? _otherMakeOption : typed.toUpperCase();
+  }
 
   bool _isSubmitting = false;
 
@@ -139,6 +156,7 @@ class _OrderRequestFormScreenState
     _phoneCtrl.dispose();
     _addressDetailCtrl.dispose();
     _notesCtrl.dispose();
+    _otherMakeCtrl.dispose();
     super.dispose();
   }
 
@@ -165,8 +183,12 @@ class _OrderRequestFormScreenState
           area == _otherAreaOption ? addressDetail : '$addressDetail, $area';
 
       final estimatedPrice = _plateStylePrices[_selectedStyle] ?? 0.0;
+      // "Other" saves the brand the customer typed instead of the literal
+      // placeholder so staff never has to guess.
+      final selectedMake =
+          _isOtherMake ? _otherMakeCtrl.text.trim().toUpperCase() : _selectedMake;
       final plateSpecSummary =
-          '${_selectedStyle.toUpperCase()} | Reg: $_selectedRegion | Make: $_selectedMake';
+          '${_selectedStyle.toUpperCase()} | Reg: $_selectedRegion | Make: $selectedMake';
 
       await FirebaseFirestore.instance.collection('order_requests').add({
         'userId': user.uid,
@@ -177,7 +199,7 @@ class _OrderRequestFormScreenState
         'plateNumber': _plateNumberCtrl.text.trim().toUpperCase(),
         'plateStyle': _selectedStyle,
         'region': _selectedRegion,
-        'brandMake': _selectedMake,
+        'brandMake': selectedMake,
         'plateSpecs': plateSpecSummary,
         // Fixed, published estimate for the chosen plate style. Kept as both
         // `price` (read by OrderRequestModel and analytics) and
@@ -230,6 +252,9 @@ class _OrderRequestFormScreenState
         ),
       ),
       body: SingleChildScrollView(
+        // Dragging the form dismisses the keyboard, and the scroll view keeps
+        // the focused field above it now that the shell no longer double-resizes.
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Form(
           key: _formKey,
@@ -363,14 +388,19 @@ class _OrderRequestFormScreenState
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                _selectedMake,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.2,
-                  fontStyle: FontStyle.italic,
-                  color: AppColors.navyPrimary,
+              Flexible(
+                child: Text(
+                  _resolvedMake,
+                  textAlign: TextAlign.right,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                    fontStyle: FontStyle.italic,
+                    color: AppColors.navyPrimary,
+                  ),
                 ),
               ),
             ],
@@ -519,6 +549,30 @@ class _OrderRequestFormScreenState
               ),
             ],
           ),
+          // The make list covers the common brands; choosing "Other" opens a
+          // free-text field so any brand (including imported units) can be
+          // recorded without leaving the form.
+          if (_isOtherMake) ...[
+            const SizedBox(height: 14),
+            TextFormField(
+              controller: _otherMakeCtrl,
+              textCapitalization: TextCapitalization.characters,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                labelText: 'Specify Motorcycle Brand *',
+                hintText: 'e.g. MOTORSTAR, LIFAN, LONCIN',
+                prefixIcon: Icon(Icons.edit_outlined,
+                    color: AppColors.navyPrimary),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              ),
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? 'Enter the motorcycle brand'
+                  : null,
+            ),
+          ],
         ],
       ),
     );

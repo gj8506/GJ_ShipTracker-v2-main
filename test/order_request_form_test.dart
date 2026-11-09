@@ -89,4 +89,40 @@ void main() {
     // Large is the rectangular plate.
     expect(find.byType(ClipPath), findsNothing);
   });
+
+  testWidgets('choosing Other reveals a free-text motorcycle brand field',
+      (tester) async {
+    await tester.pumpWidget(_buildForm());
+    await tester.pump();
+
+    expect(find.text('Specify Motorcycle Brand *'), findsNothing);
+
+    _dropdown(tester, 2).onChanged!('OTHER');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Specify Motorcycle Brand *'), findsOneWidget);
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Specify Motorcycle Brand *'),
+      'motorstar',
+    );
+    await tester.pump();
+
+    // The live plate preview shows the typed brand instead of the placeholder.
+    expect(find.text('MOTORSTAR'), findsWidgets);
+  });
+
+  testWidgets('switching away from Other hides the brand field', (tester) async {
+    await tester.pumpWidget(_buildForm());
+    await tester.pump();
+
+    _dropdown(tester, 2).onChanged!('OTHER');
+    await tester.pumpAndSettle();
+    expect(find.text('Specify Motorcycle Brand *'), findsOneWidget);
+
+    _dropdown(tester, 2).onChanged!('HONDA');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Specify Motorcycle Brand *'), findsNothing);
+  });
 }
