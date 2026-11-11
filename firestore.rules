@@ -80,6 +80,28 @@ service cloud.firestore {
       allow write: if isSignedIn();
     }
 
+    // Daily staff-application counter used to enforce the 10-per-day cap.
+    //
+    // The document holds only the date key and an aggregate count, so it is
+    // safe to read publicly without exposing any personal data. A signed-in
+    // applicant may create the day with count 1 or bump it by exactly one, but
+    // can never set it beyond the cap, rewrite the date, or delete history.
+    match /staff_registration_days/{dayKey} {
+      allow read: if true;
+
+      allow create: if isSignedIn()
+                    && request.resource.data.day == dayKey
+                    && request.resource.data.count == 1;
+
+      allow update: if isSignedIn()
+                    && request.resource.data.day == resource.data.day
+                    && request.resource.data.count
+                         == resource.data.count + 1
+                    && request.resource.data.count <= 10;
+
+      allow delete: if false;
+    }
+
     match /parcels/{parcelId} {
       allow read, write: if isStaffOrAdmin();
     }

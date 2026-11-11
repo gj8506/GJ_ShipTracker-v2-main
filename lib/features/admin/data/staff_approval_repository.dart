@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/email_service.dart';
+import '../../../core/utils/staff_registration_policy.dart';
 import '../../auth/domain/user_profile_model.dart';
 
 class StaffApprovalResult {
@@ -48,6 +49,49 @@ class StaffApprovalRepository {
 
           return pending;
         });
+  }
+
+  /// Automatically rejects pending staff applications that have been waiting
+  /// longer than [StaffRegistrationPolicy.autoRejectAfter].
+  ///
+  /// This runs client-side whenever an admin opens the Staff Approvals screen,
+  /// so stale sign-ups disappear from the queue without requiring a scheduled
+  /// Cloud Function. Returns the number of profiles rejected.
+  Future<int> autoRejectExpiredStaff({DateTime? now}) async {
+    final snapshot = await _firestore
+        .collection(AppConstants.collectionUsers)
+        .where('role', whereIn: const ['staff', 'Staff']).get();
+
+    final expired = snapshot.docs.where((doc) {
+      final profile = UserProfileModel.fromMap(doc.data());
+      return profile.isStaff &&
+          profile.isPending &&
+          StaffRegistrationPolicy.isExpired(profile.createdAt, now: now);
+    }).toList();
+
+    if (expired.isEmpty) return 0;
+
+    final reason = StaffRegistrationPolicy.autoRejectReason;
+
+    // Firestore allows at most 500 writes per batch; 400 leaves headroom.
+    const chunkSize = 400;
+    for (var start = 0; start < expired.length; start += chunkSize) {
+      final batch = _firestore.batch();
+      for (final doc in expired.skip(start).take(chunkSize)) {
+        batch.update(doc.reference, {
+          'status': AppConstants.accountStatusRejected,
+          'approvedBy': FieldValue.delete(),
+          'approvedAt': FieldValue.delete(),
+          'rejectedBy': 'system',
+          'rejectedAt': FieldValue.serverTimestamp(),
+          'rejectionReason': reason,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+      await batch.commit();
+    }
+
+    return expired.length;
   }
 
   /// Marks a staff account active and sends the approval email.

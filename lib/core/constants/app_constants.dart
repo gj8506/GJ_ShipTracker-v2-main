@@ -12,6 +12,14 @@ class AppConstants {
   // Staff registration messaging
   static const String staffApprovalPendingMessage =
       'Admin will be reviewing this account, please stand-by and wait for the approval of this registration.';
+  static const String staffApplicationLimitMessage =
+      'Staff registration is closed for today. The daily limit of 10 '
+      'applications has been reached. Please try again tomorrow.';
+
+  // Daily aggregate used to enforce the staff application cap without reading
+  // personal profiles. The document id is the local calendar day.
+  static const String collectionStaffRegistrationDays =
+      'staff_registration_days';
 
   // Cloudinary Configuration
   static const String cloudinaryCloudName = 'zxatyaly';

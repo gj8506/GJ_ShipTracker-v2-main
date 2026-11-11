@@ -9,6 +9,7 @@ import '../../../core/utils/form_validators.dart';
 import 'auth_providers.dart';
 import 'auth_error_text.dart';
 import 'signup_prefill.dart';
+import '../data/staff_registration_limiter.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key, this.prefill});
@@ -118,6 +119,26 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     ref.invalidate(dpaAcceptedStatusProvider);
   }
 
+  /// Blocks a staff application when today's cap is already reached.
+  ///
+  /// The check is a friendly early exit; [AuthRepository] performs the
+  /// authoritative atomic reservation before it writes a staff profile. Counter
+  /// infrastructure errors fail open so a delayed rules deployment cannot stop
+  /// sign-ups, while a genuine limit hit always fails closed.
+  Future<bool> _ensureStaffSlotAvailable() async {
+    if (_selectedRole != AppConstants.roleStaff) return true;
+    try {
+      await ref.read(staffRegistrationLimiterProvider).assertCanApply();
+      return true;
+    } on StaffApplicationLimitException catch (e) {
+      if (mounted) _showAuthError(e.message);
+      return false;
+    } catch (_) {
+      // Counter unavailable: let the repository reservation decide.
+      return true;
+    }
+  }
+
   Future<void> _handleSignUp() async {
     if (!_agreedToTerms) {
       _showTermsAndPrivacyModal();
@@ -130,6 +151,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
+      if (!await _ensureStaffSlotAvailable()) return;
+
       await ref.read(authRepositoryProvider).signUpWithEmailPassword(
             email: _emailCtrl.text.trim(),
             password: _passwordCtrl.text,
@@ -162,6 +185,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
+      if (!await _ensureStaffSlotAvailable()) return;
+
       final name = _nameCtrl.text.trim();
       await ref.read(authRepositoryProvider).signUpWithGoogle(
             role: _selectedRole,
@@ -200,6 +225,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
+      if (!await _ensureStaffSlotAvailable()) return;
+
       await ref.read(authRepositoryProvider).completeGoogleSignUp(
             role: _selectedRole,
             fullName: _nameCtrl.text.trim(),
@@ -320,8 +347,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded,
-              color: AppColors.navyPrimary),
+          icon: Icon(Icons.arrow_back_rounded, color: AppColors.navyPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -489,8 +515,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   icon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
                   inputFormatters: contactNumberInputFormatters,
-                  validator: (v) =>
-                      validateContactNumber(v, required: false),
+                  validator: (v) => validateContactNumber(v, required: false),
                 ),
                 // Google accounts authenticate through Google, so a password is
                 // optional there. The toggle lets the user add one anyway, so
@@ -663,8 +688,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         ),
         child: Row(
           children: [
-            Icon(Icons.lock_outline_rounded,
-                color: AppColors.textTertiary),
+            Icon(Icons.lock_outline_rounded, color: AppColors.textTertiary),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -711,8 +735,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ? Icons.visibility_off_outlined
                 : Icons.visibility_outlined,
             color: AppColors.textSecondary),
-        onPressed: () =>
-            setState(() => _obscurePassword = !_obscurePassword),
+        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
       ),
       validator: _validatePassword,
     );
@@ -770,8 +793,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       validator: validator,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle:
-            TextStyle(color: AppColors.textSecondary, fontSize: 15),
+        hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 15),
         prefixIcon: Icon(icon, color: AppColors.textTertiary),
         suffixIcon: suffixIcon,
         filled: true,
@@ -933,8 +955,7 @@ class _TermsAndPrivacySheetState extends ConsumerState<_TermsAndPrivacySheet> {
 
   @override
   Widget build(BuildContext context) {
-    final policy =
-        ref.watch(dpaPolicyProvider).value ?? DpaPolicy.defaults;
+    final policy = ref.watch(dpaPolicyProvider).value ?? DpaPolicy.defaults;
 
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.85,

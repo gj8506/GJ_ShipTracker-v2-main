@@ -1,10 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/auth_repository.dart';
+import '../data/staff_registration_limiter.dart';
 import '../domain/user_profile_model.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
+});
+
+/// Enforces the daily staff application cap during the signup flow.
+final staffRegistrationLimiterProvider =
+    Provider<StaffRegistrationLimiter>((ref) {
+  return StaffRegistrationLimiter();
 });
 
 /// True while a manual sign-in/sign-up is being verified.

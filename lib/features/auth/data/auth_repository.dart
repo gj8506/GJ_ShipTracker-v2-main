@@ -5,6 +5,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/services/email_service.dart';
 import '../domain/user_profile_model.dart';
 import '../../qr_customers/domain/customer_model.dart'; // Added import for customer synchronization
+import 'staff_registration_limiter.dart';
 
 /// The Web OAuth client of Firebase project `shiptracker-v2`.
 ///
@@ -29,13 +30,17 @@ class AuthRepository {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
   final GoogleSignIn _googleSignIn;
+  final StaffRegistrationLimiter _staffRegistrationLimiter;
 
   AuthRepository({
     FirebaseAuth? auth,
     FirebaseFirestore? firestore,
     GoogleSignIn? googleSignIn,
+    StaffRegistrationLimiter? staffRegistrationLimiter,
   })  : _auth = auth ?? FirebaseAuth.instance,
         _firestore = firestore ?? FirebaseFirestore.instance,
+        _staffRegistrationLimiter =
+            staffRegistrationLimiter ?? StaffRegistrationLimiter(),
         _googleSignIn = googleSignIn ??
             GoogleSignIn(
               serverClientId: kGoogleServerClientId,
@@ -144,12 +149,18 @@ class AuthRepository {
       );
     }
 
-    await _createUserProfile(
-      user,
-      role,
-      fullName: fullName ?? user.displayName,
-      phoneNumber: phoneNumber,
-    );
+    try {
+      await _createUserProfile(
+        user,
+        role,
+        fullName: fullName ?? user.displayName,
+        phoneNumber: phoneNumber,
+      );
+    } on StaffApplicationLimitException {
+      // Do not leave a Google session signed in without an app profile.
+      await signOut();
+      rethrow;
+    }
 
     return userCredential;
   }
@@ -201,12 +212,19 @@ class AuthRepository {
 
     final trimmedName = (fullName ?? '').trim();
 
-    await _createUserProfile(
-      user,
-      role,
-      fullName: trimmedName.isEmpty ? null : trimmedName,
-      phoneNumber: phoneNumber,
-    );
+    try {
+      await _createUserProfile(
+        user,
+        role,
+        fullName: trimmedName.isEmpty ? null : trimmedName,
+        phoneNumber: phoneNumber,
+      );
+    } on StaffApplicationLimitException {
+      // Keep the user out of the app when the staff cap is full; they can
+      // retry tomorrow without a half-created profile.
+      await signOut();
+      rethrow;
+    }
 
     return getUserProfile(user.uid);
   }
@@ -244,6 +262,12 @@ class AuthRepository {
         ? AppConstants.roleCustomer
         : role.trim().toLowerCase();
     final isStaffRole = assignedRole == AppConstants.roleStaff;
+
+    // Authoritative daily cap: claim a slot before the staff profile exists.
+    // Throws StaffApplicationLimitException when today's applications are full.
+    if (isStaffRole) {
+      await _staffRegistrationLimiter.reserveSlot();
+    }
 
     final profile = UserProfileModel(
       uid: user.uid,
@@ -283,9 +307,8 @@ class AuthRepository {
     String uid,
     UserProfileModel profile,
   ) async {
-    final docRef = _firestore
-        .collection(AppConstants.collectionCustomers)
-        .doc(uid);
+    final docRef =
+        _firestore.collection(AppConstants.collectionCustomers).doc(uid);
 
     final existing = await docRef.get();
     if (existing.exists) return;
@@ -369,42 +392,37 @@ class AuthRepository {
     final user = credential.user;
     if (user != null) {
       final displayName = fullName ?? username ?? '';
-      final rawRole = role?.trim() ?? '';
-      final assignedRole =
-          rawRole.isEmpty ? AppConstants.roleCustomer : rawRole.toLowerCase();
-      final isStaffRole = assignedRole == AppConstants.roleStaff;
-      final normalizedPhone =
-          (phoneNumber ?? '').trim().isEmpty ? null : phoneNumber!.trim();
 
-      final profile = UserProfileModel(
-        uid: user.uid,
-        email: user.email ?? email.trim(),
-        fullName: displayName,
-        role: assignedRole,
-        status: isStaffRole
-            ? AppConstants.accountStatusPending
-            : AppConstants.accountStatusActive,
-        phoneNumber: normalizedPhone,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-
-      await _firestore
-          .collection(AppConstants.collectionUsers)
-          .doc(user.uid)
-          .set(profile.toMap());
+      try {
+        await _createUserProfile(
+          user,
+          role ?? '',
+          fullName: displayName.isEmpty ? null : displayName,
+          phoneNumber: phoneNumber,
+        );
+      } on StaffApplicationLimitException {
+        // Remove the just-created Auth user so the address stays free for a
+        // future attempt once today's staff slots open again.
+        await _deleteAuthUserQuietly(user);
+        rethrow;
+      }
 
       if (displayName.isNotEmpty) {
         await user.updateDisplayName(displayName);
       }
-
-      // Sync to Customer Registry & QR system if role is customer
-      if (assignedRole == AppConstants.roleCustomer) {
-        await _syncCustomerRegistry(user.uid, profile);
-      }
     }
 
     return credential;
+  }
+
+  /// Best-effort cleanup after an aborted registration.
+  Future<void> _deleteAuthUserQuietly(User user) async {
+    try {
+      await user.delete();
+    } catch (_) {
+      // Deleting can require a recent login; at minimum drop the session.
+      await signOut();
+    }
   }
 
   // Password reset. When the branded email worker is configured we send a
@@ -501,9 +519,8 @@ class AuthRepository {
           (userDoc.data()?['role'] as String? ?? '').trim().toLowerCase();
       if (role != AppConstants.roleCustomer) return;
 
-      final customerRef = _firestore
-          .collection(AppConstants.collectionCustomers)
-          .doc(uid);
+      final customerRef =
+          _firestore.collection(AppConstants.collectionCustomers).doc(uid);
       final customerDoc = await customerRef.get();
       if (!customerDoc.exists) return;
 

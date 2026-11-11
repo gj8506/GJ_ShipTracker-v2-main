@@ -4,12 +4,21 @@ import 'package:intl/intl.dart';
 
 import '../../../core/services/email_service.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/staff_registration_policy.dart';
 import '../../auth/domain/user_profile_model.dart';
 import '../../auth/presentation/auth_providers.dart';
 import 'staff_approval_providers.dart';
 
 class StaffApprovalScreen extends ConsumerStatefulWidget {
-  const StaffApprovalScreen({super.key});
+  const StaffApprovalScreen({
+    super.key,
+    this.autoRejectExpired = true,
+  });
+
+  /// When true (the default), opening this screen sweeps the pending queue and
+  /// rejects applications older than [StaffRegistrationPolicy.autoRejectAfter].
+  /// Tests set this to false to avoid touching Firestore.
+  final bool autoRejectExpired;
 
   @override
   ConsumerState<StaffApprovalScreen> createState() =>
@@ -18,6 +27,52 @@ class StaffApprovalScreen extends ConsumerStatefulWidget {
 
 class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
   String? _processingUid;
+  final ScrollController _scrollController = ScrollController();
+
+  /// Zero-based index of the approval page currently shown.
+  int _page = 0;
+
+  bool _autoRejectScheduled = false;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /// Rejects stale pending applications once per screen visit, then refreshes
+  /// the stream so they disappear from the review queue immediately.
+  Future<void> _autoRejectExpired() async {
+    if (!widget.autoRejectExpired) return;
+    try {
+      final rejected = await ref
+          .read(staffApprovalRepositoryProvider)
+          .autoRejectExpiredStaff();
+      if (!mounted || rejected == 0) return;
+      _showMessage(
+        '$rejected stale staff application${rejected == 1 ? '' : 's'} '
+        'auto-rejected after ${StaffRegistrationPolicy.autoRejectAfter.inHours} '
+        'hours without review.',
+        color: AppColors.warningOrange,
+      );
+      ref.invalidate(pendingStaffProvider);
+    } catch (e) {
+      // Auto-rejection is best-effort; the list must still load for review.
+      debugPrint('⚠️ [StaffApprovals] Auto-reject sweep failed: $e');
+    }
+  }
+
+  void _goToPage(int page) {
+    if (page == _page) return;
+    setState(() => _page = page);
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    }
+  }
 
   Future<void> _approve(UserProfileModel staff) async {
     final confirmed = await showDialog<bool>(
@@ -251,6 +306,13 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
       );
     }
 
+    if (isAdmin && !_autoRejectScheduled) {
+      _autoRejectScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _autoRejectExpired();
+      });
+    }
+
     final pendingAsync = ref.watch(pendingStaffProvider);
 
     return Scaffold(
@@ -269,9 +331,17 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
             return const _EmptyState();
           }
 
+          final pageCount = StaffRegistrationPolicy.pageCount(staff.length);
+          final page = StaffRegistrationPolicy.clampPage(
+            _page,
+            staff.length,
+          );
+          final visibleStaff = StaffRegistrationPolicy.pageSlice(staff, page);
+
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(pendingStaffProvider),
             child: ListView(
+              controller: _scrollController,
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               children: [
                 if (!EmailService().isConfigured) ...[
@@ -313,6 +383,7 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
                     border: Border.all(color: AppColors.tealBorder),
                   ),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(Icons.info_outline_rounded,
                           color: AppColors.infoBlue),
@@ -321,7 +392,10 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
                         child: Text(
                           '${staff.length} staff registration'
                           '${staff.length == 1 ? '' : 's'} waiting for review. '
-                          'Approving sends an email to the staff member.',
+                          'Showing ${StaffRegistrationPolicy.approvalsPageSize} '
+                          'per page. Approving sends an email to the staff '
+                          'member. '
+                          '${StaffRegistrationPolicy.autoRejectDescription}',
                           style: TextStyle(
                             fontSize: 13,
                             color: AppColors.navySecondary,
@@ -333,7 +407,7 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                for (final member in staff) ...[
+                for (final member in visibleStaff) ...[
                   _StaffCard(
                     staff: member,
                     initials: _initials(member.fullName),
@@ -344,10 +418,147 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
                   ),
                   const SizedBox(height: 12),
                 ],
+                if (pageCount > 1)
+                  _ApprovalPagination(
+                    page: page,
+                    pageCount: pageCount,
+                    itemCount: staff.length,
+                    pageSize: StaffRegistrationPolicy.approvalsPageSize,
+                    onPageChanged: _goToPage,
+                  ),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _ApprovalPagination extends StatelessWidget {
+  final int page;
+  final int pageCount;
+  final int itemCount;
+  final int pageSize;
+  final ValueChanged<int> onPageChanged;
+
+  const _ApprovalPagination({
+    required this.page,
+    required this.pageCount,
+    required this.itemCount,
+    required this.pageSize,
+    required this.onPageChanged,
+  });
+
+  /// Page indexes to render as numbered buttons. Short queues show every page;
+  /// longer queues show a five-page window around the current page.
+  List<int> get _visiblePages {
+    if (pageCount <= 7) {
+      return List<int>.generate(pageCount, (index) => index);
+    }
+    final start = (page - 2).clamp(0, pageCount - 5);
+    return List<int>.generate(5, (index) => start + index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final first = itemCount == 0 ? 0 : page * pageSize + 1;
+    final last = ((page + 1) * pageSize).clamp(0, itemCount);
+
+    return Container(
+      margin: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: Column(
+        children: [
+          Text(
+            'Showing $first–$last of $itemCount pending registrations',
+            style: TextStyle(fontSize: 12, color: AppColors.navyMuted),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final index in _visiblePages)
+                _PageNumberButton(
+                  pageNumber: index + 1,
+                  selected: index == page,
+                  onTap: () => onPageChanged(index),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: page > 0 ? () => onPageChanged(page - 1) : null,
+                  icon: const Icon(Icons.chevron_left_rounded, size: 18),
+                  label: const Text('Previous'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: page < pageCount - 1
+                      ? () => onPageChanged(page + 1)
+                      : null,
+                  icon: const Icon(Icons.chevron_right_rounded, size: 18),
+                  label: const Text('Next'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PageNumberButton extends StatelessWidget {
+  final int pageNumber;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _PageNumberButton({
+    required this.pageNumber,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: 'Page $pageNumber',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: 34,
+          height: 34,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: selected ? AppColors.navyPrimary : AppColors.surfaceMuted,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            '$pageNumber',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: selected ? Colors.white : AppColors.navySecondary,
+            ),
+          ),
+        ),
       ),
     );
   }
