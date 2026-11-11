@@ -185,8 +185,9 @@ class _OrderRequestFormScreenState
       final estimatedPrice = _plateStylePrices[_selectedStyle] ?? 0.0;
       // "Other" saves the brand the customer typed instead of the literal
       // placeholder so staff never has to guess.
-      final selectedMake =
-          _isOtherMake ? _otherMakeCtrl.text.trim().toUpperCase() : _selectedMake;
+      final selectedMake = _isOtherMake
+          ? _otherMakeCtrl.text.trim().toUpperCase()
+          : _selectedMake;
       final plateSpecSummary =
           '${_selectedStyle.toUpperCase()} | Reg: $_selectedRegion | Make: $selectedMake';
 
@@ -215,8 +216,8 @@ class _OrderRequestFormScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                const Text('Plate order request submitted! Awaiting staff review.'),
+            content: const Text(
+                'Plate order request submitted! Awaiting staff review.'),
             backgroundColor: AppColors.tealDark,
           ),
         );
@@ -474,8 +475,8 @@ class _OrderRequestFormScreenState
             isExpanded: true,
             decoration: InputDecoration(
               labelText: 'Plate Shape / Style *',
-              prefixIcon: Icon(Icons.style_outlined,
-                  color: AppColors.navyPrimary),
+              prefixIcon:
+                  Icon(Icons.style_outlined, color: AppColors.navyPrimary),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               contentPadding:
@@ -500,8 +501,8 @@ class _OrderRequestFormScreenState
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: 'Region *',
-                    prefixIcon: Icon(Icons.map_outlined,
-                        color: AppColors.navyPrimary),
+                    prefixIcon:
+                        Icon(Icons.map_outlined, color: AppColors.navyPrimary),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                     contentPadding: const EdgeInsets.symmetric(
@@ -557,20 +558,21 @@ class _OrderRequestFormScreenState
             TextFormField(
               controller: _otherMakeCtrl,
               textCapitalization: TextCapitalization.characters,
+              // Keep the brand short enough for the plate preview and order
+              // cards; 20 characters covers every common make.
+              inputFormatters: motorcycleBrandInputFormatters,
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 labelText: 'Specify Motorcycle Brand *',
                 hintText: 'e.g. MOTORSTAR, LIFAN, LONCIN',
-                prefixIcon: Icon(Icons.edit_outlined,
-                    color: AppColors.navyPrimary),
+                prefixIcon:
+                    Icon(Icons.edit_outlined, color: AppColors.navyPrimary),
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               ),
-              validator: (v) => (v == null || v.trim().isEmpty)
-                  ? 'Enter the motorcycle brand'
-                  : null,
+              validator: (v) => validateMotorcycleBrand(v, required: true),
             ),
           ],
         ],
@@ -603,8 +605,8 @@ class _OrderRequestFormScreenState
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(
               labelText: 'Full Name *',
-              prefixIcon: Icon(Icons.person_outline,
-                  color: AppColors.navyPrimary),
+              prefixIcon:
+                  Icon(Icons.person_outline, color: AppColors.navyPrimary),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               contentPadding:
@@ -621,8 +623,8 @@ class _OrderRequestFormScreenState
             inputFormatters: contactNumberInputFormatters,
             decoration: InputDecoration(
               labelText: 'Mobile Phone Number *',
-              prefixIcon: Icon(Icons.phone_outlined,
-                  color: AppColors.navyPrimary),
+              prefixIcon:
+                  Icon(Icons.phone_outlined, color: AppColors.navyPrimary),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               contentPadding:

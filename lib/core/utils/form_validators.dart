@@ -24,6 +24,10 @@ const int kOrderNotesMaxLength = 30;
 /// photo alone rarely explains the problem.
 const int kReturnNotesMaxLength = 150;
 
+/// Free-text motorcycle brands are capped at 20 characters: that covers the
+/// longest common makes while keeping the plate preview and order cards tidy.
+const int kMotorcycleBrandMaxLength = 20;
+
 /// Keeps the tracking-number fields at the courier's 15-character format and
 /// blocks characters that can never appear in a tracking code.
 final List<TextInputFormatter> trackingNumberInputFormatters =
@@ -60,6 +64,13 @@ final List<TextInputFormatter> orderNotesInputFormatters = <TextInputFormatter>[
 final List<TextInputFormatter> returnNotesInputFormatters =
     <TextInputFormatter>[
   LengthLimitingTextInputFormatter(kReturnNotesMaxLength),
+];
+
+/// Caps a free-text motorcycle brand at [kMotorcycleBrandMaxLength]
+/// characters.
+final List<TextInputFormatter> motorcycleBrandInputFormatters =
+    <TextInputFormatter>[
+  LengthLimitingTextInputFormatter(kMotorcycleBrandMaxLength),
 ];
 
 /// Trims [value] down to [maxLength] characters.
@@ -155,6 +166,22 @@ String? validateReturnNotes(String? value, {bool required = false}) {
   }
   if (notes.length > kReturnNotesMaxLength) {
     return 'Defect description must be $kReturnNotesMaxLength characters or fewer';
+  }
+  return null;
+}
+
+/// Validates a free-text motorcycle brand against
+/// [kMotorcycleBrandMaxLength].
+///
+/// Set [required] to true where the brand must not be blank.
+String? validateMotorcycleBrand(String? value, {bool required = false}) {
+  final brand = (value ?? '').trim();
+  if (brand.isEmpty) {
+    return required ? 'Enter the motorcycle brand' : null;
+  }
+  if (brand.length > kMotorcycleBrandMaxLength) {
+    return 'Motorcycle brand must be '
+        '$kMotorcycleBrandMaxLength characters or fewer';
   }
   return null;
 }

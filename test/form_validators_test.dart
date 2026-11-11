@@ -162,6 +162,37 @@ void main() {
     });
   });
 
+  group('validateMotorcycleBrand', () {
+    test('accepts common brands and empty optional values', () {
+      expect(validateMotorcycleBrand('MOTORSTAR'), isNull);
+      expect(validateMotorcycleBrand('HONDA'), isNull);
+      expect(validateMotorcycleBrand(''), isNull);
+      expect(validateMotorcycleBrand(null), isNull);
+    });
+
+    test('requires a brand when asked', () {
+      expect(
+        validateMotorcycleBrand('  ', required: true),
+        'Enter the motorcycle brand',
+      );
+    });
+
+    test('accepts a brand at the configured limit', () {
+      expect(
+        validateMotorcycleBrand('a' * kMotorcycleBrandMaxLength),
+        isNull,
+      );
+    });
+
+    test('rejects a brand longer than the configured limit', () {
+      expect(
+        validateMotorcycleBrand('a' * (kMotorcycleBrandMaxLength + 1)),
+        'Motorcycle brand must be '
+        '$kMotorcycleBrandMaxLength characters or fewer',
+      );
+    });
+  });
+
   group('limitLength', () {
     test('keeps short values untouched', () {
       expect(limitLength('Makati', 35), 'Makati');
@@ -232,6 +263,17 @@ void main() {
       expect(
         _apply(returnNotesInputFormatters, 'd' * 200),
         'd' * kReturnNotesMaxLength,
+      );
+    });
+
+    test('motorcycle brands stop at 20 characters', () {
+      expect(
+        _apply(motorcycleBrandInputFormatters, 'MOTORSTARSUPERLONGNAME'),
+        'MOTORSTARSUPERLONGNAME'.substring(0, kMotorcycleBrandMaxLength),
+      );
+      expect(
+        _apply(motorcycleBrandInputFormatters, 'a' * 60),
+        'a' * kMotorcycleBrandMaxLength,
       );
     });
   });
