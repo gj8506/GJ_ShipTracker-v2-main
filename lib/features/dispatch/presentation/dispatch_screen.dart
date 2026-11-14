@@ -130,6 +130,7 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
         platform: _selectedPlatform,
         courier: _selectedCourier,
         customerId: _scannedCustomerId,
+        orderRequestId: _pendingOrderId,
         customerName: _customerNameController.text.trim(),
         contactNumber: _contactController.text.trim(),
         address: _addressController.text.trim(),

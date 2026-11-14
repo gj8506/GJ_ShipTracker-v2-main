@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/money_format.dart';
 import '../../../core/utils/order_pricing.dart';
+import '../../../core/utils/order_status.dart';
 import '../../auth/presentation/auth_providers.dart';
 import 'order_admin_providers.dart';
 
@@ -30,8 +31,10 @@ class _AdminOrderRequestsScreenState
     'APPROVED',
     'IN_PRODUCTION',
     'DISPATCHED',
+    'IN_TRANSIT',
     'DELIVERED',
     'CANCELLED',
+    'RETURNED',
   ];
 
   final _searchController = TextEditingController();
@@ -162,8 +165,9 @@ class _AdminOrderRequestsScreenState
   }
 
   bool _isVisible(Map<String, dynamic> order) {
-    final status = _value(order, ['status']).toLowerCase();
-    if (_statusFilter != 'All' && status != _statusFilter.toLowerCase()) {
+    final status = normalizeOrderStatus(_value(order, ['status']));
+    if (_statusFilter != 'All' &&
+        status != normalizeOrderStatus(_statusFilter)) {
       return false;
     }
 
@@ -579,15 +583,20 @@ class _AdminOrderRequestsScreenState
   }
 
   Color _statusColor(String status) {
-    switch (status.trim().toLowerCase()) {
+    switch (normalizeOrderStatus(status)) {
       case 'approved':
       case 'in_production':
+      case 'printed':
+      case 'packed':
         return AppColors.statusProcessing;
       case 'dispatched':
         return AppColors.statusDispatched;
+      case 'in_transit':
+        return AppColors.statusInTransit;
       case 'delivered':
         return AppColors.statusDelivered;
       case 'cancelled':
+      case 'returned':
         return AppColors.statusCancelled;
       default:
         return AppColors.statusPending;

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:developer' as developer;
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/order_status.dart';
 import '../domain/parcel_model.dart';
 
 class ParcelRepository {
@@ -13,6 +14,8 @@ class ParcelRepository {
 
   CollectionReference get _parcelsCol =>
       _firestore.collection(AppConstants.collectionParcels);
+
+  CollectionReference get _ordersCol => _firestore.collection('order_requests');
 
   // Real-time stream of all parcels (newest first)
   Stream<List<ParcelModel>> getParcelsStream() {
@@ -65,32 +68,94 @@ class ParcelRepository {
 
     await _parcelsCol.doc(id).update(updateData);
 
-    // TRIGGER NOTIFICATION AFTER SUCCESSFUL STATUS UPDATE
-    _triggerOrderStatusNotification(id, status);
+    // Customers cannot read `parcels` (Firestore rules restrict it to staff),
+    // so "My Orders" is driven entirely by `order_requests`. Mirror the new
+    // parcel status onto the linked order, otherwise the customer keeps seeing
+    // the last status dispatch wrote until someone edits the order by hand.
+    final parcelDoc = await _parcelsCol.doc(id).get();
+    final parcelData = parcelDoc.data() as Map<String, dynamic>?;
+    if (parcelData != null) {
+      await _syncLinkedOrderStatus(parcelData, status);
+      _triggerOrderStatusNotification(parcelData, status);
+    }
+  }
+
+  // Mirrors a parcel status onto the customer's order request. The order is
+  // matched by `orderRequestId` when the parcel was created from an order, and
+  // otherwise by the tracking number. Failures are logged instead of thrown:
+  // the parcel update already succeeded, and a missing/foreign order should not
+  // make the status change look unsuccessful to staff.
+  Future<void> _syncLinkedOrderStatus(
+    Map<String, dynamic> parcelData,
+    String newStatus,
+  ) async {
+    final normalizedStatus = orderStatusFromParcel(newStatus);
+
+    final update = <String, dynamic>{
+      // Order requests store statuses uppercased (`DISPATCHED`), while parcel
+      // statuses are Title Case (`In Transit`).
+      'status': normalizedStatus,
+      // Keep the raw, human-readable value so the order can present it without
+      // guessing how the uppercase form should be capitalised.
+      'parcelStatus': newStatus,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+    if (newStatus == AppConstants.statusDelivered) {
+      update['deliveredAt'] = FieldValue.serverTimestamp();
+    }
+
+    try {
+      final orderRequestId =
+          (parcelData['orderRequestId'] as String?)?.trim() ?? '';
+      if (orderRequestId.isNotEmpty) {
+        final orderDoc = await _ordersCol.doc(orderRequestId).get();
+        if (orderDoc.exists) {
+          await orderDoc.reference.update(update);
+          return;
+        }
+      }
+
+      final trackingNumber =
+          (parcelData['trackingNumber'] as String?)?.trim() ?? '';
+      if (trackingNumber.isEmpty) return;
+
+      // Fallback for parcels dispatched before `orderRequestId` was stored.
+      final matches = await _ordersCol
+          .where('trackingNumber', isEqualTo: trackingNumber)
+          .get();
+      if (matches.docs.isEmpty) return;
+
+      final batch = _firestore.batch();
+      for (final doc in matches.docs) {
+        batch.update(doc.reference, update);
+      }
+      await batch.commit();
+    } catch (e) {
+      developer.log(
+        'Failed to sync parcel status to the linked order request',
+        name: 'parcel_repository',
+        error: e,
+      );
+    }
   }
 
   // --- INTERNAL HELPER FOR CLOUDFLARE WEBHOOK ---
   Future<void> _triggerOrderStatusNotification(
-      String parcelId, String newStatus) async {
+    Map<String, dynamic> data,
+    String newStatus,
+  ) async {
     try {
-      // 1. Fetch the parcel to get customer ID and tracking number
-      final parcelDoc = await _parcelsCol.doc(parcelId).get();
-      if (!parcelDoc.exists) return;
-
-      final data = parcelDoc.data() as Map<String, dynamic>?;
-      if (data == null) return;
-
       final customerId = data['customerId'];
       final trackingNumber = data['trackingNumber'] ?? 'Unknown';
 
       if (customerId != null && customerId.toString().isNotEmpty) {
-        // 2. Fetch the customer's FCM token from the users collection
+        // 1. Fetch the customer's FCM token from the users collection
         final userDoc =
             await _firestore.collection('users').doc(customerId).get();
         final fcmToken = userDoc.data()?['fcmToken'] as String?;
 
         if (fcmToken != null) {
-          // 3. Send the webhook
+          // 2. Send the webhook
           await http.post(
             Uri.parse(
                 'https://shiptracker-fcm.artlorence-hveridiano.workers.dev/'),

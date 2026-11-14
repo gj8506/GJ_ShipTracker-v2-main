@@ -7,6 +7,10 @@ class ParcelModel {
   final String trackingNumber;
   final String platform; // Shopee, Lazada, TikTok Shop
   final String? customerId; // ADDED: Links the QR ID to prevent duplicates
+  // Links the parcel to the customer's submitted order request so status
+  // changes can be mirrored onto `order_requests` (the only collection
+  // customers are allowed to read).
+  final String? orderRequestId;
   final String customerName;
   final String? contactNumber;
   final String? address;
@@ -27,6 +31,7 @@ class ParcelModel {
     required this.trackingNumber,
     required this.platform,
     this.customerId,
+    this.orderRequestId,
     required this.customerName,
     this.contactNumber,
     this.address,
@@ -49,6 +54,7 @@ class ParcelModel {
       trackingNumber: data['trackingNumber'] as String? ?? '',
       platform: data['platform'] as String? ?? AppConstants.platformShopee,
       customerId: data['customerId'] as String?,
+      orderRequestId: data['orderRequestId'] as String?,
       customerName: data['customerName'] as String? ?? 'Customer',
       contactNumber: data['contactNumber'] as String?,
       address: data['address'] as String?,
@@ -72,6 +78,7 @@ class ParcelModel {
       'trackingNumber': trackingNumber,
       'platform': platform,
       if (customerId != null) 'customerId': customerId,
+      if (orderRequestId != null) 'orderRequestId': orderRequestId,
       'customerName': customerName,
       'contactNumber': contactNumber,
       'address': address,
@@ -101,6 +108,7 @@ class ParcelModel {
       trackingNumber: trackingNumber,
       platform: platform,
       customerId: customerId,
+      orderRequestId: orderRequestId,
       customerName: customerName,
       contactNumber: contactNumber,
       address: address,

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/money_format.dart';
 import '../../../core/utils/order_pricing.dart';
+import '../../../core/utils/order_status.dart';
 import 'customer_portal_providers.dart'; // Imports the secure, shared stream
 
 class CustomerMyOrdersScreen extends ConsumerStatefulWidget {
@@ -27,8 +28,23 @@ class _CustomerMyOrdersScreenState
     'pending',
     'in_production',
     'dispatched',
-    'delivered'
+    'in_transit',
+    'delivered',
+    'cancelled',
+    'returned'
   ];
+
+  /// Re-reads the customer's orders. The stream would normally update by
+  /// itself, but pulling to refresh (or tapping the AppBar button) gives staff
+  /// and customers an immediate way to confirm a status change.
+  Future<void> _refreshOrders() async {
+    ref.invalidate(customerOrdersStreamProvider);
+    try {
+      await ref.read(customerOrdersStreamProvider.future);
+    } catch (_) {
+      // The error state is rendered by the list below.
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +57,13 @@ class _CustomerMyOrdersScreenState
           'My Custom Plate Orders',
           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Refresh orders',
+            onPressed: _refreshOrders,
+            icon: const Icon(Icons.refresh_rounded),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -91,41 +114,66 @@ class _CustomerMyOrdersScreenState
               data: (orders) {
                 final filtered = orders.where((order) {
                   if (_selectedFilter == 'All') return true;
-                  final status =
-                      (order['status'] as String?)?.toLowerCase() ?? '';
-                  return status == _selectedFilter.toLowerCase();
+                  return normalizeOrderStatus(order['status']) ==
+                      normalizeOrderStatus(_selectedFilter);
                 }).toList();
 
                 if (filtered.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.inventory_2_outlined,
-                          size: 64,
-                          color: AppColors.textMuted,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'No orders match this filter',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                  return RefreshIndicator(
+                    onRefresh: _refreshOrders,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                                minHeight: constraints.maxHeight),
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.inventory_2_outlined,
+                                    size: 64,
+                                    color: AppColors.textMuted,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'No orders match this filter',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Pull down to refresh',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   );
                 }
 
-                return ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: filtered.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    return _buildOrderCard(filtered[index]);
-                  },
+                return RefreshIndicator(
+                  onRefresh: _refreshOrders,
+                  child: ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filtered.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      return _buildOrderCard(filtered[index]);
+                    },
+                  ),
                 );
               },
             ),
@@ -627,17 +675,22 @@ class _CustomerMyOrdersScreenState
   }
 
   Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
+    switch (normalizeOrderStatus(status)) {
       case 'pending':
         return AppColors.statusPending;
       case 'approved':
       case 'in_production':
+      case 'printed':
+      case 'packed':
         return AppColors.statusProcessing;
       case 'dispatched':
         return AppColors.statusReplacementDispatched;
+      case 'in_transit':
+        return AppColors.statusInTransit;
       case 'delivered':
         return AppColors.statusDelivered;
       case 'cancelled':
+      case 'returned':
         return AppColors.statusReturned;
       default:
         return AppColors.statusCancelled;

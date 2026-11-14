@@ -115,4 +115,85 @@ void main() {
     // A million-plus amount is abbreviated so the row never overflows.
     expect(find.textContaining('₱1B'), findsWidgets);
   });
+
+  testWidgets('refresh action re-reads the customer order stream',
+      (tester) async {
+    var builds = 0;
+    final order = <String, dynamic>{
+      'id': 'order-1',
+      'userId': 'customer-1',
+      'plateNumber': 'ABC 123',
+      'status': 'DELIVERED',
+      'createdAt': DateTime(2026, 11, 12),
+    };
+
+    final container = ProviderContainer(
+      overrides: [
+        customerOrdersStreamProvider.overrideWith((ref) {
+          builds++;
+          return Stream.value([order]);
+        }),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(home: CustomerMyOrdersScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final initialBuilds = builds;
+    expect(find.byTooltip('Refresh orders'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Refresh orders'));
+    await tester.pumpAndSettle();
+
+    expect(builds, greaterThan(initialBuilds),
+        reason: 'tapping refresh should rebuild the order stream');
+    expect(find.text('ABC 123'), findsOneWidget);
+  });
+
+  testWidgets('an IN_TRANSIT live status matches its filter chip',
+      (tester) async {
+    Map<String, dynamic> order(String id, String status) => {
+          'id': id,
+          'userId': 'customer-1',
+          'plateNumber': id,
+          'status': status,
+          'createdAt': DateTime(2026, 11, 12),
+        };
+
+    final container = ProviderContainer(
+      overrides: [
+        customerOrdersStreamProvider.overrideWith(
+          (ref) => Stream.value([
+            order('DISPATCHED1', 'DISPATCHED'),
+            // Written by the new parcel -> order status sync.
+            order('TRANSIT1', 'IN_TRANSIT'),
+          ]),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(home: CustomerMyOrdersScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('DISPATCHED1'), findsOneWidget);
+    expect(find.text('TRANSIT1'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilterChip, 'IN TRANSIT'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('TRANSIT1'), findsOneWidget);
+    expect(find.text('DISPATCHED1'), findsNothing);
+  });
 }
