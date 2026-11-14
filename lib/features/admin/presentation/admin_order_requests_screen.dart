@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/money_format.dart';
 import '../../../core/utils/order_pricing.dart';
 import '../../auth/presentation/auth_providers.dart';
 import 'order_admin_providers.dart';
@@ -23,11 +23,6 @@ class AdminOrderRequestsScreen extends ConsumerStatefulWidget {
 class _AdminOrderRequestsScreenState
     extends ConsumerState<AdminOrderRequestsScreen> {
   static final DateFormat _dateFormat = DateFormat('MMM d, yyyy');
-  static final NumberFormat _moneyFormat = NumberFormat.currency(
-    locale: 'en_PH',
-    symbol: '₱',
-    decimalDigits: 2,
-  );
 
   static const List<String> _statusFilters = [
     'All',
@@ -250,14 +245,19 @@ class _AdminOrderRequestsScreenState
                     ),
                   ),
                 ),
-                Text(
-                  price == null ? 'Pending quote' : _moneyFormat.format(price),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: finalPrice
-                        ? AppColors.statusDelivered
-                        : AppColors.navyPrimary,
+                Flexible(
+                  child: Text(
+                    price == null ? 'Pending quote' : formatMoneyShort(price),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: finalPrice
+                          ? AppColors.statusDelivered
+                          : AppColors.navyPrimary,
+                    ),
                   ),
                 ),
               ],
@@ -399,16 +399,19 @@ class _AdminOrderRequestsScreenState
                       ),
                     ),
                     const Spacer(),
-                    Text(
-                      price == null
-                          ? 'Pending quote'
-                          : _moneyFormat.format(price),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: finalPrice
-                            ? AppColors.statusDelivered
-                            : AppColors.navyPrimary,
+                    Flexible(
+                      child: Text(
+                        price == null ? 'Pending quote' : formatMoney(price),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: finalPrice
+                              ? AppColors.statusDelivered
+                              : AppColors.navyPrimary,
+                        ),
                       ),
                     ),
                   ],
@@ -719,14 +722,12 @@ class _PriceOverrideDialogState extends ConsumerState<_PriceOverrideDialog> {
               readOnly: _saving,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(
-                  RegExp(r'[0-9.,₱\s]'),
-                ),
-              ],
+              // Hard cap: 9 whole digits, 2 decimals, no scientific notation.
+              inputFormatters: moneyInputFormatters,
               decoration: InputDecoration(
                 labelText: 'Final price (₱)',
                 prefixText: '₱ ',
+                helperText: 'Up to ₱999,999,999.00',
                 errorText: _error,
               ),
               onSubmitted: (_) {

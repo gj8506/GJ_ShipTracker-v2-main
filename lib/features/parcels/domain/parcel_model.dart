@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/money_format.dart';
 
 class ParcelModel {
   final String id;
@@ -52,7 +53,9 @@ class ParcelModel {
       contactNumber: data['contactNumber'] as String?,
       address: data['address'] as String?,
       items: data['items'] as String?,
-      amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
+      // A corrupt or oversized value must never reach the UI, charts or
+      // invoices; treat it as unknown (0) instead of rendering 1e+32.
+      amount: sanitizeMoneyValue(data['amount']) ?? 0.0,
       courier: data['courier'] as String? ?? AppConstants.courierSPX,
       status: data['status'] as String? ?? AppConstants.statusPending,
       notes: data['notes'] as String?,

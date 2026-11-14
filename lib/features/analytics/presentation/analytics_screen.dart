@@ -12,6 +12,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/money_format.dart';
 import '../../forecasting/presentation/forecasting_screen.dart';
 
 // -------------------------------------------------------------
@@ -95,6 +96,65 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   bool _isProcessingSample = false;
   int _touchedBarIndex = -1;
+
+  // Filtering the parcel stream on every rebuild (including each chart touch)
+  // is wasted work on large databases. The filtered lists are memoised for the
+  // current stream emission and selected range.
+  List<Map<String, dynamic>>? _cachedParcelSource;
+  List<Map<String, dynamic>>? _cachedFilteredParcels;
+  int _cachedParcelDays = -1;
+
+  List<Map<String, dynamic>>? _cachedReturnSource;
+  List<Map<String, dynamic>>? _cachedFilteredReturns;
+  int _cachedReturnDays = -1;
+
+  List<Map<String, dynamic>> _filterParcels(
+    List<Map<String, dynamic>> source,
+    int days,
+  ) {
+    if (identical(source, _cachedParcelSource) &&
+        days == _cachedParcelDays &&
+        _cachedFilteredParcels != null) {
+      return _cachedFilteredParcels!;
+    }
+
+    final cutoffDate = DateTime.now().subtract(Duration(days: days));
+    final filtered = <Map<String, dynamic>>[];
+    for (final parcel in source) {
+      final date = _extractDate(
+        parcel['createdAt'] ?? parcel['dispatchedAt'] ?? parcel['dateShipped'],
+      );
+      if (date.isAfter(cutoffDate)) filtered.add(parcel);
+    }
+
+    _cachedParcelSource = source;
+    _cachedParcelDays = days;
+    _cachedFilteredParcels = filtered;
+    return filtered;
+  }
+
+  List<Map<String, dynamic>> _filterReturns(
+    List<Map<String, dynamic>> source,
+    int days,
+  ) {
+    if (identical(source, _cachedReturnSource) &&
+        days == _cachedReturnDays &&
+        _cachedFilteredReturns != null) {
+      return _cachedFilteredReturns!;
+    }
+
+    final cutoffDate = DateTime.now().subtract(Duration(days: days));
+    final filtered = <Map<String, dynamic>>[];
+    for (final item in source) {
+      final date = _extractDate(item['reportedAt'] ?? item['createdAt']);
+      if (date.isAfter(cutoffDate)) filtered.add(item);
+    }
+
+    _cachedReturnSource = source;
+    _cachedReturnDays = days;
+    _cachedFilteredReturns = filtered;
+    return filtered;
+  }
 
   // -----------------------------------------------------------
   // SAMPLE DATA ENGINE (14 MONTHS: POPULATES ANALYTICS & FORECASTING)
@@ -306,28 +366,21 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final allReturns = returnsAsync.value ?? [];
     final isLoading = parcelsAsync.isLoading && allParcels.isEmpty;
 
-    final now = DateTime.now();
-    final cutoffDate = now.subtract(Duration(days: selectedRange.days));
+    final filteredParcels = _filterParcels(allParcels, selectedRange.days);
+    final filteredReturns = _filterReturns(allReturns, selectedRange.days);
 
-    final filteredParcels = allParcels.where((p) {
-      final date =
-          _extractDate(p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
-      return date.isAfter(cutoffDate);
-    }).toList();
-
-    final filteredReturns = allReturns.where((r) {
-      final date = _extractDate(r['reportedAt'] ?? r['createdAt']);
-      return date.isAfter(cutoffDate);
-    }).toList();
-
+    // Only sane amounts feed the totals. A corrupt record is skipped instead of
+    // poisoning every tile and bar with a value like 1e+32.
     double totalSales = 0;
-    for (var p in filteredParcels) {
-      final amt = p['amount'] ?? p['totalPrice'];
-      if (amt is num) {
-        totalSales += amt.toDouble();
-      } else if (amt is String) {
-        totalSales += double.tryParse(amt) ?? 0.0;
+    int skippedAmounts = 0;
+    for (final parcel in filteredParcels) {
+      final raw = parcel['amount'] ?? parcel['totalPrice'];
+      final amount = sanitizeMoneyValue(raw);
+      if (amount == null) {
+        if (raw != null) skippedAmounts++;
+        continue;
       }
+      totalSales += amount;
     }
 
     final totalDispatched = filteredParcels.length;
@@ -394,6 +447,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     _buildForecastingBanner(context),
                     const SizedBox(height: 16),
                     _buildTimeRangeSelector(selectedRange),
+                    if (skippedAmounts > 0) ...[
+                      const SizedBox(height: 10),
+                      _buildSkippedAmountsNotice(skippedAmounts),
+                    ],
                     const SizedBox(height: 16),
                     _buildMetricCards(
                       totalSales: totalSales,
@@ -661,6 +718,44 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   // -------------------------------------------------------------
   // METRIC CARDS (2X2 GRID)
   // -------------------------------------------------------------
+  /// Explains why a record is not counted in the totals. The record stays in
+  /// Firestore; it is only excluded from the chart so one bad document cannot
+  /// make Analytics freeze.
+  Widget _buildSkippedAmountsNotice(int count) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.warningSurface,
+        borderRadius: BorderRadius.circular(10),
+        border:
+            Border.all(color: AppColors.warningOrange.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            size: 18,
+            color: AppColors.warningOrange,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '$count record${count == 1 ? '' : 's'} skipped: the amount is '
+              'missing, negative or above ₱999,999,999. Only valid amounts are '
+              'charted.',
+              style: TextStyle(
+                fontSize: 11,
+                height: 1.35,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMetricCards({
     required double totalSales,
     required int totalDispatched,
@@ -668,8 +763,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     required String returnRate,
     required String rangeTitle,
   }) {
-    final currencyFormatter =
-        NumberFormat.currency(locale: 'en_PH', symbol: '₱', decimalDigits: 2);
+    final totalSalesLabel = formatMoneyShort(totalSales);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -688,7 +782,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             Expanded(
               child: _buildMetricTile(
                 title: 'Total Sales',
-                value: currencyFormatter.format(totalSales),
+                value: totalSalesLabel,
                 icon: Icons.payments_outlined,
                 color: AppColors.statusDelivered,
                 bgColor: AppColors.statusDeliveredContainer,
@@ -783,14 +877,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.navyPrimary,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navyPrimary,
+              ),
             ),
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -809,6 +907,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final List<String> labels = [];
     final List<double> values = [];
 
+    // Amounts are sanitised once per record: invalid or oversized values count
+    // as zero here, which keeps the axis and the bars stable.
+    double amountOf(Map<String, dynamic> parcel) {
+      final raw = parcel['amount'] ?? parcel['totalPrice'];
+      return sanitizeMoneyValue(raw) ?? 0.0;
+    }
+
     if (range == AnalyticsTimeRange.threeMonths) {
       for (int i = 2; i >= 0; i--) {
         final targetMonth = DateTime(now.year, now.month - i, 1);
@@ -820,9 +925,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
           if (pDate.year == targetMonth.year &&
               pDate.month == targetMonth.month) {
-            final amt = p['amount'] ?? p['totalPrice'];
-            if (amt is num) monthRevenue += amt.toDouble();
-            if (amt is String) monthRevenue += double.tryParse(amt) ?? 0.0;
+            monthRevenue += amountOf(p);
           }
         }
         values.add(monthRevenue);
@@ -839,9 +942,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           if (pDate.year == day.year &&
               pDate.month == day.month &&
               pDate.day == day.day) {
-            final amt = p['amount'] ?? p['totalPrice'];
-            if (amt is num) dayRev += amt.toDouble();
-            if (amt is String) dayRev += double.tryParse(amt) ?? 0.0;
+            dayRev += amountOf(p);
           }
         }
         values.add(dayRev);
@@ -857,9 +958,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           final pDate = _extractDate(
               p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
           if (pDate.isAfter(start) && pDate.isBefore(end)) {
-            final amt = p['amount'] ?? p['totalPrice'];
-            if (amt is num) weekRev += amt.toDouble();
-            if (amt is String) weekRev += double.tryParse(amt) ?? 0.0;
+            weekRev += amountOf(p);
           }
         }
         values.add(weekRev);
@@ -876,17 +975,17 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               p['createdAt'] ?? p['dispatchedAt'] ?? p['dateShipped']);
           if (pDate.year == targetMonth.year &&
               pDate.month == targetMonth.month) {
-            final amt = p['amount'] ?? p['totalPrice'];
-            if (amt is num) rev += amt.toDouble();
-            if (amt is String) rev += double.tryParse(amt) ?? 0.0;
+            rev += amountOf(p);
           }
         }
         values.add(rev);
       }
     }
 
-    final double maxVal = values.isEmpty ? 1000 : (values.reduce(max) * 1.25);
-    final safeMaxY = maxVal <= 0 ? 1000.0 : maxVal;
+    // A single bad value must not stretch the axis or make the chart lay out a
+    // meaningless scale: bound the peak to the money cap.
+    final peak = values.isEmpty ? 0.0 : values.reduce(max);
+    final safeMaxY = peak <= 0 ? 1000.0 : min(peak * 1.25, kMaxMoneyAmount);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1513,8 +1612,6 @@ class _ExcelExportEngine {
     final excel = Excel.createExcel();
     final defaultSheet = excel.getDefaultSheet() ?? 'Sheet1';
 
-    final currencyFormatter =
-        NumberFormat.currency(locale: 'en_PH', symbol: '₱ ', decimalDigits: 2);
     final dateFormatter = DateFormat('yyyy-MM-dd HH:mm');
 
     final headerStyle = CellStyle(
@@ -1590,10 +1687,8 @@ class _ExcelExportEngine {
         final courier = (p['courier'] ?? 'Standard').toString();
         final customer = (p['customerName'] ?? 'N/A').toString();
         final contact = (p['contactNumber'] ?? '-').toString();
-        final amt = p['amount'] ?? p['totalPrice'];
-        double amount = 0.0;
-        if (amt is num) amount = amt.toDouble();
-        if (amt is String) amount = double.tryParse(amt) ?? 0.0;
+        final amount =
+            sanitizeMoneyValue(p['amount'] ?? p['totalPrice']) ?? 0.0;
         final status = (p['status'] ?? 'Pending').toString();
 
         platformTotalRevenue += amount;
@@ -1682,10 +1777,8 @@ class _ExcelExportEngine {
 
       final count = pList.length;
       final rev = pList.fold<double>(0.0, (total, p) {
-        final amt = p['amount'] ?? p['totalPrice'];
-        if (amt is num) return total + amt.toDouble();
-        if (amt is String) return total + (double.tryParse(amt) ?? 0.0);
-        return total;
+        return total +
+            (sanitizeMoneyValue(p['amount'] ?? p['totalPrice']) ?? 0.0);
       });
 
       grandTotalParcels += count;
@@ -1694,14 +1787,14 @@ class _ExcelExportEngine {
       summarySheet.appendRow([
         TextCellValue(platform),
         IntCellValue(count),
-        TextCellValue(currencyFormatter.format(rev)),
+        TextCellValue(formatMoney(rev)),
       ]);
     }
 
     summarySheet.appendRow([
       TextCellValue('GRAND TOTAL'),
       IntCellValue(grandTotalParcels),
-      TextCellValue(currencyFormatter.format(grandTotalRevenue)),
+      TextCellValue(formatMoney(grandTotalRevenue)),
     ]);
     summarySheet.appendRow([TextCellValue('')]);
 
@@ -1715,10 +1808,8 @@ class _ExcelExportEngine {
         ? (returns.length / grandTotalParcels * 100).toStringAsFixed(2)
         : '0.00';
     final returnLostValue = returns.fold<double>(0.0, (total, r) {
-      final amt = r['amount'] ?? r['totalPrice'];
-      if (amt is num) return total + amt.toDouble();
-      if (amt is String) return total + (double.tryParse(amt) ?? 0.0);
-      return total;
+      return total +
+          (sanitizeMoneyValue(r['amount'] ?? r['totalPrice']) ?? 0.0);
     });
 
     summarySheet.appendRow(
@@ -1727,7 +1818,7 @@ class _ExcelExportEngine {
         [TextCellValue('Return Rate'), TextCellValue('$returnRate %')]);
     summarySheet.appendRow([
       TextCellValue('Return Impact Value'),
-      TextCellValue(currencyFormatter.format(returnLostValue))
+      TextCellValue(formatMoney(returnLostValue))
     ]);
 
     summarySheet.setColumnWidth(0, 32.0);

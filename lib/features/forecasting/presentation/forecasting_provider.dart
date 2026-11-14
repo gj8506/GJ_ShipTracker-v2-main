@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/money_format.dart';
 import '../domain/forecast_models.dart';
 import '../domain/forecasting_engine.dart';
 
@@ -34,8 +35,10 @@ final historicalSalesProvider =
     }
 
     final platform = (data['platform'] as String? ?? 'Direct / Walk-in').trim();
-    final amount = (data['amount'] as num? ?? data['totalPrice'] as num? ?? 0.0)
-        .toDouble();
+    // Corrupt or oversized amounts are treated as zero so one bad document
+    // cannot distort the forecast or freeze its chart.
+    final amount =
+        sanitizeMoneyValue(data['amount'] ?? data['totalPrice']) ?? 0.0;
 
     final key = '${date.year}-${date.month}_$platform';
     final existing = buckets[key];

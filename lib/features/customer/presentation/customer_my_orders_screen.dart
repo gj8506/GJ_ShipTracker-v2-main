@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/money_format.dart';
 import '../../../core/utils/order_pricing.dart';
 import 'customer_portal_providers.dart'; // Imports the secure, shared stream
 
@@ -18,11 +19,6 @@ class CustomerMyOrdersScreen extends ConsumerStatefulWidget {
 class _CustomerMyOrdersScreenState
     extends ConsumerState<CustomerMyOrdersScreen> {
   static final DateFormat _dateFormat = DateFormat('MMM d, yyyy');
-  static final NumberFormat _moneyFormat = NumberFormat.currency(
-    locale: 'en_PH',
-    symbol: '₱',
-    decimalDigits: 2,
-  );
 
   String _selectedFilter = 'All';
 
@@ -277,23 +273,31 @@ class _CustomerMyOrdersScreenState
                   Expanded(
                     child: Text(
                       'Ordered ${_formatDate(order['createdAt'])}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 11,
                         color: AppColors.textMuted,
                       ),
                     ),
                   ),
-                  Text(
-                    price == null
-                        ? 'Pending quote'
-                        : '${hasFinal ? 'Final' : 'Est.'} '
-                            '${_moneyFormat.format(price)}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      color: hasFinal
-                          ? AppColors.statusDelivered
-                          : AppColors.navyPrimary,
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      price == null
+                          ? 'Pending quote'
+                          : '${hasFinal ? 'Final' : 'Est.'} '
+                              '${formatMoneyShort(price)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: hasFinal
+                            ? AppColors.statusDelivered
+                            : AppColors.navyPrimary,
+                      ),
                     ),
                   ),
                 ],
@@ -412,23 +416,29 @@ class _CustomerMyOrdersScreenState
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              price == null
-                                  ? 'Pending quote'
-                                  : _moneyFormat.format(price),
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w900,
-                                color: hasFinal
-                                    ? AppColors.statusDelivered
-                                    : AppColors.navyPrimary,
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                price == null
+                                    ? 'Pending quote'
+                                    : formatMoney(price),
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w900,
+                                  color: hasFinal
+                                      ? AppColors.statusDelivered
+                                      : AppColors.navyPrimary,
+                                ),
                               ),
                             ),
                             if (showOriginalEstimate) ...[
                               const SizedBox(height: 2),
                               Text(
                                 'Original estimate '
-                                '${_moneyFormat.format(estimate.toDouble())}',
+                                '${formatMoney(estimate.toDouble())}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: AppColors.textMuted,

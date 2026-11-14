@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/money_format.dart';
 import '../domain/analytics_data.dart';
 
 class AnalyticsRepository {
@@ -83,7 +84,9 @@ class AnalyticsRepository {
 
       final rawAmount =
           data['amount'] ?? data['totalAmount'] ?? data['price'] ?? 0;
-      final amount = (rawAmount is num) ? rawAmount.toDouble() : 0.0;
+      // Skip the numeric value of corrupt documents without dropping the order
+      // itself: a 1e+32 amount used to break every chart that consumed it.
+      final amount = sanitizeMoneyValue(rawAmount) ?? 0.0;
 
       final rawPlatform = (data['platform'] ?? 'Direct').toString().trim();
       final platform = _canonicalPlatform(rawPlatform);

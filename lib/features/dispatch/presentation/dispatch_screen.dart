@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/form_validators.dart';
+import '../../../core/utils/money_format.dart';
 import '../../parcels/domain/parcel_model.dart';
 import '../../parcels/presentation/parcel_providers.dart';
 import '../../auth/presentation/auth_providers.dart';
@@ -120,7 +121,9 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
 
     try {
       final userProfile = ref.read(userProfileProvider).value;
-      final amount = double.tryParse(_amountController.text.trim()) ?? 0.0;
+      // Guard rails: even if validation is bypassed, never persist an absurd
+      // amount that would break Analytics and order cards.
+      final amount = sanitizeMoneyValue(_amountController.text.trim()) ?? 0.0;
 
       final newParcel = ParcelModel(
         trackingNumber: _trackingController.text.trim(),
@@ -348,14 +351,17 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                       controller: _amountController,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
+                      // 9 whole digits and 2 decimals; blocks pasted
+                      // scientific notation such as `1e32`.
+                      inputFormatters: moneyInputFormatters,
                       decoration: const InputDecoration(
                         labelText: 'Final Amount (₱) *',
                         prefixText: '₱ ',
                         hintText: '0.00',
+                        helperText: 'Up to ₱999,999,999.00',
                       ),
-                      validator: (val) => val == null || val.trim().isEmpty
-                          ? 'Enter amount'
-                          : null,
+                      validator: (val) =>
+                          validateMoneyInput(val, label: 'final amount'),
                     ),
                   ),
                 ],

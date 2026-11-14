@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/money_format.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../domain/parcel_model.dart';
 import 'parcel_providers.dart';
@@ -310,12 +311,18 @@ class ParcelDetailScreen extends ConsumerWidget {
                         Text('Declared Amount',
                             style: TextStyle(
                                 fontSize: 14, color: AppColors.textSecondary)),
-                        Text(
-                          '₱${parcel.amount.toStringAsFixed(2)}',
-                          style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.tealDark),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: Text(
+                            formatMoney(parcel.amount),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                            style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.tealDark),
+                          ),
                         ),
                       ],
                     ),

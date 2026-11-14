@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/money_format.dart';
 import '../../customer/data/models/order_request_model.dart';
 import '../../parcels/domain/parcel_model.dart';
 import '../../parcels/presentation/parcel_providers.dart';
@@ -31,11 +32,6 @@ class _SearchSummaryScreenState extends ConsumerState<SearchSummaryScreen> {
 
   static final DateFormat _dayFormat = DateFormat('MMM d, yyyy');
   static final DateFormat _shortDayFormat = DateFormat('MMM d');
-  static final NumberFormat _moneyFormat = NumberFormat.currency(
-    locale: 'en_PH',
-    symbol: '₱',
-    decimalDigits: 2,
-  );
 
   @override
   void dispose() {
@@ -322,7 +318,7 @@ class _SearchSummaryScreenState extends ConsumerState<SearchSummaryScreen> {
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerRight,
                       child: Text(
-                        _moneyFormat.format(totals.totalValue),
+                        formatMoneyShort(totals.totalValue),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
@@ -613,7 +609,7 @@ class _SearchSummaryScreenState extends ConsumerState<SearchSummaryScreen> {
                       ),
                     ),
                     Text(
-                      _moneyFormat.format(parcel.amount),
+                      formatMoneyShort(parcel.amount),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -695,7 +691,7 @@ class _SearchSummaryScreenState extends ConsumerState<SearchSummaryScreen> {
                       ),
                     ),
                     Text(
-                      _moneyFormat.format(order.price),
+                      formatMoney(order.price),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -814,8 +810,7 @@ class _SearchSummaryScreenState extends ConsumerState<SearchSummaryScreen> {
                   _detailRow('Phone', order.customerPhone),
                   _detailRow('Style', order.plateStyle),
                   _detailRow('Address', order.deliveryAddress),
-                  _detailRow(
-                      'Estimated price', _moneyFormat.format(order.price)),
+                  _detailRow('Estimated price', formatMoney(order.price)),
                   _detailRow('Created', _dayFormat.format(order.createdAt)),
                   if (order.notes.trim().isNotEmpty)
                     _detailRow('Notes', order.notes),

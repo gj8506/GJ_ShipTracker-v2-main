@@ -68,4 +68,51 @@ void main() {
     expect(find.text('Use a white reflective background.'), findsOneWidget);
     expect(find.text('DISPATCHED'), findsWidgets);
   });
+
+  testWidgets('corrupt or oversized amounts never break the order card',
+      (tester) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    Map<String, dynamic> order(String id, Object? amount) => {
+          'id': id,
+          'userId': 'customer-1',
+          'customerName': 'Maria Santos',
+          'plateNumber': id,
+          'plateStyle': 'Standard',
+          'status': 'DISPATCHED',
+          'estimatedPrice': amount,
+          'price': amount,
+          'createdAt': DateTime(2026, 11, 12),
+        };
+
+    final container = ProviderContainer(
+      overrides: [
+        customerOrdersStreamProvider.overrideWith(
+          (ref) => Stream.value([
+            // The value that used to make the card render a 300-character
+            // number and squeeze the date into a vertical column.
+            order('CORRUPT1', 1e32),
+            order('MAXIMUM1', 999999999.0),
+          ]),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(home: CustomerMyOrdersScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('CORRUPT1'), findsOneWidget);
+    expect(find.textContaining('Pending quote'), findsWidgets);
+    // A million-plus amount is abbreviated so the row never overflows.
+    expect(find.textContaining('₱1B'), findsWidgets);
+  });
 }
