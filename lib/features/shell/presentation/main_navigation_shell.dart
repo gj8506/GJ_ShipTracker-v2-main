@@ -65,22 +65,36 @@ class MainNavigationShell extends ConsumerWidget {
             child: MediaQuery(
               // The banner already covers the status bar while offline, so
               // drop the top inset to avoid a second empty header band.
-              data: isOffline ? media.removePadding(removeTop: true) : media,
+              data: (isOffline
+                      ? media.removePadding(removeTop: true)
+                      : media)
+                  // The Scaffold above already shrank this body for the
+                  // keyboard and stripped its bottom view inset. Re-applying
+                  // the outer MediaQuery put that inset back, so nested screens
+                  // removed it a second time and their content — such as the
+                  // Dispatch form — collapsed behind the keyboard. Keep it
+                  // stripped so the shell is the only widget that resizes.
+                  .removeViewInsets(removeBottom: true),
               child: navigationShell,
             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.navyPrimary,
-        foregroundColor: AppColors.textOnPrimary,
-        tooltip: 'Open support assistant',
-        child: const Icon(Icons.smart_toy_rounded),
-        onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (_) => const ChatbotScreen()));
-        },
-      ),
+      floatingActionButton: media.viewInsets.bottom > 0
+          // The keyboard already covers the bottom of the shell; floating the
+          // support button over the form would hide fields and the dispatch
+          // action, so tuck it away while the user is typing.
+          ? null
+          : FloatingActionButton(
+              backgroundColor: AppColors.navyPrimary,
+              foregroundColor: AppColors.textOnPrimary,
+              tooltip: 'Open support assistant',
+              child: const Icon(Icons.smart_toy_rounded),
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const ChatbotScreen()));
+              },
+            ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.chromeBlue,

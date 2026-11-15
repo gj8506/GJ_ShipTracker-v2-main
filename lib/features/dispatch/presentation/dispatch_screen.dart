@@ -209,6 +209,9 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
         ),
       ),
       body: SingleChildScrollView(
+        // Dragging the form dismisses the keyboard instead of leaving the user
+        // stuck behind it on small screens.
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -330,43 +333,32 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                 onChanged: (val) => setState(() => _selectedCourier = val!),
               ),
               const SizedBox(height: 14),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextFormField(
-                      controller: _customerNameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Customer Name *',
-                        prefixIcon: Icon(Icons.person_outline),
-                      ),
-                      validator: (val) => val == null || val.trim().isEmpty
-                          ? 'Enter name'
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 2,
-                    child: TextFormField(
-                      controller: _amountController,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      // 9 whole digits and 2 decimals; blocks pasted
-                      // scientific notation such as `1e32`.
-                      inputFormatters: moneyInputFormatters,
-                      decoration: const InputDecoration(
-                        labelText: 'Final Amount (₱) *',
-                        prefixText: '₱ ',
-                        hintText: '0.00',
-                        helperText: 'Up to ₱999,999,999.00',
-                      ),
-                      validator: (val) =>
-                          validateMoneyInput(val, label: 'final amount'),
-                    ),
-                  ),
-                ],
+              TextFormField(
+                controller: _customerNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Customer Name *',
+                  prefixIcon: Icon(Icons.person_outline),
+                ),
+                validator: (val) => val == null || val.trim().isEmpty
+                    ? 'Enter name'
+                    : null,
+              ),
+              const SizedBox(height: 14),
+              TextFormField(
+                controller: _amountController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                // 9 whole digits and 2 decimals; blocks pasted
+                // scientific notation such as `1e32`.
+                inputFormatters: moneyInputFormatters,
+                decoration: const InputDecoration(
+                  labelText: 'Final Amount (₱) *',
+                  prefixText: '₱ ',
+                  hintText: '0.00',
+                  helperText: 'Up to ₱999,999,999.00',
+                ),
+                validator: (val) =>
+                    validateMoneyInput(val, label: 'final amount'),
               ),
               const SizedBox(height: 14),
               TextFormField(

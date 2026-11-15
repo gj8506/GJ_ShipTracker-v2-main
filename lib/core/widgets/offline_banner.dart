@@ -33,13 +33,18 @@ class OfflineBanner extends ConsumerWidget {
                 Icon(Icons.wifi_off_rounded,
                     color: AppColors.textOnPrimary, size: 14),
                 const SizedBox(width: 8),
-                Text(
-                  'Offline • Working from local cache',
-                  style: TextStyle(
-                    color: AppColors.textOnPrimary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
+                Flexible(
+                  child: Text(
+                    'Offline • Working from local cache',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.textOnPrimary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
               ],
