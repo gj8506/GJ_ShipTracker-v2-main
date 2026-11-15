@@ -161,8 +161,8 @@ class _AdminExcelExportDialogState
                 const SizedBox(height: 12),
                 Text(
                   _errorMessage!,
-                  style: TextStyle(
-                      color: AppColors.statusReturned, fontSize: 12),
+                  style:
+                      TextStyle(color: AppColors.statusReturned, fontSize: 12),
                 ),
               ],
 
@@ -181,17 +181,17 @@ class _AdminExcelExportDialogState
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.statusDelivered,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.textOnPrimary,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 10),
                     ),
                     onPressed: _isExporting ? null : _handleExport,
                     icon: _isExporting
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white),
+                                strokeWidth: 2, color: AppColors.textOnPrimary),
                           )
                         : const Icon(Icons.file_download_outlined, size: 18),
                     label: Text(_isExporting

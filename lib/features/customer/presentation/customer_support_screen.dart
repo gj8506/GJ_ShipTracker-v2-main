@@ -48,7 +48,7 @@ class CustomerSupportScreen extends ConsumerWidget {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.navyPrimary,
-                  foregroundColor: Colors.white),
+                  foregroundColor: AppColors.textOnPrimary),
               onPressed: isSaving
                   ? null
                   : () async {
@@ -75,10 +75,11 @@ class CustomerSupportScreen extends ConsumerWidget {
                       }
                     },
               child: isSaving
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(color: Colors.white))
+                      child: CircularProgressIndicator(
+                          color: AppColors.textOnPrimary))
                   : const Text('Start Chat'),
             ),
           ],
@@ -142,7 +143,7 @@ class CustomerSupportScreen extends ConsumerWidget {
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.navyPrimary,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.textOnPrimary,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(

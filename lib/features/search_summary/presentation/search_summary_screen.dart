@@ -302,10 +302,10 @@ class _SearchSummaryScreenState extends ConsumerState<SearchSummaryScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.payments_outlined,
+                  Icon(Icons.payments_outlined,
                       size: 18, color: AppColors.textOnPrimary),
                   const SizedBox(width: 8),
-                  const Text(
+                  Text(
                     'Recorded value',
                     style: TextStyle(
                       fontSize: 13,
@@ -319,7 +319,7 @@ class _SearchSummaryScreenState extends ConsumerState<SearchSummaryScreen> {
                       alignment: Alignment.centerRight,
                       child: Text(
                         formatMoneyShort(totals.totalValue),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
                           color: AppColors.textOnPrimary,

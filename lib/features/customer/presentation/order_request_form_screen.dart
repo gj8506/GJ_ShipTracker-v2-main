@@ -283,7 +283,7 @@ class _OrderRequestFormScreenState
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.navyPrimary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.textOnPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -291,12 +291,12 @@ class _OrderRequestFormScreenState
                   ),
                   onPressed: _isSubmitting ? null : _submitOrderRequest,
                   child: _isSubmitting
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.textOnPrimary,
                           ),
                         )
                       : const Text(

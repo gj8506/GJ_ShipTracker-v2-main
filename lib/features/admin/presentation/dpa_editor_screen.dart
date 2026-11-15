@@ -142,9 +142,8 @@ class _DpaEditorScreenState extends ConsumerState<DpaEditorScreen> {
                         hintText: 'Data Privacy Agreement',
                         border: OutlineInputBorder(),
                       ),
-                      validator: (value) => (value ?? '').trim().isEmpty
-                          ? 'Enter a title'
-                          : null,
+                      validator: (value) =>
+                          (value ?? '').trim().isEmpty ? 'Enter a title' : null,
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
@@ -189,18 +188,18 @@ class _DpaEditorScreenState extends ConsumerState<DpaEditorScreen> {
                         onPressed: _saving ? null : () => _save(policy),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.navyPrimary,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.textOnPrimary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: _saving
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 22,
                                 height: 22,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.white,
+                                  color: AppColors.textOnPrimary,
                                 ),
                               )
                             : Text(

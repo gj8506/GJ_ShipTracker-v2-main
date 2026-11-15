@@ -692,14 +692,16 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (isSelected) ...[
-                      const Icon(Icons.check, size: 14, color: Colors.white),
+                      Icon(Icons.check,
+                          size: 14, color: AppColors.textOnPrimary),
                       const SizedBox(width: 3),
                     ],
                     Text(
                       range.label,
                       style: TextStyle(
-                        color:
-                            isSelected ? Colors.white : AppColors.textSecondary,
+                        color: isSelected
+                            ? AppColors.textOnPrimary
+                            : AppColors.textSecondary,
                         fontWeight:
                             isSelected ? FontWeight.bold : FontWeight.w600,
                         fontSize: 12,
@@ -1298,16 +1300,17 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
             SnackBar(
               backgroundColor: AppColors.statusDelivered,
               behavior: SnackBarBehavior.floating,
-              content: const Row(
+              content: Row(
                 children: [
                   Icon(Icons.check_circle_outline,
-                      color: Colors.white, size: 20),
-                  SizedBox(width: 8),
+                      color: AppColors.textOnPrimary, size: 20),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Workbook generated and shared successfully!',
                       style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w600),
+                          color: AppColors.textOnPrimary,
+                          fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
@@ -1317,15 +1320,16 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
         } else if (result.status == ShareResultStatus.dismissed) {
           messenger.showSnackBar(
             SnackBar(
-              backgroundColor: AppColors.textSecondary,
+              backgroundColor: AppColors.navyPrimary,
               behavior: SnackBarBehavior.floating,
               duration: const Duration(seconds: 2),
-              content: const Row(
+              content: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.white, size: 20),
-                  SizedBox(width: 8),
+                  Icon(Icons.info_outline,
+                      color: AppColors.textOnPrimary, size: 20),
+                  const SizedBox(width: 8),
                   Text('Export cancelled.',
-                      style: TextStyle(color: Colors.white)),
+                      style: TextStyle(color: AppColors.textOnPrimary)),
                 ],
               ),
             ),
@@ -1348,13 +1352,14 @@ class _AdminExcelExportSheetState extends ConsumerState<AdminExcelExportSheet> {
             margin: const EdgeInsets.all(16),
             content: Row(
               children: [
-                const Icon(Icons.info_outline, color: Colors.white, size: 20),
+                Icon(Icons.info_outline,
+                    color: AppColors.textOnPrimary, size: 20),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     cleanMsg,
-                    style: const TextStyle(
-                        color: Colors.white,
+                    style: TextStyle(
+                        color: AppColors.textOnPrimary,
                         fontWeight: FontWeight.w500,
                         fontSize: 13),
                   ),

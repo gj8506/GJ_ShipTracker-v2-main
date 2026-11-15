@@ -51,7 +51,7 @@ class ProfileScreen extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
                         AppColors.statusReturned, // Soft red matching design
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.textOnPrimary,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -132,7 +132,7 @@ class ProfileScreen extends ConsumerWidget {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.navyPrimary,
-              foregroundColor: Colors.white,
+              foregroundColor: AppColors.textOnPrimary,
             ),
             onPressed: () async {
               if (nameCtrl.text.trim().isEmpty) return;
@@ -296,11 +296,15 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceWhite,
+              // A Material (not a coloured Container) so the ListTile ink
+              // splashes stay visible and the framework's debug assertion
+              // about hidden splashes is not triggered.
+              Material(
+                color: AppColors.surfaceWhite,
+                clipBehavior: Clip.antiAlias,
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.borderLight),
+                  side: BorderSide(color: AppColors.borderLight),
                 ),
                 child: Column(
                   children: [
@@ -362,11 +366,12 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceWhite,
+                Material(
+                  color: AppColors.surfaceWhite,
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.borderLight),
+                    side: BorderSide(color: AppColors.borderLight),
                   ),
                   child: Column(
                     children: [
@@ -416,8 +421,8 @@ class ProfileScreen extends ConsumerWidget {
                                 ),
                                 child: Text(
                                   '$pendingStaffCount',
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: AppColors.textOnPrimary,
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -537,11 +542,12 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceWhite,
+              Material(
+                color: AppColors.surfaceWhite,
+                clipBehavior: Clip.antiAlias,
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.borderLight),
+                  side: BorderSide(color: AppColors.borderLight),
                 ),
                 child: ListTile(
                   leading: Icon(Icons.privacy_tip_outlined,
@@ -649,7 +655,7 @@ Policy Version ${policy.version}.0 • ${policy.updatedLabel}''',
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.navyPrimary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.textOnPrimary,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),

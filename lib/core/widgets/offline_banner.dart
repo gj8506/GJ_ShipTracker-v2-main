@@ -23,19 +23,20 @@ class OfflineBanner extends ConsumerWidget {
       color: AppColors.statusPending,
       child: Padding(
         padding: EdgeInsets.only(top: topInset),
-        child: const SingleChildScrollView(
-          physics: NeverScrollableScrollPhysics(),
+        child: SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
           child: SizedBox(
             height: 32,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.wifi_off_rounded, color: Colors.white, size: 14),
-                SizedBox(width: 8),
+                Icon(Icons.wifi_off_rounded,
+                    color: AppColors.textOnPrimary, size: 14),
+                const SizedBox(width: 8),
                 Text(
                   'Offline • Working from local cache',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.textOnPrimary,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,

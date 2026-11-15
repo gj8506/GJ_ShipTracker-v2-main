@@ -160,10 +160,9 @@ class CustomerListScreen extends ConsumerWidget {
                   ref.read(customerSearchProvider.notifier).state = val,
               decoration: InputDecoration(
                 hintText: 'Search by name, contact, shop...',
-                hintStyle: TextStyle(
-                    fontSize: 14, color: AppColors.textSecondary),
-                prefixIcon:
-                    Icon(Icons.search, color: AppColors.textSecondary),
+                hintStyle:
+                    TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
                 filled: true,
                 fillColor: AppColors.surfaceWhite,
                 contentPadding:
@@ -649,24 +648,24 @@ class _AddEditCustomerDialogState
       actions: [
         TextButton(
           onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-          child: Text('Cancel',
-              style: TextStyle(color: AppColors.textSecondary)),
+          child:
+              Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.navyPrimary,
-            foregroundColor: Colors.white,
+            foregroundColor: AppColors.textOnPrimary,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           onPressed: _isSaving ? null : _saveCustomer,
           child: _isSaving
-              ? const SizedBox(
+              ? SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Colors.white,
+                    color: AppColors.textOnPrimary,
                   ),
                 )
               : Text(isEditing ? 'Save Changes' : 'Save Customer'),

@@ -191,8 +191,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
             Text(
               widget.subject,
-              style:
-                  TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -322,7 +321,8 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                               DateFormat('hh:mm a').format(msg.createdAt),
                               style: TextStyle(
                                   color: isMe
-                                      ? Colors.white70
+                                      ? AppColors.textOnPrimary
+                                          .withValues(alpha: 0.72)
                                       : AppColors.textSecondary,
                                   fontSize: 10),
                             ),
@@ -381,8 +381,8 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                   CircleAvatar(
                     backgroundColor: AppColors.navyPrimary,
                     child: IconButton(
-                      icon: const Icon(Icons.send_rounded,
-                          color: Colors.white, size: 20),
+                      icon: Icon(Icons.send_rounded,
+                          color: AppColors.textOnPrimary, size: 20),
                       onPressed: () => _sendMessage(),
                     ),
                   ),

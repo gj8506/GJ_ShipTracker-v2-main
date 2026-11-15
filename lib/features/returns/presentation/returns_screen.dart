@@ -112,7 +112,7 @@ class ReturnsScreen extends ConsumerWidget {
                             errorBuilder: (_, __, ___) => Container(
                               padding: const EdgeInsets.all(24),
                               decoration: BoxDecoration(
-                                color: AppColors.navyDark,
+                                color: AppColors.calloutSurface,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Column(
@@ -124,7 +124,8 @@ class ReturnsScreen extends ConsumerWidget {
                                   Text(
                                     'Failed to load image',
                                     style: TextStyle(
-                                        color: Colors.white70, fontSize: 13),
+                                        color: AppColors.onCallout,
+                                        fontSize: 13),
                                   ),
                                 ],
                               ),
@@ -346,10 +347,9 @@ class ReturnsScreen extends ConsumerWidget {
                   ref.read(returnSearchQueryProvider.notifier).state = val,
               decoration: InputDecoration(
                 hintText: 'Search tracking number, customer, defect...',
-                hintStyle: TextStyle(
-                    fontSize: 14, color: AppColors.textSecondary),
-                prefixIcon:
-                    Icon(Icons.search, color: AppColors.textSecondary),
+                hintStyle:
+                    TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
                 filled: true,
                 fillColor: AppColors.surfaceWhite,
                 contentPadding:
@@ -381,7 +381,7 @@ class ReturnsScreen extends ConsumerWidget {
                   selectedColor: AppColors.navyPrimary,
                   labelStyle: TextStyle(
                     color: selectedDefect == null
-                        ? Colors.white
+                        ? AppColors.textOnPrimary
                         : AppColors.navyPrimary,
                     fontWeight: selectedDefect == null
                         ? FontWeight.bold
@@ -408,8 +408,9 @@ class ReturnsScreen extends ConsumerWidget {
                           .state = isSelected ? null : defect,
                       selectedColor: AppColors.navyPrimary,
                       labelStyle: TextStyle(
-                        color:
-                            isSelected ? Colors.white : AppColors.navyPrimary,
+                        color: isSelected
+                            ? AppColors.textOnPrimary
+                            : AppColors.navyPrimary,
                         fontWeight:
                             isSelected ? FontWeight.bold : FontWeight.normal,
                         fontSize: 12,
@@ -740,8 +741,7 @@ class ReturnsScreen extends ConsumerWidget {
                                                 borderRadius:
                                                     BorderRadius.circular(10),
                                               ),
-                                              child: Icon(
-                                                  Icons.broken_image,
+                                              child: Icon(Icons.broken_image,
                                                   size: 22,
                                                   color:
                                                       AppColors.textSecondary),
@@ -773,8 +773,7 @@ class ReturnsScreen extends ConsumerWidget {
                             ),
                           ],
 
-                          Divider(
-                              height: 20, color: AppColors.borderLight),
+                          Divider(height: 20, color: AppColors.borderLight),
 
                           // Bottom Row: Date & Update Status Button
                           Row(
@@ -1069,18 +1068,18 @@ class _UpdateStatusDialogState extends ConsumerState<_UpdateStatusDialog> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.navyPrimary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.textOnPrimary,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 onPressed: _isSaving ? null : _handleSaveStatus,
                 child: _isSaving
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white),
+                            strokeWidth: 2, color: AppColors.textOnPrimary),
                       )
                     : const Text('Save Status'),
               ),

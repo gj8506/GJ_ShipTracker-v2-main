@@ -75,6 +75,11 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
   }
 
   Future<void> _approve(UserProfileModel staff) async {
+    final emailNote = EmailService().isConfigured
+        ? 'An approval email will be sent to the address above.'
+        : 'No email is sent automatically, so let them know their account is '
+            'ready.';
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -85,8 +90,7 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
         ),
         content: Text(
           '${staff.fullName} (${staff.email}) will be able to sign in to the '
-          'Staff Portal immediately. An approval email will be sent to the '
-          'address above.',
+          'Staff Portal immediately. $emailNote',
         ),
         actions: [
           TextButton(
@@ -96,7 +100,7 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.statusDelivered,
-              foregroundColor: Colors.white,
+              foregroundColor: AppColors.textOnPrimary,
             ),
             onPressed: () => Navigator.pop(ctx, true),
             icon: const Icon(Icons.check_rounded, size: 18),
@@ -125,20 +129,23 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
         );
       } else {
         _showMessage(
-          '${staff.fullName} approved, but the email could not be sent. '
-          'Check the email worker configuration.',
+          '${staff.fullName} is approved, but the approval email could not be '
+          'sent. Please let them know their account is ready.',
           color: AppColors.warningOrange,
           action: SnackBarAction(
             label: 'Retry email',
-            textColor: Colors.white,
+            textColor: AppColors.textOnPrimary,
             onPressed: () => _resendEmail(staff),
           ),
         );
       }
     } catch (e) {
+      // The raw error goes to the log only; admins see a recovery message.
+      debugPrint('⚠️ [StaffApprovals] Approval failed for ${staff.uid}: $e');
       if (mounted) {
         _showMessage(
-          'Could not approve ${staff.fullName}: $e',
+          'Could not approve ${staff.fullName}. Please check your connection '
+          'and try again.',
           color: AppColors.errorRed,
         );
       }
@@ -160,8 +167,14 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
         color: AppColors.statusDelivered,
       );
     } else {
+      // Keep the technical reason in the log, not in front of the admin.
+      debugPrint(
+        '⚠️ [StaffApprovals] Retry email failed for ${staff.uid}: '
+        '${result.emailError}',
+      );
       _showMessage(
-        'Email still failed: ${result.emailError ?? 'Unknown error'}',
+        'The approval email still could not be sent. Please let '
+        '${staff.fullName} know their account is ready.',
         color: AppColors.errorRed,
       );
     }
@@ -207,7 +220,7 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.errorRed,
-              foregroundColor: Colors.white,
+              foregroundColor: AppColors.textOnPrimary,
             ),
             onPressed: () => Navigator.pop(ctx, true),
             icon: const Icon(Icons.close_rounded, size: 18),
@@ -238,9 +251,11 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
         );
       }
     } catch (e) {
+      debugPrint('⚠️ [StaffApprovals] Rejection failed for ${staff.uid}: $e');
       if (mounted) {
         _showMessage(
-          'Could not reject ${staff.fullName}: $e',
+          'Could not reject ${staff.fullName}. Please check your connection '
+          'and try again.',
           color: AppColors.errorRed,
         );
       }
@@ -337,6 +352,7 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
             staff.length,
           );
           final visibleStaff = StaffRegistrationPolicy.pageSlice(staff, page);
+          final emailConfigured = EmailService().isConfigured;
 
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(pendingStaffProvider),
@@ -344,7 +360,7 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
               controller: _scrollController,
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               children: [
-                if (!EmailService().isConfigured) ...[
+                if (!emailConfigured) ...[
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
@@ -360,9 +376,9 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Approval emails are disabled in this build. '
-                            'Rebuild with EMAIL_WORKER_URL and EMAIL_API_KEY '
-                            'to send the approval email automatically.',
+                            'Automatic approval emails are unavailable right '
+                            'now. You can still approve staff — just let them '
+                            'know their account is ready.',
                             style: TextStyle(
                               fontSize: 13,
                               color: AppColors.warningDeep,
@@ -393,12 +409,12 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
                           '${staff.length} staff registration'
                           '${staff.length == 1 ? '' : 's'} waiting for review. '
                           'Showing ${StaffRegistrationPolicy.approvalsPageSize} '
-                          'per page. Approving sends an email to the staff '
-                          'member. '
+                          'per page. '
+                          '${emailConfigured ? 'Approving sends an email to the staff member. ' : 'Approved members are enabled immediately; just let them know. '}'
                           '${StaffRegistrationPolicy.autoRejectDescription}',
                           style: TextStyle(
                             fontSize: 13,
-                            color: AppColors.navySecondary,
+                            color: AppColors.textSecondary,
                             height: 1.35,
                           ),
                         ),
@@ -555,7 +571,8 @@ class _PageNumberButton extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
-              color: selected ? Colors.white : AppColors.navySecondary,
+              color:
+                  selected ? AppColors.textOnPrimary : AppColors.textSecondary,
             ),
           ),
         ),
@@ -686,7 +703,7 @@ class _StaffCard extends StatelessWidget {
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.statusDelivered,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.textOnPrimary,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -694,12 +711,12 @@ class _StaffCard extends StatelessWidget {
                   ),
                   onPressed: isProcessing ? null : onApprove,
                   icon: isProcessing
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.textOnPrimary,
                           ),
                         )
                       : const Icon(Icons.check_rounded, size: 18),

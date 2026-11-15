@@ -319,7 +319,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.navyPrimary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.textOnPrimary,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -601,11 +601,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             ? _handleFinishGoogleSetup
                             : _handleSignUp),
                     child: _isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 24,
                             height: 24,
                             child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2))
+                                color: AppColors.textOnPrimary, strokeWidth: 2))
                         : Text(
                             _isGoogleSetup
                                 ? 'Finish Account Setup'

@@ -107,6 +107,14 @@ class AppColors {
   static Color get calloutBorder =>
       _pick(const Color(0xFF1E8DBF), const Color(0xFF2A6F91));
 
+  /// Start/end of the customer hero banner gradient. Both ends stay dark in
+  /// every theme so [onCallout] text keeps its contrast, including after a
+  /// live theme switch.
+  static Color get heroGradientStart =>
+      _pick(const Color(0xFF075E85), const Color(0xFF0D3A52));
+  static Color get heroGradientEnd =>
+      _pick(const Color(0xFF0079AC), const Color(0xFF1B6C8F));
+
   /// Primary text/icon colour on [calloutSurface].
   static const Color onCallout = Color(0xFFF2FAFF);
 
@@ -119,7 +127,21 @@ class AppColors {
       _pick(const Color(0xFF47657A), const Color(0xFFB3C9D8));
   static Color get textMuted =>
       _pick(const Color(0xFF5C7488), const Color(0xFF93AEBF));
-  static const Color textOnPrimary = Colors.white;
+
+  /// Deep ink used for text on light tints (logo blue chips, selected
+  /// switches). Deliberately constant: it must stay dark no matter the theme.
+  static const Color inkOnLight = Color(0xFF04121B);
+
+  /// Text/icon colour for brand and status surfaces: primary buttons, the FAB,
+  /// selected chips, snackbars, tooltips and status badges.
+  ///
+  /// The brand colours are dark in the light theme but light azures in the dark
+  /// theme, so a hard-coded white label would wash out the moment the user
+  /// switches modes. Light mode therefore uses white and dark mode uses
+  /// [inkOnLight]. This is the token every screen must use instead of
+  /// `Colors.white` on top of [navyPrimary], [errorRed] or [statusDelivered].
+  static Color get textOnPrimary => _pick(Colors.white, inkOnLight);
+
   static const Color textOnDark = Color(0xFFF0F8FD);
 
   // ---------------------------------------------------------------------------
@@ -164,7 +186,7 @@ class AppColors {
   static Color get statusReturnedContainer =>
       _pick(const Color(0xFFFDECEC), const Color(0xFF3A1D1B));
   static Color get statusPending =>
-      _pick(const Color(0xFFB26A00), const Color(0xFFF2BE6A));
+      _pick(const Color(0xFFA05F00), const Color(0xFFF2BE6A));
   static Color get statusPendingContainer =>
       _pick(const Color(0xFFFFF4DB), const Color(0xFF36280F));
   static Color get statusInTransit =>
@@ -200,7 +222,7 @@ class AppColors {
   static Color get errorRed =>
       _pick(const Color(0xFFC0392B), const Color(0xFFF58B7F));
   static Color get warningOrange =>
-      _pick(const Color(0xFFB26A00), const Color(0xFFF2BE6A));
+      _pick(const Color(0xFFA05F00), const Color(0xFFF2BE6A));
   static Color get infoBlue =>
       _pick(const Color(0xFF0079AC), const Color(0xFF58BEEA));
   static Color get error => errorRed;

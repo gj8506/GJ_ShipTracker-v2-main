@@ -213,7 +213,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       action: info.canResetPassword
           ? SnackBarAction(
               label: 'Reset password',
-              textColor: Colors.white,
               onPressed: _showForgotPasswordDialog,
             )
           : null,
@@ -538,12 +537,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           elevation: 0,
                         ),
                         child: _isLoading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 height: 22,
                                 width: 22,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2.5,
-                                  color: Colors.white,
+                                  color: AppColors.textOnPrimary,
                                 ),
                               )
                             : Text(

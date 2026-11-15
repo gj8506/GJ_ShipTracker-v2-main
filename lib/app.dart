@@ -49,6 +49,7 @@ class _ShipTrackerAppState extends ConsumerState<ShipTrackerApp>
 
   @override
   void didChangePlatformBrightness() {
+    if (!mounted) return;
     final next = WidgetsBinding.instance.platformDispatcher.platformBrightness;
     if (next != _platformBrightness) {
       setState(() => _platformBrightness = next);
@@ -111,6 +112,7 @@ class _ShipTrackerAppState extends ConsumerState<ShipTrackerApp>
       if (phase == SchedulerPhase.persistentCallbacks ||
           phase == SchedulerPhase.midFrameMicrotasks) {
         _schedulePaletteRepaint();
+        SchedulerBinding.instance.scheduleFrame();
         return;
       }
 
@@ -124,27 +126,45 @@ class _ShipTrackerAppState extends ConsumerState<ShipTrackerApp>
   ///
   /// The walk is iterative to avoid deep recursion, skips elements that were
   /// deactivated while the theme changed, and never lets one unusual element
-  /// abort the rest of the repaint.
+  /// abort the rest of the repaint or escape as a crash.
   void _repaintPalette() {
-    final root = WidgetsBinding.instance.rootElement;
-    if (root == null) return;
+    try {
+      final root = WidgetsBinding.instance.rootElement;
+      if (root == null) return;
 
-    final pending = <Element>[];
-    root.visitChildren(pending.add);
+      final pending = <Element>[];
+      _addChildren(root, pending);
 
-    while (pending.isNotEmpty) {
-      final element = pending.removeLast();
-      if (!element.mounted) continue;
+      while (pending.isNotEmpty) {
+        final element = pending.removeLast();
+        if (!element.mounted) continue;
 
-      try {
-        element.markNeedsBuild();
-      } catch (_) {
-        // A route may have been removed between the frame and this callback.
-        // Its remaining children are no longer part of the visible tree.
-        continue;
+        try {
+          element.markNeedsBuild();
+        } catch (_) {
+          // A route may have been removed between the frame and this callback.
+          // Its remaining children are no longer part of the visible tree.
+          continue;
+        }
+
+        // A dialog, sheet or route can finish its transition halfway through
+        // the walk. Skip that subtree instead of letting it abort the repaint.
+        _addChildren(element, pending);
       }
+    } catch (error, stack) {
+      // Repainting is cosmetic: a failure must never take the app down. The
+      // next navigation (or a later theme change) simply retries.
+      debugPrint('Theme palette repaint skipped: $error\n$stack');
+    }
+  }
 
+  /// Queues [element]'s children, tolerating subtrees that are already being
+  /// torn down while the theme changes.
+  static void _addChildren(Element element, List<Element> pending) {
+    try {
       element.visitChildren(pending.add);
+    } catch (error) {
+      debugPrint('Theme palette repaint skipped an element: $error');
     }
   }
 }

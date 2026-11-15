@@ -48,7 +48,7 @@ class AppTheme {
       shadow: const Color(0x1A0A4763),
       scrim: const Color(0x800A4763),
       inverseSurface: AppColors.navyPrimary,
-      onInverseSurface: AppColors.textOnDark,
+      onInverseSurface: AppColors.textOnPrimary,
       inversePrimary: AppColors.tealSecondary,
     );
 
@@ -389,7 +389,7 @@ class AppTheme {
           color: AppColors.textOnPrimary,
           fontWeight: FontWeight.w500,
         ),
-        actionTextColor: AppColors.tealSecondary,
+        actionTextColor: AppColors.textOnPrimary,
         behavior: SnackBarBehavior.floating,
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -429,7 +429,7 @@ class AppTheme {
           }
           return Colors.transparent;
         }),
-        checkColor: const WidgetStatePropertyAll(AppColors.textOnPrimary),
+        checkColor: WidgetStatePropertyAll(AppColors.textOnPrimary),
         side: BorderSide(color: AppColors.borderStrong, width: 1.4),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
@@ -446,7 +446,7 @@ class AppTheme {
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return AppColors.surfaceWhite;
+            return AppColors.textOnPrimary;
           }
           return AppColors.surfaceWhite;
         }),

@@ -270,8 +270,8 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                       padding: const EdgeInsets.only(right: 8.0),
                       child: ChoiceChip(
                         avatar: isSelected
-                            ? const Icon(Icons.check,
-                                size: 16, color: Colors.white)
+                            ? Icon(Icons.check,
+                                size: 16, color: AppColors.textOnPrimary)
                             : null,
                         label: Text(platform),
                         selected: isSelected,
@@ -289,8 +289,9 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                           ),
                         ),
                         labelStyle: TextStyle(
-                          color:
-                              isSelected ? Colors.white : AppColors.navyPrimary,
+                          color: isSelected
+                              ? AppColors.textOnPrimary
+                              : AppColors.navyPrimary,
                           fontWeight:
                               isSelected ? FontWeight.bold : FontWeight.w500,
                         ),
@@ -423,11 +424,11 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _isLoading ? null : _submitDispatch,
                   icon: _isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2),
+                              color: AppColors.textOnPrimary, strokeWidth: 2),
                         )
                       : const Icon(Icons.send_rounded),
                   label: Text(

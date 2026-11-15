@@ -90,7 +90,10 @@ class CustomerHomeScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.navySecondary, AppColors.navyPrimary],
+                  colors: [
+                    AppColors.heroGradientStart,
+                    AppColors.heroGradientEnd,
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -116,10 +119,10 @@ class CustomerHomeScreen extends ConsumerWidget {
                           color: AppColors.logoBlue,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text(
+                        child: const Text(
                           'FAST TRACK FABRICATION',
                           style: TextStyle(
-                            color: AppColors.navyDark,
+                            color: AppColors.inkOnLight,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.8,
@@ -127,14 +130,14 @@ class CustomerHomeScreen extends ConsumerWidget {
                         ),
                       ),
                       const Icon(Icons.directions_car_filled,
-                          color: Colors.white70, size: 28),
+                          color: AppColors.onCallout, size: 28),
                     ],
                   ),
                   const SizedBox(height: 12),
                   const Text(
                     'Order Your Custom Plate',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppColors.onCallout,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -143,7 +146,7 @@ class CustomerHomeScreen extends ConsumerWidget {
                   Text(
                     'High-grade embossed aluminum, tamper-resistant hologram, LTO-compliant styling.',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.72),
+                      color: AppColors.onCallout.withValues(alpha: 0.78),
                       fontSize: 13,
                     ),
                   ),
@@ -441,8 +444,8 @@ class CustomerHomeScreen extends ConsumerWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 12, color: AppColors.textSecondary),
+                    style:
+                        TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ],
               ),

@@ -78,59 +78,62 @@ class ParcelDetailScreen extends ConsumerWidget {
                       final isSelected = parcel.status == status;
                       final statusColor = _getStatusColor(status);
 
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        decoration: BoxDecoration(
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Material(
                           color: isSelected
                               ? statusColor.withValues(alpha: 0.08)
                               : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected
-                                ? statusColor
-                                : AppColors.borderLight,
-                            width: isSelected ? 1.5 : 1,
-                          ),
-                        ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 2),
-                          leading: Container(
-                            width: 14,
-                            height: 14,
-                            decoration: BoxDecoration(
-                              color: statusColor,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          title: Text(
-                            status,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.w500,
+                          clipBehavior: Clip.antiAlias,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
                               color: isSelected
                                   ? statusColor
-                                  : AppColors.navyPrimary,
+                                  : AppColors.borderLight,
+                              width: isSelected ? 1.5 : 1,
                             ),
                           ),
-                          trailing: isSelected
-                              ? Icon(Icons.check_circle_rounded,
-                                  color: statusColor, size: 20)
-                              : null,
-                          onTap: () async {
-                            final user = ref.read(userProfileProvider).value;
-                            await ref
-                                .read(parcelRepositoryProvider)
-                                .updateParcelStatus(
-                                  parcel.id,
-                                  status,
-                                  dispatchedById: user?.uid,
-                                  dispatchedByName: user?.displayName,
-                                );
-                            if (ctx.mounted) Navigator.of(ctx).pop();
-                          },
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 2),
+                            leading: Container(
+                              width: 14,
+                              height: 14,
+                              decoration: BoxDecoration(
+                                color: statusColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            title: Text(
+                              status,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
+                                color: isSelected
+                                    ? statusColor
+                                    : AppColors.navyPrimary,
+                              ),
+                            ),
+                            trailing: isSelected
+                                ? Icon(Icons.check_circle_rounded,
+                                    color: statusColor, size: 20)
+                                : null,
+                            onTap: () async {
+                              final user = ref.read(userProfileProvider).value;
+                              await ref
+                                  .read(parcelRepositoryProvider)
+                                  .updateParcelStatus(
+                                    parcel.id,
+                                    status,
+                                    dispatchedById: user?.uid,
+                                    dispatchedByName: user?.displayName,
+                                  );
+                              if (ctx.mounted) Navigator.of(ctx).pop();
+                            },
+                          ),
                         ),
                       );
                     }).toList(),
@@ -373,7 +376,7 @@ class ParcelDetailScreen extends ConsumerWidget {
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.navyPrimary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.textOnPrimary,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                     elevation: 0,

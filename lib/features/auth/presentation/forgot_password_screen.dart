@@ -130,11 +130,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           ElevatedButton(
                             onPressed: _isLoading ? null : _handleReset,
                             child: _isLoading
-                                ? const SizedBox(
+                                ? SizedBox(
                                     width: 20,
                                     height: 20,
                                     child: CircularProgressIndicator(
-                                        color: Colors.white))
+                                        color: AppColors.textOnPrimary))
                                 : const Text('Send Reset Link'),
                           ),
                         ],

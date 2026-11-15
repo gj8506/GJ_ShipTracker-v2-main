@@ -72,7 +72,7 @@ class _AdminInboxScreenState extends ConsumerState<AdminInboxScreen> {
                     selectedColor: AppColors.navyPrimary,
                     labelStyle: TextStyle(
                         color: _filter == 'open'
-                            ? Colors.white
+                            ? AppColors.textOnPrimary
                             : AppColors.textPrimary),
                   ),
                 ),
@@ -85,7 +85,7 @@ class _AdminInboxScreenState extends ConsumerState<AdminInboxScreen> {
                     selectedColor: AppColors.navyPrimary,
                     labelStyle: TextStyle(
                         color: _filter == 'resolved'
-                            ? Colors.white
+                            ? AppColors.textOnPrimary
                             : AppColors.textPrimary),
                   ),
                 ),
@@ -109,8 +109,7 @@ class _AdminInboxScreenState extends ConsumerState<AdminInboxScreen> {
                             size: 64, color: AppColors.textMuted),
                         const SizedBox(height: 16),
                         Text('No $_filter support tickets.',
-                            style: TextStyle(
-                                color: AppColors.textSecondary)),
+                            style: TextStyle(color: AppColors.textSecondary)),
                       ],
                     ),
                   );

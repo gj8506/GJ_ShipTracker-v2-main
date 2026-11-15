@@ -39,7 +39,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.navyPrimary,
-                foregroundColor: Colors.white),
+                foregroundColor: AppColors.textOnPrimary),
             onPressed: () async {
               if (ctrl.text.trim().isNotEmpty) {
                 await ref
@@ -152,11 +152,12 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
                   ),
                 ),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceWhite,
+              Material(
+                color: AppColors.surfaceWhite,
+                clipBehavior: Clip.antiAlias,
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.borderLight),
+                  side: BorderSide(color: AppColors.borderLight),
                 ),
                 child: Column(
                   children: [
@@ -286,7 +287,7 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.statusReturned,
-                                foregroundColor: Colors.white),
+                                foregroundColor: AppColors.textOnPrimary),
                             onPressed: () => Navigator.pop(ctx, true),
                             child: const Text('Sign Out'),
                           ),
@@ -386,7 +387,7 @@ TERMS OF SERVICE
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.navyPrimary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.textOnPrimary,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),

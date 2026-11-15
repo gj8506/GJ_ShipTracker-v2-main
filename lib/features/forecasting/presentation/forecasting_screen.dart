@@ -200,8 +200,8 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (isSelected) ...[
-                            const Icon(Icons.check,
-                                size: 12, color: Colors.white),
+                            Icon(Icons.check,
+                                size: 12, color: AppColors.textOnPrimary),
                             const SizedBox(width: 3),
                           ],
                           Text(
@@ -210,7 +210,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: isSelected
-                                  ? Colors.white
+                                  ? AppColors.textOnPrimary
                                   : AppColors.textSecondary,
                             ),
                           ),
@@ -260,8 +260,8 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (isSelected) ...[
-                            const Icon(Icons.check,
-                                size: 12, color: Colors.white),
+                            Icon(Icons.check,
+                                size: 12, color: AppColors.textOnPrimary),
                             const SizedBox(width: 3),
                           ],
                           Text(
@@ -270,7 +270,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: isSelected
-                                  ? Colors.white
+                                  ? AppColors.textOnPrimary
                                   : AppColors.textSecondary,
                             ),
                           ),
@@ -326,7 +326,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.warningStrong,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.textOnPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
@@ -415,8 +415,7 @@ class _ForecastingScreenState extends ConsumerState<ForecastingScreen> {
                 const SizedBox(height: 4),
                 Text(
                   '${horizon.fullTitle} Total',
-                  style:
-                      TextStyle(fontSize: 11, color: AppColors.textMuted),
+                  style: TextStyle(fontSize: 11, color: AppColors.textMuted),
                 ),
               ],
             ),

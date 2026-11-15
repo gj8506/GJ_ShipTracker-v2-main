@@ -135,7 +135,8 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
       if (!mounted || _isDisposed) return;
 
       final pendingDocs = orderSnap.docs.where((doc) {
-        final status = (doc.data() as Map<String, dynamic>)['status'] as String?;
+        final status =
+            (doc.data() as Map<String, dynamic>)['status'] as String?;
         return status?.toUpperCase() == 'PENDING' || status == 'Pending Quote';
       }).toList();
 
@@ -385,8 +386,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          side:
-                              BorderSide(color: AppColors.textSecondary),
+                          side: BorderSide(color: AppColors.textSecondary),
                         ),
                         onPressed: () {
                           Navigator.pop(ctx);
@@ -403,7 +403,7 @@ class _ResellerScannerScreenState extends ConsumerState<ResellerScannerScreen> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.navyPrimary,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.textOnPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           elevation: 0,
                           shape: RoundedRectangleBorder(

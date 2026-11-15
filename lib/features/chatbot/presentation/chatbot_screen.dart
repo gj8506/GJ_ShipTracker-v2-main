@@ -184,8 +184,8 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
             CircleAvatar(
               backgroundColor: AppColors.navyPrimary,
               child: IconButton(
-                icon: const Icon(Icons.send_rounded,
-                    color: Colors.white, size: 20),
+                icon: Icon(Icons.send_rounded,
+                    color: AppColors.textOnPrimary, size: 20),
                 onPressed: () => _handleSend(_textController.text),
               ),
             ),

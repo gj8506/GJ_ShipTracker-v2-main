@@ -92,7 +92,7 @@ class PrivacyPolicySheet extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.navyPrimary,
-              foregroundColor: Colors.white,
+              foregroundColor: AppColors.textOnPrimary,
               minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
