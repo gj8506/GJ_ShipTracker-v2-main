@@ -64,6 +64,25 @@ void main() {
     );
   });
 
+  testWidgets('approval dialog explains the no-email fallback in plain language',
+      (tester) async {
+    await tester.pumpWidget(_screenFor(Brightness.light));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Approve'));
+    await tester.pumpAndSettle();
+
+    // The admin is told what will happen without exposing build variables.
+    expect(
+      find.textContaining('No email is sent automatically'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('EMAIL_WORKER_URL'), findsNothing);
+    expect(find.textContaining('EMAIL_API_KEY'), findsNothing);
+    expect(
+        find.textContaining('email worker', findRichText: false), findsNothing);
+  });
+
   for (final brightness in Brightness.values) {
     testWidgets('Staff Approvals banner stays readable in $brightness mode',
         (tester) async {

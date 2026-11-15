@@ -20,7 +20,9 @@ class MainNavigationShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userProfileAsync = ref.watch(userProfileProvider);
     final role = userProfileAsync.value?.role ?? AppConstants.roleStaff;
-    final isAdmin = role == AppConstants.roleAdmin;
+    // Use the shared role normalizer so legacy profiles such as "Admin" keep
+    // the same tabs and branch mapping that the router grants them.
+    final isAdmin = AppConstants.isAdminRole(role);
     final isOffline = ref.watch(isOfflineProvider);
     final media = MediaQuery.of(context);
 

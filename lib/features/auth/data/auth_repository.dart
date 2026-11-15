@@ -538,11 +538,18 @@ class AuthRepository {
   }
 
   // Sign out
+  //
+  // Firebase Auth is cleared first because it is the session the router and
+  // every screen watch. The Google client is cleared best-effort afterwards: a
+  // missing or unavailable Google plugin must never keep the user signed in or
+  // turn a normal logout into an error.
   Future<void> signOut() async {
-    await Future.wait([
-      _auth.signOut(),
-      _googleSignIn.signOut(),
-    ]);
+    await _auth.signOut();
+    try {
+      await _googleSignIn.signOut();
+    } catch (_) {
+      // Firebase Auth is already cleared; Google is only used for the picker.
+    }
   }
 
   // Watch User Profile stream
