@@ -20,6 +20,16 @@ const int kMaxMoneyIntegerDigits = 9;
 /// Maximum number of digits allowed after the decimal point.
 const int kMoneyDecimalDigits = 2;
 
+/// Hard ceiling for the Dispatch "Final Amount" field.
+///
+/// Six whole digits (so at most ₱999,999.99) keep a single parcel strictly
+/// below ₱1,000,000, which stops a fat-fingered value from flattening the
+/// Analytics charts.
+const double kMaxFinalAmount = 999999.99;
+
+/// Maximum whole digits accepted by the Dispatch "Final Amount" field.
+const int kMaxFinalAmountIntegerDigits = 6;
+
 final NumberFormat _currencyFormat = NumberFormat.currency(
   locale: 'en_PH',
   symbol: '₱',
@@ -174,7 +184,18 @@ final List<TextInputFormatter> moneyInputFormatters = <TextInputFormatter>[
   const MoneyInputFormatter(),
 ];
 
-/// Validates a typed amount against [kMaxMoneyAmount].
+/// Input formatters for the Dispatch "Final Amount" field.
+///
+/// Six whole digits means the field tops out at ₱999,999.99; a seventh digit
+/// is simply never accepted.
+final List<TextInputFormatter> finalAmountInputFormatters =
+    <TextInputFormatter>[
+  const MoneyInputFormatter(
+    maxIntegerDigits: kMaxFinalAmountIntegerDigits,
+  ),
+];
+
+/// Validates a typed amount against [maxAmount].
 ///
 /// Returns `null` when valid, otherwise a short message suitable for an
 /// `InputDecoration.errorText`.
@@ -182,6 +203,8 @@ String? validateMoneyInput(
   String? raw, {
   bool required = true,
   String label = 'amount',
+  double maxAmount = kMaxMoneyAmount,
+  int maxIntegerDigits = kMaxMoneyIntegerDigits,
 }) {
   final cleaned = (raw ?? '').replaceAll(RegExp(r'[₱,\s]'), '');
   if (cleaned.isEmpty) {
@@ -191,7 +214,9 @@ String? validateMoneyInput(
   // Reject anything that is not plain digits with up to two decimals. This
   // catches scientific notation, signs and stray characters that
   // `double.tryParse` would otherwise accept.
-  if (!RegExp(r'^\d{1,9}(\.\d{1,2})?$').hasMatch(cleaned)) {
+  final pattern =
+      RegExp('^\\d{1,$maxIntegerDigits}(\\.\\d{1,$kMoneyDecimalDigits})?\$');
+  if (!pattern.hasMatch(cleaned)) {
     return 'Enter a valid $label, for example 1450 or 1450.50.';
   }
 
@@ -199,8 +224,22 @@ String? validateMoneyInput(
   if (parsed == null || !parsed.isFinite) {
     return 'Enter a valid $label, for example 1450 or 1450.50.';
   }
-  if (parsed > kMaxMoneyAmount) {
-    return 'The $label must be ₱999,999,999 or less.';
+  if (parsed > maxAmount) {
+    final limit = NumberFormat.decimalPattern('en_PH').format(
+      maxAmount.truncate(),
+    );
+    return 'The $label must be ₱$limit or less.';
   }
   return null;
 }
+
+/// Validates the Dispatch "Final Amount" field.
+///
+/// The hard cap is six whole digits, so the largest accepted amount is
+/// ₱999,999.99 — always strictly below ₱1,000,000.
+String? validateFinalAmount(String? raw) => validateMoneyInput(
+      raw,
+      label: 'final amount',
+      maxAmount: kMaxFinalAmount,
+      maxIntegerDigits: kMaxFinalAmountIntegerDigits,
+    );

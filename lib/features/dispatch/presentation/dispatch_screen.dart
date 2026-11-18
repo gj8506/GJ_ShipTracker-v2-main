@@ -122,8 +122,13 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
     try {
       final userProfile = ref.read(userProfileProvider).value;
       // Guard rails: even if validation is bypassed, never persist an absurd
-      // amount that would break Analytics and order cards.
-      final amount = sanitizeMoneyValue(_amountController.text.trim()) ?? 0.0;
+      // amount that would break Analytics and order cards. The Final Amount
+      // field is capped strictly below ₱1,000,000.
+      final parsedAmount =
+          sanitizeMoneyValue(_amountController.text.trim()) ?? 0.0;
+      final amount = parsedAmount > kMaxFinalAmount
+          ? kMaxFinalAmount
+          : parsedAmount;
 
       final newParcel = ParcelModel(
         trackingNumber: _trackingController.text.trim(),
@@ -348,17 +353,17 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                 controller: _amountController,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
-                // 9 whole digits and 2 decimals; blocks pasted
-                // scientific notation such as `1e32`.
-                inputFormatters: moneyInputFormatters,
+                // 6 whole digits (max ₱999,999.99) and 2 decimals; blocks
+                // pasted scientific notation such as `1e32` and keeps a
+                // single parcel strictly below one million.
+                inputFormatters: finalAmountInputFormatters,
                 decoration: const InputDecoration(
                   labelText: 'Final Amount (₱) *',
                   prefixText: '₱ ',
                   hintText: '0.00',
-                  helperText: 'Up to ₱999,999,999.00',
+                  helperText: 'Below ₱1,000,000.00',
                 ),
-                validator: (val) =>
-                    validateMoneyInput(val, label: 'final amount'),
+                validator: validateFinalAmount,
               ),
               const SizedBox(height: 14),
               TextFormField(

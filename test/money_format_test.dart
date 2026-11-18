@@ -111,4 +111,36 @@ void main() {
       expect(validateMoneyInput('', required: false), isNull);
     });
   });
+
+  group('final amount cap', () {
+    const formatter = MoneyInputFormatter(
+      maxIntegerDigits: kMaxFinalAmountIntegerDigits,
+    );
+
+    TextEditingValue type(String text, {String previous = ''}) {
+      return formatter.formatEditUpdate(
+        TextEditingValue(text: previous),
+        TextEditingValue(text: text),
+      );
+    }
+
+    test('only accepts six whole digits', () {
+      expect(type('1234567').text, '123456');
+      expect(type('₱ 1,234,567.89').text, '123456.89');
+      expect(type('999999.99').text, '999999.99');
+    });
+
+    test('accepts amounts up to ₱999,999.99', () {
+      expect(validateFinalAmount('999999'), isNull);
+      expect(validateFinalAmount('999999.99'), isNull);
+      expect(validateFinalAmount('0'), isNull);
+    });
+
+    test('rejects one million and above', () {
+      expect(validateFinalAmount('1000000'), isNotNull);
+      expect(validateFinalAmount('₱1,000,000.00'), isNotNull);
+      expect(validateFinalAmount('9999999'), isNotNull);
+      expect(validateFinalAmount(''), isNotNull);
+    });
+  });
 }

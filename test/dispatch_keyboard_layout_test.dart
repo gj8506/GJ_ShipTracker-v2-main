@@ -89,18 +89,41 @@ void main() {
     await tester.pumpWidget(buildTestApp());
     await tester.pumpAndSettle();
 
-    TextField fieldFor(String label) {
-      return tester
-          .widgetList<TextField>(find.byType(TextField))
-          .firstWhere((field) => field.decoration?.labelText == label);
-    }
-
-    final customerName = fieldFor('Customer Name *');
-    final amount = fieldFor('Final Amount (₱) *');
+    final customerName = fieldFor(tester, 'Customer Name *');
+    final amount = fieldFor(tester, 'Final Amount (₱) *');
 
     expect(
       tester.getTopLeft(find.byWidget(amount)).dy,
       greaterThan(tester.getBottomLeft(find.byWidget(customerName)).dy),
     );
   });
+
+  testWidgets('final amount stops at six whole digits', (tester) async {
+    await tester.pumpWidget(buildTestApp());
+    await tester.pumpAndSettle();
+
+    Finder amountField() =>
+        find.byWidget(fieldFor(tester, 'Final Amount (₱) *'));
+
+    await tester.enterText(amountField(), '1234567');
+    await tester.pump();
+    expect(
+      fieldFor(tester, 'Final Amount (₱) *').controller!.text,
+      '123456',
+    );
+
+    // Pasting a formatted, oversized amount is trimmed the same way.
+    await tester.enterText(amountField(), '₱ 1,234,567.89');
+    await tester.pump();
+    expect(
+      fieldFor(tester, 'Final Amount (₱) *').controller!.text,
+      '123456.89',
+    );
+  });
+}
+
+TextField fieldFor(WidgetTester tester, String label) {
+  return tester
+      .widgetList<TextField>(find.byType(TextField))
+      .firstWhere((field) => field.decoration?.labelText == label);
 }
