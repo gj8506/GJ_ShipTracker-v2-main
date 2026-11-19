@@ -210,6 +210,327 @@ class ReturnsScreen extends ConsumerWidget {
     );
   }
 
+  /// The Firestore document id doubles as the ticket number. Older tickets
+  /// that cannot resolve an id fall back to their tracking number.
+  String _ticketNumber(ReturnModel item) {
+    final id = item.id.trim();
+    return id.isEmpty ? item.trackingNumber : id;
+  }
+
+  /// Reads plate specifications from the dedicated field, falling back to the
+  /// `Plate Specs:` line that older tickets stored inside the notes.
+  String _ticketPlateSpecs(ReturnModel item) {
+    final explicit = item.customPlateDetails?.trim() ?? '';
+    if (explicit.isNotEmpty) return explicit;
+    for (final line in (item.notes ?? '').split('\n')) {
+      final trimmed = line.trim();
+      if (trimmed.toLowerCase().startsWith('plate specs:')) {
+        return trimmed.substring('plate specs:'.length).trim();
+      }
+    }
+    return '';
+  }
+
+  /// Removes the plate-specs line from the notes so the detail sheet does not
+  /// show the same value twice.
+  String _ticketDescription(ReturnModel item) {
+    final notes = item.notes?.trim() ?? '';
+    if (notes.isEmpty) return '';
+    return notes
+        .split('\n')
+        .where((line) => !line.trim().toLowerCase().startsWith('plate specs:'))
+        .join('\n')
+        .trim();
+  }
+
+  String _formatTicketDate(DateTime? date) {
+    if (date == null) return 'Not available';
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return '${date.year}-$month-$day $hour:$minute';
+  }
+
+  Widget _ticketSectionTitle(String title) {
+    return Text(
+      title.toUpperCase(),
+      style: TextStyle(
+        fontSize: 10,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 0.8,
+        color: AppColors.textMuted,
+      ),
+    );
+  }
+
+  Widget _ticketDetailRow(String label, String? value) {
+    final shown = (value ?? '').trim();
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            shown.isEmpty ? 'N/A' : shown,
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.35,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _ticketPhotoEvidence(BuildContext context, ReturnModel item) {
+    if (item.photoUrls.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.borderLight),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.image_not_supported_outlined,
+                size: 28, color: AppColors.textMuted),
+            const SizedBox(height: 6),
+            Text(
+              'No photo evidence uploaded',
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: List.generate(item.photoUrls.length, (index) {
+        final url = item.photoUrls[index];
+        return InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: () => _showImagePreviewDialog(context, item.photoUrls, index),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.network(
+              url,
+              width: 96,
+              height: 96,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, progress) {
+                if (progress == null) return child;
+                return Container(
+                  width: 96,
+                  height: 96,
+                  color: AppColors.surfaceMuted,
+                  child: const Center(
+                    child: SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                );
+              },
+              errorBuilder: (_, __, ___) => Container(
+                width: 96,
+                height: 96,
+                color: AppColors.surfaceVariant,
+                child: Icon(Icons.broken_image,
+                    size: 24, color: AppColors.textSecondary),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  /// Clean read-only detail sheet for one submitted return / defect ticket.
+  void _showTicketDetailSheet(BuildContext context, ReturnModel item) {
+    final statusColor = _getReturnStatusColor(item.status);
+    final statusIcon = _getReturnStatusIcon(item.status);
+    final plateSpecs = _ticketPlateSpecs(item);
+    final description = _ticketDescription(item);
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      backgroundColor: AppColors.surfaceWhite,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(sheetContext).size.height * 0.9,
+          ),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              20,
+              0,
+              20,
+              MediaQuery.of(sheetContext).viewInsets.bottom + 24,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Return Ticket Details',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            item.trackingNumber,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.1,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      tooltip: 'Close ticket details',
+                      onPressed: () => Navigator.pop(sheetContext),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(14),
+                    border:
+                        Border.all(color: statusColor.withValues(alpha: 0.35)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(statusIcon, color: statusColor, size: 24),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Ticket Status',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.6,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              item.status,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                color: statusColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (item.resolutionType.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceWhite,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                                color: statusColor.withValues(alpha: 0.35)),
+                          ),
+                          child: Text(
+                            item.resolutionType,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: statusColor,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _ticketSectionTitle('Ticket information'),
+                _ticketDetailRow('Ticket Number', _ticketNumber(item)),
+                _ticketDetailRow(
+                    'Original Tracking Number', item.trackingNumber),
+                _ticketDetailRow('Platform', item.platform),
+                _ticketDetailRow('Resolution', item.resolutionType),
+                const SizedBox(height: 14),
+                _ticketSectionTitle('Customer'),
+                _ticketDetailRow('Customer / Buyer Name', item.customerName),
+                _ticketDetailRow('Contact Number', item.contactNumber),
+                const SizedBox(height: 14),
+                _ticketSectionTitle('Defect'),
+                _ticketDetailRow('Motorcycle Plate Specifications', plateSpecs),
+                _ticketDetailRow('Defect Category', item.defectReason),
+                _ticketDetailRow('Defect Description / Notes', description),
+                const SizedBox(height: 14),
+                _ticketSectionTitle('Photo Evidence'),
+                const SizedBox(height: 8),
+                _ticketPhotoEvidence(sheetContext, item),
+                const SizedBox(height: 16),
+                _ticketSectionTitle('Timeline'),
+                _ticketDetailRow('Logged', _formatTicketDate(item.createdAt)),
+                _ticketDetailRow(
+                  'Last updated',
+                  item.updatedAt == null
+                      ? 'Not updated yet'
+                      : _formatTicketDate(item.updatedAt),
+                ),
+                if ((item.handledByName ?? '').trim().isNotEmpty)
+                  _ticketDetailRow('Handled by', item.handledByName),
+                if ((item.replacementTrackingNumber ?? '').trim().isNotEmpty)
+                  _ticketDetailRow('Replacement Tracking Number',
+                      item.replacementTrackingNumber),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final returnsAsync = ref.watch(returnsStreamProvider);
@@ -479,334 +800,380 @@ class ReturnsScreen extends ConsumerWidget {
                     final item = filteredReturns[index];
                     final statusColor = _getReturnStatusColor(item.status);
 
-                    return Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceWhite,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: AppColors.borderLight),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Tracking Number & Status Badge
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  item.trackingNumber,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    letterSpacing: 0.5,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: statusColor.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                      color:
-                                          statusColor.withValues(alpha: 0.5)),
-                                ),
-                                child: Text(
-                                  item.status,
-                                  style: TextStyle(
-                                    color: statusColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-
-                          // Platform & Resolution tags
-                          Row(
-                            children: [
-                              if (item.platform.isNotEmpty) ...[
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.surfaceMuted,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    item.platform,
-                                    style: TextStyle(
-                                        fontSize: 11,
-                                        color: AppColors.navyMuted),
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                              ],
-                              if (item.resolutionType.isNotEmpty)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.statusInTransitContainer,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    item.resolutionType,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.statusInTransit,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-
-                          // Customer Info
-                          if (item.customerName.isNotEmpty) ...[
-                            Row(
-                              children: [
-                                Icon(Icons.person_outline,
-                                    size: 16, color: AppColors.textSecondary),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Text(
-                                    item.customerName,
-                                    style: TextStyle(
-                                        fontSize: 13,
-                                        color: AppColors.textPrimary),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                          ],
-
-                          // Defect Reason Badge
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.statusReturnedContainer,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.warning_amber_rounded,
-                                    size: 14, color: AppColors.dangerDeep),
-                                const SizedBox(width: 6),
-                                Flexible(
-                                  child: Text(
-                                    item.defectReason,
-                                    style: TextStyle(
-                                      color: AppColors.dangerDeep,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          // Notes
-                          if (item.notes != null &&
-                              item.notes!.trim().isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              item.notes!,
-                              style: TextStyle(
-                                  fontSize: 13, color: AppColors.textPrimary),
+                    return Semantics(
+                      button: true,
+                      label: 'View return ticket ${item.trackingNumber}',
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
                             ),
                           ],
-
-                          // Replacement Tracking #
-                          if (item.replacementTrackingNumber != null &&
-                              item.replacementTrackingNumber!
-                                  .trim()
-                                  .isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(Icons.local_shipping_outlined,
-                                    size: 14,
-                                    color: AppColors.statusDispatched),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Replacement: ${item.replacementTrackingNumber!}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.statusDispatched,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-
-                          // Photo Evidence Gallery (Clickable)
-                          if (item.photoUrls.isNotEmpty) ...[
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Icon(Icons.photo_library_outlined,
-                                    size: 14, color: AppColors.navyPrimary),
-                                const SizedBox(width: 5),
-                                Text(
-                                  'Photo Evidence (${item.photoUrls.length})',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.navyPrimary,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  '• Tap to preview',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            SizedBox(
-                              height: 68,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: item.photoUrls.length,
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(width: 8),
-                                itemBuilder: (context, photoIndex) {
-                                  final photoUrl = item.photoUrls[photoIndex];
-                                  return InkWell(
-                                    borderRadius: BorderRadius.circular(10),
-                                    onTap: () => _showImagePreviewDialog(
-                                      context,
-                                      item.photoUrls,
-                                      photoIndex,
-                                    ),
-                                    child: Stack(
-                                      children: [
-                                        ClipRRect(
+                        ),
+                        child: Material(
+                          color: AppColors.surfaceWhite,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            side: BorderSide(color: AppColors.borderLight),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () => _showTicketDetailSheet(context, item),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Tracking Number & Status Badge
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          item.trackingNumber,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            letterSpacing: 0.5,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: statusColor.withValues(
+                                              alpha: 0.12),
                                           borderRadius:
-                                              BorderRadius.circular(10),
-                                          child: Image.network(
-                                            photoUrl,
-                                            width: 68,
-                                            height: 68,
-                                            fit: BoxFit.cover,
-                                            loadingBuilder:
-                                                (context, child, progress) {
-                                              if (progress == null) {
-                                                return child;
-                                              }
-                                              return Container(
-                                                width: 68,
-                                                height: 68,
-                                                color: AppColors.surfaceMuted,
-                                                child: const Center(
-                                                  child: SizedBox(
-                                                    width: 18,
-                                                    height: 18,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                            strokeWidth: 2),
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                            errorBuilder: (_, __, ___) =>
-                                                Container(
-                                              width: 68,
-                                              height: 68,
-                                              decoration: BoxDecoration(
-                                                color: AppColors.surfaceVariant,
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              child: Icon(Icons.broken_image,
-                                                  size: 22,
-                                                  color:
-                                                      AppColors.textSecondary),
+                                              BorderRadius.circular(20),
+                                          border: Border.all(
+                                              color: statusColor.withValues(
+                                                  alpha: 0.5)),
+                                        ),
+                                        child: Text(
+                                          item.status,
+                                          style: TextStyle(
+                                            color: statusColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 2),
+                                      Icon(
+                                        Icons.chevron_right_rounded,
+                                        size: 22,
+                                        color: AppColors.textMuted,
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+
+                                  // Platform & Resolution tags
+                                  Row(
+                                    children: [
+                                      if (item.platform.isNotEmpty) ...[
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.surfaceMuted,
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            item.platform,
+                                            style: TextStyle(
+                                                fontSize: 11,
+                                                color: AppColors.navyMuted),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                      ],
+                                      if (item.resolutionType.isNotEmpty)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: AppColors
+                                                .statusInTransitContainer,
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            item.resolutionType,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: AppColors.statusInTransit,
+                                              fontWeight: FontWeight.w600,
                                             ),
                                           ),
                                         ),
-                                        Positioned(
-                                          bottom: 4,
-                                          right: 4,
-                                          child: Container(
-                                            padding: const EdgeInsets.all(3),
-                                            decoration: BoxDecoration(
-                                              color: Colors.black
-                                                  .withValues(alpha: 0.6),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const Icon(
-                                              Icons.fullscreen_rounded,
-                                              size: 13,
-                                              color: Colors.white,
-                                            ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+
+                                  // Customer Info
+                                  if (item.customerName.isNotEmpty) ...[
+                                    Row(
+                                      children: [
+                                        Icon(Icons.person_outline,
+                                            size: 16,
+                                            color: AppColors.textSecondary),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            item.customerName,
+                                            style: TextStyle(
+                                                fontSize: 13,
+                                                color: AppColors.textPrimary),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                       ],
                                     ),
-                                  );
-                                },
+                                    const SizedBox(height: 6),
+                                  ],
+
+                                  // Defect Reason Badge
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.statusReturnedContainer,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.warning_amber_rounded,
+                                            size: 14,
+                                            color: AppColors.dangerDeep),
+                                        const SizedBox(width: 6),
+                                        Flexible(
+                                          child: Text(
+                                            item.defectReason,
+                                            style: TextStyle(
+                                              color: AppColors.dangerDeep,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 12,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  // Notes
+                                  if (item.notes != null &&
+                                      item.notes!.trim().isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      item.notes!,
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          color: AppColors.textPrimary),
+                                    ),
+                                  ],
+
+                                  // Replacement Tracking #
+                                  if (item.replacementTrackingNumber != null &&
+                                      item.replacementTrackingNumber!
+                                          .trim()
+                                          .isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.local_shipping_outlined,
+                                            size: 14,
+                                            color: AppColors.statusDispatched),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'Replacement: ${item.replacementTrackingNumber!}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.statusDispatched,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+
+                                  // Photo Evidence Gallery (Clickable)
+                                  if (item.photoUrls.isNotEmpty) ...[
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.photo_library_outlined,
+                                            size: 14,
+                                            color: AppColors.navyPrimary),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          'Photo Evidence (${item.photoUrls.length})',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.navyPrimary,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          '• Tap to preview',
+                                          style: TextStyle(
+                                              fontSize: 11,
+                                              color: AppColors.textSecondary),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                    SizedBox(
+                                      height: 68,
+                                      child: ListView.separated(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: item.photoUrls.length,
+                                        separatorBuilder: (_, __) =>
+                                            const SizedBox(width: 8),
+                                        itemBuilder: (context, photoIndex) {
+                                          final photoUrl =
+                                              item.photoUrls[photoIndex];
+                                          return InkWell(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            onTap: () =>
+                                                _showImagePreviewDialog(
+                                              context,
+                                              item.photoUrls,
+                                              photoIndex,
+                                            ),
+                                            child: Stack(
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                  child: Image.network(
+                                                    photoUrl,
+                                                    width: 68,
+                                                    height: 68,
+                                                    fit: BoxFit.cover,
+                                                    loadingBuilder: (context,
+                                                        child, progress) {
+                                                      if (progress == null) {
+                                                        return child;
+                                                      }
+                                                      return Container(
+                                                        width: 68,
+                                                        height: 68,
+                                                        color: AppColors
+                                                            .surfaceMuted,
+                                                        child: const Center(
+                                                          child: SizedBox(
+                                                            width: 18,
+                                                            height: 18,
+                                                            child:
+                                                                CircularProgressIndicator(
+                                                                    strokeWidth:
+                                                                        2),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                    errorBuilder:
+                                                        (_, __, ___) =>
+                                                            Container(
+                                                      width: 68,
+                                                      height: 68,
+                                                      decoration: BoxDecoration(
+                                                        color: AppColors
+                                                            .surfaceVariant,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
+                                                      ),
+                                                      child: Icon(
+                                                          Icons.broken_image,
+                                                          size: 22,
+                                                          color: AppColors
+                                                              .textSecondary),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  bottom: 4,
+                                                  right: 4,
+                                                  child: Container(
+                                                    padding:
+                                                        const EdgeInsets.all(3),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.black
+                                                          .withValues(
+                                                              alpha: 0.6),
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons.fullscreen_rounded,
+                                                      size: 13,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
+
+                                  Divider(
+                                      height: 20, color: AppColors.borderLight),
+
+                                  // Bottom Row: Date & Update Status Button
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Logged: ${item.createdAt.month}/${item.createdAt.day}/${item.createdAt.year} ${item.createdAt.hour.toString().padLeft(2, '0')}:${item.createdAt.minute.toString().padLeft(2, '0')}',
+                                        style: TextStyle(
+                                            fontSize: 11,
+                                            color: AppColors.textSecondary),
+                                      ),
+                                      TextButton.icon(
+                                        style: TextButton.styleFrom(
+                                          foregroundColor:
+                                              AppColors.navyPrimary,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 6),
+                                          visualDensity: VisualDensity.compact,
+                                        ),
+                                        icon: const Icon(
+                                            Icons.playlist_add_check_rounded,
+                                            size: 18),
+                                        label: const Text(
+                                          'Update Status',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13),
+                                        ),
+                                        onPressed: () =>
+                                            _showUpdateStatusDialog(
+                                                context, ref, item),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-
-                          Divider(height: 20, color: AppColors.borderLight),
-
-                          // Bottom Row: Date & Update Status Button
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Logged: ${item.createdAt.month}/${item.createdAt.day}/${item.createdAt.year} ${item.createdAt.hour.toString().padLeft(2, '0')}:${item.createdAt.minute.toString().padLeft(2, '0')}',
-                                style: TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textSecondary),
-                              ),
-                              TextButton.icon(
-                                style: TextButton.styleFrom(
-                                  foregroundColor: AppColors.navyPrimary,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 6),
-                                  visualDensity: VisualDensity.compact,
-                                ),
-                                icon: const Icon(
-                                    Icons.playlist_add_check_rounded,
-                                    size: 18),
-                                label: const Text(
-                                  'Update Status',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13),
-                                ),
-                                onPressed: () =>
-                                    _showUpdateStatusDialog(context, ref, item),
-                              ),
-                            ],
                           ),
-                        ],
+                        ),
                       ),
                     );
                   },

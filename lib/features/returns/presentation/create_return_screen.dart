@@ -193,6 +193,9 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
         'contactNumber': _contactController.text.trim().isEmpty
             ? null
             : _contactController.text.trim(),
+        // Kept as a dedicated field so the ticket detail view can show the
+        // plate specifications without parsing the combined notes.
+        'customPlateDetails': specs.isEmpty ? null : specs,
         'notes': combinedNotes.isEmpty ? null : combinedNotes,
         'photoUrls': <String>[photoUrl],
         'status': AppConstants.returnStatusPending,
@@ -324,6 +327,8 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                 TextFormField(
                   controller: _customerNameController,
                   textCapitalization: TextCapitalization.words,
+                  // Customer names are capped at 60 characters.
+                  inputFormatters: customerNameInputFormatters,
                   decoration: InputDecoration(
                     labelText: 'Customer / Buyer Name *',
                     prefixIcon: Icon(Icons.person_outline,
@@ -335,7 +340,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                     if (val == null || val.trim().isEmpty) {
                       return 'Customer name is required';
                     }
-                    return null;
+                    return validateCustomerName(val, required: true);
                   },
                 ),
                 const SizedBox(height: 16),
@@ -361,8 +366,9 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                 // Motorcycle Plate Specifications
                 TextFormField(
                   controller: _specsController,
-                  // Plate specs are capped by the shared length limit.
-                  inputFormatters: itemSpecsInputFormatters,
+                  // Plate specs are capped at 30 characters so they fit on a
+                  // single return-ticket card line.
+                  inputFormatters: plateSpecsInputFormatters,
                   decoration: InputDecoration(
                     labelText: 'Motorcycle Plate Specifications *',
                     hintText: 'e.g. White plate, embossed, 4x7 with bracket',
@@ -371,7 +377,7 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  validator: (val) => validateItemSpecs(val, required: true),
+                  validator: (val) => validatePlateSpecs(val, required: true),
                 ),
                 const SizedBox(height: 16),
 

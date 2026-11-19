@@ -63,8 +63,11 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
 
       setState(() {
         _scannedCustomerId = customer.id;
-        _customerNameController.text =
-            pendingOrder?['customerName'] ?? customer.name;
+        // Stored names may predate the 60-character limit.
+        _customerNameController.text = limitLength(
+          pendingOrder?['customerName'] ?? customer.name,
+          kCustomerNameMaxLength,
+        );
         _contactController.text = normalizeContactNumber(
             pendingOrder?['contactNumber'] ?? customer.contactNumber);
         // Stored addresses may predate the length limit, so trim them before
@@ -80,10 +83,18 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
         }
 
         if (pendingOrder != null) {
-          _itemsController.text = limitLength(
-            'Custom Plate: [${pendingOrder['plateNumber']}] ${pendingOrder['plateSpecs']}',
-            kItemSpecsMaxLength,
-          );
+          // The Items / Plate Specs field is capped at 30 characters, so the
+          // autofill summary is kept short enough to fit in one line.
+          final plateNumber =
+              (pendingOrder['plateNumber'] ?? '').toString().trim();
+          final plateSpecs =
+              (pendingOrder['plateSpecs'] ?? '').toString().trim();
+          final summary = plateNumber.isEmpty
+              ? plateSpecs
+              : (plateSpecs.isEmpty
+                  ? plateNumber
+                  : '$plateNumber • $plateSpecs');
+          _itemsController.text = limitLength(summary, kPlateSpecsMaxLength);
           _notesController.text = limitLength(
             pendingOrder['specialNotes'],
             kOrderNotesMaxLength,
@@ -343,12 +354,15 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
               const SizedBox(height: 14),
               TextFormField(
                 controller: _customerNameController,
+                // Customer names are capped at 60 characters.
+                inputFormatters: customerNameInputFormatters,
                 decoration: const InputDecoration(
                   labelText: 'Customer Name *',
                   prefixIcon: Icon(Icons.person_outline),
                 ),
-                validator: (val) =>
-                    val == null || val.trim().isEmpty ? 'Enter name' : null,
+                validator: (val) => val == null || val.trim().isEmpty
+                    ? 'Enter name'
+                    : validateCustomerName(val, required: true),
               ),
               const SizedBox(height: 14),
               TextFormField(
@@ -396,14 +410,14 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
               TextFormField(
                 controller: _itemsController,
                 maxLines: 2,
-                // Items / plate specs are capped by the shared length limit.
-                inputFormatters: itemSpecsInputFormatters,
+                // Items / plate specs are capped at 30 characters.
+                inputFormatters: plateSpecsInputFormatters,
                 decoration: const InputDecoration(
                   labelText: 'Items / Plate Specs',
                   hintText: 'e.g. 2x Side Mirror, Custom Plate',
                   prefixIcon: Icon(Icons.inventory_2_outlined),
                 ),
-                validator: (val) => validateItemSpecs(val, required: false),
+                validator: (val) => validatePlateSpecs(val, required: false),
               ),
               const SizedBox(height: 14),
               TextFormField(

@@ -103,4 +103,21 @@ void main() {
 
     expect(find.text('Describe the other issue'), findsOneWidget);
   });
+
+  testWidgets('name stops at 60 characters and plate specs at 30',
+      (tester) async {
+    await tester.pumpWidget(_buildScreen());
+    await tester.pump();
+
+    final name = find.widgetWithText(TextFormField, 'Customer / Buyer Name *');
+    await tester.enterText(name, 'A' * 80);
+    await tester.pump();
+    expect(tester.widget<TextFormField>(name).controller!.text, 'A' * 60);
+
+    final specs =
+        find.widgetWithText(TextFormField, 'Motorcycle Plate Specifications *');
+    await tester.enterText(specs, 'B' * 45);
+    await tester.pump();
+    expect(tester.widget<TextFormField>(specs).controller!.text, 'B' * 30);
+  });
 }

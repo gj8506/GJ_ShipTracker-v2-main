@@ -112,7 +112,8 @@ void main() {
     expect(find.text('MOTORSTAR'), findsWidgets);
   });
 
-  testWidgets('switching away from Other hides the brand field', (tester) async {
+  testWidgets('switching away from Other hides the brand field',
+      (tester) async {
     await tester.pumpWidget(_buildForm());
     await tester.pump();
 
@@ -124,5 +125,22 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Specify Motorcycle Brand *'), findsNothing);
+  });
+
+  testWidgets('name stops at 60 characters and plate text at 30',
+      (tester) async {
+    await tester.pumpWidget(_buildForm());
+    await tester.pump();
+
+    final name = find.widgetWithText(TextFormField, 'Full Name *');
+    await tester.enterText(name, 'A' * 80);
+    await tester.pump();
+    expect(tester.widget<TextFormField>(name).controller!.text, 'A' * 60);
+
+    final plate =
+        find.widgetWithText(TextFormField, 'Plate Number / Inscription *');
+    await tester.enterText(plate, 'B' * 45);
+    await tester.pump();
+    expect(tester.widget<TextFormField>(plate).controller!.text, 'B' * 30);
   });
 }

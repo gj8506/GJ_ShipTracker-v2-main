@@ -28,6 +28,14 @@ const int kReturnNotesMaxLength = 150;
 /// longest common makes while keeping the plate preview and order cards tidy.
 const int kMotorcycleBrandMaxLength = 20;
 
+/// Customer / buyer names are capped at 60 characters so a long name can never
+/// overflow a dispatch row, order card or return-ticket card.
+const int kCustomerNameMaxLength = 60;
+
+/// Plate specification details on the order, dispatch and return forms are
+/// capped at 30 characters so they fit on a single card line.
+const int kPlateSpecsMaxLength = 30;
+
 /// Keeps the tracking-number fields at the courier's 15-character format and
 /// blocks characters that can never appear in a tracking code.
 final List<TextInputFormatter> trackingNumberInputFormatters =
@@ -71,6 +79,17 @@ final List<TextInputFormatter> returnNotesInputFormatters =
 final List<TextInputFormatter> motorcycleBrandInputFormatters =
     <TextInputFormatter>[
   LengthLimitingTextInputFormatter(kMotorcycleBrandMaxLength),
+];
+
+/// Caps customer / buyer names at [kCustomerNameMaxLength] characters.
+final List<TextInputFormatter> customerNameInputFormatters =
+    <TextInputFormatter>[
+  LengthLimitingTextInputFormatter(kCustomerNameMaxLength),
+];
+
+/// Caps the plate specification fields at [kPlateSpecsMaxLength] characters.
+final List<TextInputFormatter> plateSpecsInputFormatters = <TextInputFormatter>[
+  LengthLimitingTextInputFormatter(kPlateSpecsMaxLength),
 ];
 
 /// Trims [value] down to [maxLength] characters.
@@ -166,6 +185,37 @@ String? validateReturnNotes(String? value, {bool required = false}) {
   }
   if (notes.length > kReturnNotesMaxLength) {
     return 'Defect description must be $kReturnNotesMaxLength characters or fewer';
+  }
+  return null;
+}
+
+/// Validates a customer / buyer name against [kCustomerNameMaxLength].
+///
+/// Set [required] to true where the name must not be blank.
+String? validateCustomerName(String? value, {bool required = false}) {
+  final name = (value ?? '').trim();
+  if (name.isEmpty) {
+    return required ? 'Enter customer name' : null;
+  }
+  if (name.length > kCustomerNameMaxLength) {
+    return 'Customer name must be '
+        '$kCustomerNameMaxLength characters or fewer';
+  }
+  return null;
+}
+
+/// Validates a short plate-specification field against
+/// [kPlateSpecsMaxLength].
+///
+/// Set [required] to true where the specifications must not be blank.
+String? validatePlateSpecs(String? value, {bool required = false}) {
+  final specs = (value ?? '').trim();
+  if (specs.isEmpty) {
+    return required ? 'Enter items or plate specs' : null;
+  }
+  if (specs.length > kPlateSpecsMaxLength) {
+    return 'Plate specifications must be '
+        '$kPlateSpecsMaxLength characters or fewer';
   }
   return null;
 }

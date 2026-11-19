@@ -120,6 +120,28 @@ void main() {
       '123456.89',
     );
   });
+
+  testWidgets('customer name and item specs honor their character limits',
+      (tester) async {
+    await tester.pumpWidget(buildTestApp());
+    await tester.pumpAndSettle();
+
+    final name = find.byWidget(fieldFor(tester, 'Customer Name *'));
+    await tester.enterText(name, 'A' * 80);
+    await tester.pump();
+    expect(
+      fieldFor(tester, 'Customer Name *').controller!.text,
+      'A' * 60,
+    );
+
+    final items = find.byWidget(fieldFor(tester, 'Items / Plate Specs'));
+    await tester.enterText(items, 'B' * 45);
+    await tester.pump();
+    expect(
+      fieldFor(tester, 'Items / Plate Specs').controller!.text,
+      'B' * 30,
+    );
+  });
 }
 
 TextField fieldFor(WidgetTester tester, String label) {

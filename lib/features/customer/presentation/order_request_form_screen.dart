@@ -140,7 +140,11 @@ class _OrderRequestFormScreenState
       final userProfile = ref.read(userProfileProvider).value;
       if (userProfile != null) {
         if (_fullNameCtrl.text.isEmpty) {
-          _fullNameCtrl.text = userProfile.displayName;
+          // Stored display names may predate the 60-character limit.
+          _fullNameCtrl.text = limitLength(
+            userProfile.displayName,
+            kCustomerNameMaxLength,
+          );
         }
         if (_phoneCtrl.text.isEmpty && userProfile.phoneNumber != null) {
           _phoneCtrl.text = normalizeContactNumber(userProfile.phoneNumber);
@@ -456,6 +460,8 @@ class _OrderRequestFormScreenState
           TextFormField(
             controller: _plateNumberCtrl,
             textCapitalization: TextCapitalization.characters,
+            // Plate inscriptions are capped at 30 characters.
+            inputFormatters: plateSpecsInputFormatters,
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               labelText: 'Plate Number / Inscription *',
@@ -467,8 +473,12 @@ class _OrderRequestFormScreenState
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             ),
-            validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Enter plate number' : null,
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) {
+                return 'Enter plate number';
+              }
+              return validatePlateSpecs(v, required: true);
+            },
           ),
           const SizedBox(height: 14),
           DropdownButtonFormField<String>(
@@ -604,6 +614,8 @@ class _OrderRequestFormScreenState
           TextFormField(
             controller: _fullNameCtrl,
             textCapitalization: TextCapitalization.words,
+            // Customer names are capped at 60 characters.
+            inputFormatters: customerNameInputFormatters,
             decoration: InputDecoration(
               labelText: 'Full Name *',
               prefixIcon:
@@ -613,8 +625,12 @@ class _OrderRequestFormScreenState
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             ),
-            validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Enter recipient name' : null,
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) {
+                return 'Enter recipient name';
+              }
+              return validateCustomerName(v, required: true);
+            },
           ),
           const SizedBox(height: 14),
           TextFormField(

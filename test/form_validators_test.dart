@@ -193,6 +193,54 @@ void main() {
     });
   });
 
+  group('validatePlateSpecs', () {
+    test('accepts specs at the 30-character limit', () {
+      expect(validatePlateSpecs('a' * kPlateSpecsMaxLength), isNull);
+      expect(validatePlateSpecs('White plate, embossed'), isNull);
+    });
+
+    test('allows an empty optional value', () {
+      expect(validatePlateSpecs('', required: false), isNull);
+      expect(validatePlateSpecs(null), isNull);
+    });
+
+    test('requires specs when asked', () {
+      expect(validatePlateSpecs('  ', required: true),
+          'Enter items or plate specs');
+    });
+
+    test('rejects specs longer than the configured limit', () {
+      expect(
+        validatePlateSpecs('a' * (kPlateSpecsMaxLength + 1)),
+        'Plate specifications must be '
+        '$kPlateSpecsMaxLength characters or fewer',
+      );
+    });
+  });
+
+  group('validateCustomerName', () {
+    test('accepts names at the 60-character limit', () {
+      expect(validateCustomerName('a' * kCustomerNameMaxLength), isNull);
+      expect(validateCustomerName('Maria Santos'), isNull);
+    });
+
+    test('allows an empty optional value', () {
+      expect(validateCustomerName(''), isNull);
+      expect(validateCustomerName(null), isNull);
+    });
+
+    test('requires a name when asked', () {
+      expect(validateCustomerName('  ', required: true), 'Enter customer name');
+    });
+
+    test('rejects a name longer than the configured limit', () {
+      expect(
+        validateCustomerName('a' * (kCustomerNameMaxLength + 1)),
+        'Customer name must be $kCustomerNameMaxLength characters or fewer',
+      );
+    });
+  });
+
   group('limitLength', () {
     test('keeps short values untouched', () {
       expect(limitLength('Makati', 35), 'Makati');
@@ -274,6 +322,20 @@ void main() {
       expect(
         _apply(motorcycleBrandInputFormatters, 'a' * 60),
         'a' * kMotorcycleBrandMaxLength,
+      );
+    });
+
+    test('customer names stop at 60 characters', () {
+      expect(
+        _apply(customerNameInputFormatters, 'a' * 100),
+        'a' * kCustomerNameMaxLength,
+      );
+    });
+
+    test('plate specifications stop at 30 characters', () {
+      expect(
+        _apply(plateSpecsInputFormatters, 'b' * 80),
+        'b' * kPlateSpecsMaxLength,
       );
     });
   });
