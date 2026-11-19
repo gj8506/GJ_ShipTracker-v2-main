@@ -48,10 +48,10 @@ class CustomerHomeScreen extends ConsumerWidget {
                     userProfile?.displayName ?? 'Customer Portal',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.navyDark,
+                      color: AppColors.onAppBar,
                     ),
                   ),
                   Text(
@@ -60,7 +60,7 @@ class CustomerHomeScreen extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.navySecondary,
+                      color: AppColors.onAppBar.withValues(alpha: 0.85),
                     ),
                   ),
                 ],
@@ -70,9 +70,9 @@ class CustomerHomeScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.help_outline,
-              color: AppColors.textSecondary,
+              color: AppColors.onAppBar,
             ),
             onPressed: onNavigateToSupport,
           ),

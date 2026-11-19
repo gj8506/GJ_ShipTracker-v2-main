@@ -4,11 +4,45 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/money_format.dart';
+import '../../../core/widgets/pagination_bar.dart';
 import '../domain/parcel_model.dart';
 import 'parcel_providers.dart';
 
-class ParcelsDashboardScreen extends ConsumerWidget {
+class ParcelsDashboardScreen extends ConsumerStatefulWidget {
   const ParcelsDashboardScreen({super.key});
+
+  @override
+  ConsumerState<ParcelsDashboardScreen> createState() =>
+      _ParcelsDashboardScreenState();
+}
+
+class _ParcelsDashboardScreenState
+    extends ConsumerState<ParcelsDashboardScreen> {
+  /// The dashboard shows ten parcels per page, as requested.
+  static const int _pageSize = 10;
+
+  /// Zero-based index of the parcel page currently shown.
+  int _page = 0;
+
+  final ScrollController _listController = ScrollController();
+
+  @override
+  void dispose() {
+    _listController.dispose();
+    super.dispose();
+  }
+
+  void _resetPage() {
+    if (_page != 0) setState(() => _page = 0);
+  }
+
+  void _goToPage(int page) {
+    if (page == _page) return;
+    setState(() => _page = page);
+    if (_listController.hasClients) {
+      _listController.jumpTo(0);
+    }
+  }
 
   Color _getStatusColor(String status) {
     switch (status) {
@@ -25,8 +59,23 @@ class ParcelsDashboardScreen extends ConsumerWidget {
     }
   }
 
+  Color _getStatusContainerColor(String status) {
+    switch (status) {
+      case AppConstants.statusDispatched:
+        return AppColors.statusDispatchedContainer;
+      case AppConstants.statusInTransit:
+        return AppColors.statusInTransitContainer;
+      case AppConstants.statusDelivered:
+        return AppColors.statusDeliveredContainer;
+      case AppConstants.statusReturned:
+        return AppColors.statusReturnedContainer;
+      default:
+        return AppColors.statusPendingContainer;
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final allParcelsAsync = ref.watch(parcelsStreamProvider);
     final filteredParcels = ref.watch(filteredParcelsProvider);
     final selectedPlatform = ref.watch(selectedPlatformFilterProvider);
@@ -49,7 +98,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
         toolbarHeight: 64,
         title: const Text(
           'Parcels Dashboard',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
         ),
         actions: [
           IconButton(
@@ -106,8 +155,12 @@ class ParcelsDashboardScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: TextField(
-              onChanged: (val) =>
-                  ref.read(searchQueryProvider.notifier).state = val,
+              onChanged: (val) {
+                ref.read(searchQueryProvider.notifier).state = val;
+                // A new search always starts from the first page so the user
+                // never lands on an empty, out-of-range page.
+                _resetPage();
+              },
               decoration: InputDecoration(
                 hintText: 'Search tracking number, customer, courier...',
                 prefixIcon: const Icon(Icons.search),
@@ -149,7 +202,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
 
-          // 4. Parcel List Area
+          // 4. Parcel List Area — slice AFTER search + platform filters run.
           Expanded(
             child: allParcelsAsync.when(
               data: (_) {
@@ -176,15 +229,57 @@ class ParcelsDashboardScreen extends ConsumerWidget {
                   );
                 }
 
-                return ListView.separated(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
-                  itemCount: filteredParcels.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) {
-                    final parcel = filteredParcels[index];
-                    return _buildParcelCard(context, parcel);
-                  },
+                final pageCount = PaginationBar.pageCountFor(
+                  filteredParcels.length,
+                  _pageSize,
+                );
+                final page = PaginationBar.clampPage(
+                  _page,
+                  filteredParcels.length,
+                  _pageSize,
+                );
+                final visibleParcels = PaginationBar.pageSlice(
+                  filteredParcels,
+                  page,
+                  _pageSize,
+                );
+
+                return Column(
+                  children: [
+                    Expanded(
+                      child: ListView.separated(
+                        controller: _listController,
+                        padding: EdgeInsets.fromLTRB(
+                          16.0,
+                          8.0,
+                          16.0,
+                          pageCount > 1 ? 16.0 : 84.0,
+                        ),
+                        itemCount: visibleParcels.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) {
+                          return _buildParcelCard(
+                            context,
+                            visibleParcels[index],
+                          );
+                        },
+                      ),
+                    ),
+                    if (pageCount > 1)
+                      Padding(
+                        // Clear the floating chatbot button so the page
+                        // controls are always tappable.
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 84),
+                        child: PaginationBar(
+                          page: page,
+                          pageCount: pageCount,
+                          itemCount: filteredParcels.length,
+                          pageSize: _pageSize,
+                          itemLabel: 'parcels',
+                          onPageChanged: _goToPage,
+                        ),
+                      ),
+                  ],
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -248,6 +343,8 @@ class ParcelsDashboardScreen extends ConsumerWidget {
           const SizedBox(height: 6),
           Text(
             count,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
@@ -269,6 +366,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
       onSelected: (_) {
         ref.read(selectedPlatformFilterProvider.notifier).state =
             label == 'All' ? null : label;
+        _resetPage();
       },
       selectedColor: AppColors.navyPrimary,
       labelStyle: TextStyle(
@@ -286,6 +384,7 @@ class ParcelsDashboardScreen extends ConsumerWidget {
 
   Widget _buildParcelCard(BuildContext context, ParcelModel parcel) {
     final statusColor = _getStatusColor(parcel.status);
+    final statusContainer = _getStatusContainerColor(parcel.status);
 
     return Card(
       elevation: 0,
@@ -302,25 +401,32 @@ class ParcelsDashboardScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    parcel.trackingNumber,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.navyPrimary,
+                  Expanded(
+                    child: Text(
+                      parcel.trackingNumber,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.navyPrimary,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  // Standardised status pill: soft container + strong label.
                   Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
+                      color: statusContainer,
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       parcel.status,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: statusColor,
                         fontWeight: FontWeight.bold,
@@ -365,6 +471,8 @@ class ParcelsDashboardScreen extends ConsumerWidget {
               const SizedBox(height: 6),
               Text(
                 '${parcel.platform} • ${parcel.courier}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondary,

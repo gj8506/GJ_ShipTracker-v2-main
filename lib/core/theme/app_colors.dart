@@ -43,6 +43,14 @@ class AppColors {
   /// Monogram royal blue from the logo. Reserved for rare, high-emphasis marks.
   static const Color logoRoyal = Color(0xFF0F0FDF);
 
+  /// Bold Cobalt used by the app bars. Deliberately constant in both themes so
+  /// the header always reads as the same deep brand blue.
+  static const Color brandCobalt = Color(0xFF02569B);
+
+  /// App-bar surface and its (always light) title/icon colour.
+  static Color get appBarBackground => brandCobalt;
+  static const Color onAppBar = Color(0xFFFFFFFF);
+
   // ---------------------------------------------------------------------------
   // 75% — BACKGROUND & SURFACE (the dominant, calming layer)
   // ---------------------------------------------------------------------------
@@ -62,10 +70,11 @@ class AppColors {
   // ---------------------------------------------------------------------------
   // 20% — INTERFACE, NAVIGATION & BUTTONS
   // ---------------------------------------------------------------------------
-  static Color get navyPrimary =>
-      _pick(const Color(0xFF0079AC), const Color(0xFF3AA7DA));
+  /// Primary action colour: bold Cobalt in light mode. The dark palette keeps
+  /// a lighter azure so white-ish labels never lose contrast.
+  static Color get navyPrimary => _pick(brandCobalt, const Color(0xFF3AA7DA));
   static Color get navySecondary =>
-      _pick(const Color(0xFF075E85), const Color(0xFF2F8FBE));
+      _pick(const Color(0xFF02447C), const Color(0xFF2F8FBE));
   static Color get navyDark =>
       _pick(const Color(0xFF0A4763), const Color(0xFFE7F2F9));
   static Color get navyMuted =>
@@ -76,9 +85,18 @@ class AppColors {
   static Color get interface => navyPrimary;
   static Color get interfaceMuted => navySecondary;
 
-  /// Light azure used for the app header and bottom navigation chrome.
+  /// Bottom-navigation chrome: pure white in light mode and deep slate in
+  /// dark mode, so the bar reads as a clean, grounded surface.
   static Color get chromeBlue =>
-      _pick(const Color(0xFFBEDEFF), const Color(0xFF0E1F2C));
+      _pick(const Color(0xFFFFFFFF), const Color(0xFF0F172A));
+
+  /// Soft blue pill behind the active bottom-navigation destination. Constant
+  /// because the selected icon flips to dark ink on top of it in both themes.
+  static const Color navIndicator = Color(0xFFE0F2FE);
+
+  /// Selected navigation icon/label. Dark ink keeps the soft-blue pill
+  /// readable in both light and dark mode.
+  static Color get navSelected => _pick(navyDark, inkOnLight);
 
   // Small accents (use sparingly — roughly 5% of the screen)
   static Color get tealAccent =>
@@ -190,11 +208,11 @@ class AppColors {
   static Color get statusPendingContainer =>
       _pick(const Color(0xFFFFF4DB), const Color(0xFF36280F));
   static Color get statusInTransit =>
-      _pick(const Color(0xFF0079AC), const Color(0xFF58BEEA));
+      _pick(const Color(0xFF02569B), const Color(0xFF58BEEA));
   static Color get statusInTransitContainer =>
       _pick(const Color(0xFFEAF8FE), const Color(0xFF103040));
   static Color get statusDispatched =>
-      _pick(const Color(0xFF0079AC), const Color(0xFF58BEEA));
+      _pick(const Color(0xFF02569B), const Color(0xFF58BEEA));
   static Color get statusDispatchedContainer =>
       _pick(const Color(0xFFEAF8FE), const Color(0xFF103040));
   static Color get statusCancelled =>

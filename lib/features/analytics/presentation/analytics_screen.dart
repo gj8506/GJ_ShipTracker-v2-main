@@ -396,9 +396,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         actions: [
           IconButton(
             key: const ValueKey('admin_excel_export_button'),
-            icon: Icon(
+            icon: const Icon(
               Icons.table_chart_rounded,
-              color: AppColors.statusDelivered,
+              color: AppColors.onAppBar,
               size: 26,
             ),
             tooltip: 'Export Organized Excel',
@@ -406,9 +406,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           ),
           IconButton(
             tooltip: 'Sales Forecasting (Admin)',
-            icon: Icon(
+            icon: const Icon(
               Icons.auto_graph_rounded,
-              color: AppColors.navyPrimary,
+              color: AppColors.onAppBar,
             ),
             onPressed: () {
               Navigator.push(

@@ -140,7 +140,9 @@ class _DpaEditorScreenState extends ConsumerState<DpaEditorScreen> {
                       decoration: const InputDecoration(
                         labelText: 'Agreement title',
                         hintText: 'Data Privacy Agreement',
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(12))),
                       ),
                       validator: (value) =>
                           (value ?? '').trim().isEmpty ? 'Enter a title' : null,
@@ -158,7 +160,9 @@ class _DpaEditorScreenState extends ConsumerState<DpaEditorScreen> {
                         hintText:
                             'Paste the full agreement shown at launch and sign-up',
                         alignLabelWithHint: true,
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(12))),
                       ),
                       validator: (value) {
                         final text = (value ?? '').trim();

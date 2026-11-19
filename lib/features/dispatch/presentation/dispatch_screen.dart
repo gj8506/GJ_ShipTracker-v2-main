@@ -126,9 +126,8 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
       // field is capped strictly below ₱1,000,000.
       final parsedAmount =
           sanitizeMoneyValue(_amountController.text.trim()) ?? 0.0;
-      final amount = parsedAmount > kMaxFinalAmount
-          ? kMaxFinalAmount
-          : parsedAmount;
+      final amount =
+          parsedAmount > kMaxFinalAmount ? kMaxFinalAmount : parsedAmount;
 
       final newParcel = ParcelModel(
         trackingNumber: _trackingController.text.trim(),
@@ -210,14 +209,16 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
         toolbarHeight: 64,
         title: const Text(
           'Outbound Dispatch',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
         ),
       ),
       body: SingleChildScrollView(
         // Dragging the form dismisses the keyboard instead of leaving the user
         // stuck behind it on small screens.
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.all(16.0),
+        // Extra bottom room so the floating chatbot button never covers the
+        // last field or the Dispatch action.
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 84),
         child: Form(
           key: _formKey,
           child: Column(
@@ -226,19 +227,21 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton.icon(
+                    child: ElevatedButton.icon(
                       onPressed: _openCustomerQrScanner,
                       icon: Icon(Icons.qr_code_scanner_rounded,
-                          color: AppColors.tealAccent),
+                          color: AppColors.textOnPrimary, size: 20),
                       label: const Text(
                         'Scan QR (Check Plate Orders)',
                         style: TextStyle(
                             fontSize: 13, fontWeight: FontWeight.bold),
                       ),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: AppColors.tealAccent),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.navyPrimary,
+                        foregroundColor: AppColors.textOnPrimary,
+                        elevation: 1,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                            borderRadius: BorderRadius.circular(12)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
@@ -344,9 +347,8 @@ class _DispatchScreenState extends ConsumerState<DispatchScreen> {
                   labelText: 'Customer Name *',
                   prefixIcon: Icon(Icons.person_outline),
                 ),
-                validator: (val) => val == null || val.trim().isEmpty
-                    ? 'Enter name'
-                    : null,
+                validator: (val) =>
+                    val == null || val.trim().isEmpty ? 'Enter name' : null,
               ),
               const SizedBox(height: 14),
               TextFormField(

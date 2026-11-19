@@ -108,7 +108,8 @@ class ProfileScreen extends ConsumerWidget {
               textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(
                 labelText: 'Display Name',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12))),
               ),
             ),
             const SizedBox(height: 12),
@@ -119,7 +120,8 @@ class ProfileScreen extends ConsumerWidget {
               inputFormatters: contactNumberInputFormatters,
               decoration: const InputDecoration(
                 labelText: 'Contact Number',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12))),
               ),
             ),
           ],
@@ -185,7 +187,7 @@ class ProfileScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout_rounded, color: AppColors.statusReturned),
+            icon: const Icon(Icons.logout_rounded, color: AppColors.onAppBar),
             tooltip: 'Sign Out',
             onPressed: () => _handleSignOut(context, ref),
           ),

@@ -42,11 +42,11 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: Row(
+        title: const Row(
           children: [
-            Icon(Icons.smart_toy_rounded, color: AppColors.navyPrimary),
-            const SizedBox(width: 8),
-            const Text('Assistant'),
+            Icon(Icons.smart_toy_rounded, color: AppColors.onAppBar),
+            SizedBox(width: 8),
+            Text('Assistant'),
           ],
         ),
       ),

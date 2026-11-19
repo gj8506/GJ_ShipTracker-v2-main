@@ -30,14 +30,16 @@ class CustomerSupportScreen extends ConsumerWidget {
                 controller: subjectCtrl,
                 decoration: const InputDecoration(
                     labelText: 'Subject / Issue type',
-                    border: OutlineInputBorder()),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)))),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: parcelCtrl,
                 decoration: const InputDecoration(
                     labelText: 'Related Tracking # (Optional)',
-                    border: OutlineInputBorder()),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)))),
               ),
             ],
           ),

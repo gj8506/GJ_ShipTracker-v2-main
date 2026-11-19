@@ -86,7 +86,7 @@ class _CustomerShellState extends ConsumerState<CustomerShell> {
         ),
         child: NavigationBar(
           backgroundColor: AppColors.chromeBlue,
-          indicatorColor: AppColors.navyPrimary.withValues(alpha: 0.14),
+          indicatorColor: AppColors.navIndicator,
           selectedIndex: _currentIndex,
           onDestinationSelected: _onTabChanged,
           destinations: const [

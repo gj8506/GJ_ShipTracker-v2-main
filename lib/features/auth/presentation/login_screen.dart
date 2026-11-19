@@ -758,7 +758,8 @@ class _ForgotPasswordDialogState extends ConsumerState<_ForgotPasswordDialog> {
             decoration: const InputDecoration(
               labelText: 'Account Email',
               prefixIcon: Icon(Icons.email_outlined),
-              border: OutlineInputBorder(),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12))),
             ),
           ),
         ],

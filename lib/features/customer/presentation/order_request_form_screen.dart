@@ -249,14 +249,15 @@ class _OrderRequestFormScreenState
       appBar: AppBar(
         title: const Text(
           'New Custom Plate Order',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 22),
         ),
       ),
       body: SingleChildScrollView(
         // Dragging the form dismisses the keyboard, and the scroll view keeps
         // the focused field above it now that the shell no longer double-resizes.
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        // Clear the floating chatbot button at the bottom of the form.
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 84),
         child: Form(
           key: _formKey,
           child: Column(

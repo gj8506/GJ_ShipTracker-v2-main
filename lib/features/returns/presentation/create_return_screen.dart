@@ -233,7 +233,8 @@ class _CreateReturnScreenState extends ConsumerState<CreateReturnScreen> {
       appBar: AppBar(title: const Text('Log Return / Defect Ticket')),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          // Bottom room so the chatbot FAB never covers the submit button.
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 84),
           child: Form(
             key: _formKey,
             child: Column(

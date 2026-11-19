@@ -65,9 +65,7 @@ class MainNavigationShell extends ConsumerWidget {
             child: MediaQuery(
               // The banner already covers the status bar while offline, so
               // drop the top inset to avoid a second empty header band.
-              data: (isOffline
-                      ? media.removePadding(removeTop: true)
-                      : media)
+              data: (isOffline ? media.removePadding(removeTop: true) : media)
                   // The Scaffold above already shrank this body for the
                   // keyboard and stripped its bottom view inset. Re-applying
                   // the outer MediaQuery put that inset back, so nested screens
@@ -104,7 +102,7 @@ class MainNavigationShell extends ConsumerWidget {
         ),
         child: NavigationBar(
           backgroundColor: AppColors.chromeBlue,
-          indicatorColor: AppColors.navyPrimary.withValues(alpha: 0.14),
+          indicatorColor: AppColors.navIndicator,
           elevation: 0,
           selectedIndex:
               _calculateSelectedIndex(navigationShell.currentIndex, isAdmin),

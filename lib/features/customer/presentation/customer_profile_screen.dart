@@ -27,7 +27,8 @@ class _CustomerProfileScreenState extends ConsumerState<CustomerProfileScreen> {
           textCapitalization: TextCapitalization.words,
           decoration: const InputDecoration(
             labelText: 'Full Name',
-            border: OutlineInputBorder(),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12))),
           ),
         ),
         actions: [

@@ -130,37 +130,37 @@ class AppTheme {
       textTheme: textTheme,
       visualDensity: VisualDensity.standard,
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.chromeBlue,
-        foregroundColor: AppColors.navyDark,
+        // Bold Cobalt header with white titles/icons in both themes.
+        backgroundColor: AppColors.appBarBackground,
+        foregroundColor: AppColors.onAppBar,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0.5,
         shadowColor: AppColors.borderStrong,
         centerTitle: false,
         titleSpacing: 16,
-        systemOverlayStyle: AppColors.isDark
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         titleTextStyle: textTheme.titleLarge?.copyWith(
-          fontSize: 20,
+          fontSize: 22,
           fontWeight: FontWeight.w700,
-          color: AppColors.navyDark,
+          color: AppColors.onAppBar,
         ),
-        iconTheme: IconThemeData(
-          color: AppColors.navyDark,
+        iconTheme: const IconThemeData(
+          color: AppColors.onAppBar,
           size: 22,
         ),
-        actionsIconTheme: IconThemeData(
-          color: AppColors.navyDark,
+        actionsIconTheme: const IconThemeData(
+          color: AppColors.onAppBar,
           size: 22,
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
+        // Pure white (light) / deep slate (dark) chrome with a soft blue pill.
         backgroundColor: AppColors.chromeBlue,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         height: 68,
-        indicatorColor: AppColors.navyPrimary.withValues(alpha: 0.14),
+        indicatorColor: AppColors.navIndicator,
         indicatorShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -169,7 +169,7 @@ class AppTheme {
           final selected = states.contains(WidgetState.selected);
           return textTheme.labelSmall?.copyWith(
             fontSize: 11,
-            color: selected ? AppColors.navyDark : AppColors.navyMuted,
+            color: selected ? AppColors.navSelected : AppColors.navyMuted,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
           );
         }),
@@ -177,13 +177,13 @@ class AppTheme {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
             size: 23,
-            color: selected ? AppColors.navyDark : AppColors.navyMuted,
+            color: selected ? AppColors.navSelected : AppColors.navyMuted,
           );
         }),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColors.chromeBlue,
-        selectedItemColor: AppColors.navyDark,
+        selectedItemColor: AppColors.navSelected,
         unselectedItemColor: AppColors.navyMuted,
         type: BottomNavigationBarType.fixed,
         elevation: 0,

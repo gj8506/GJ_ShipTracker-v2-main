@@ -191,7 +191,10 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
             Text(
               widget.subject,
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.onAppBar.withValues(alpha: 0.85),
+              ),
             ),
           ],
         ),
@@ -205,10 +208,9 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Marked as Resolved')));
               },
-              child: Text('Resolve',
+              child: const Text('Resolve',
                   style: TextStyle(
-                      color: AppColors.statusDelivered,
-                      fontWeight: FontWeight.bold)),
+                      color: AppColors.onAppBar, fontWeight: FontWeight.bold)),
             ),
         ],
       ),
