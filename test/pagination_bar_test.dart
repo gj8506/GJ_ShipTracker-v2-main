@@ -38,9 +38,9 @@ void main() {
 
     expect(find.text('Showing 1–10 of 24 parcels'), findsOneWidget);
     expect(find.byType(Wrap), findsOneWidget);
-    expect(find.text('Page 1'), findsOneWidget);
-    expect(find.text('Page 2'), findsOneWidget);
-    expect(find.text('Page 3'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
 
     final previous = tester.widget<OutlinedButton>(
       find.widgetWithText(OutlinedButton, 'Previous'),
@@ -61,7 +61,7 @@ void main() {
     );
     expect(next.onPressed, isNotNull);
 
-    await tester.tap(find.text('Page 3'));
+    await tester.tap(find.text('3'));
     await tester.pumpAndSettle();
     expect(find.text('Showing 21–24 of 24 parcels'), findsOneWidget);
 
@@ -82,9 +82,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(Wrap), findsOneWidget);
-    // Eight pages produce a five-pill window; the Wrap lays them out over
-    // multiple runs when the screen is narrow.
-    expect(find.text('Page 1'), findsOneWidget);
+    // Eight pages produce a five-pill window plus a trailing gap marker; the
+    // compact numeric pills fit on a narrow phone without stacking.
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('…'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
