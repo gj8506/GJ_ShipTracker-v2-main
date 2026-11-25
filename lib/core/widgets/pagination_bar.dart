@@ -6,11 +6,13 @@ import '../theme/app_theme.dart';
 /// Registry and Staff Approvals screens.
 ///
 /// All slicing happens in memory on the already-filtered list, so search and
-/// date filters keep working exactly as before. Numbered page pills live inside
-/// a [Wrap] so a long queue can never overflow horizontally, and the
-/// Previous / Next controls stay full-width on phones. Pills show the bare page
-/// number with gap markers ("…") when the window skips pages, so the row stays
-/// on a single line on phones instead of stacking one pill per row.
+/// date filters keep working exactly as before.
+///
+/// The control is a single compact line — `Back 1 2 3 4 5 Next` — with the
+/// selected page filled by the theme's primary colour. Gap markers ("…") stand
+/// in for pages hidden by the five-page window. A [FittedBox] keeps the whole
+/// row on one line even on a narrow phone, and every colour comes from the
+/// active [ColorScheme] so the bar follows light/dark theme changes instantly.
 class PaginationBar extends StatelessWidget {
   const PaginationBar({
     super.key,
@@ -37,7 +39,8 @@ class PaginationBar extends StatelessWidget {
   /// Called with the zero-based index of the page the user picked.
   final ValueChanged<int> onPageChanged;
 
-  /// Plural noun used in the "Showing X–Y of Z <itemLabel>" summary.
+  /// Plural noun used in the "Showing X–Y of Z <itemLabel>" accessibility
+  /// label. The visible control itself shows only page numbers.
   final String itemLabel;
 
   /// Number of pages needed to show [itemCount] items.
@@ -84,67 +87,93 @@ class PaginationBar extends StatelessWidget {
     final showLeadingGap = visiblePages.isNotEmpty && visiblePages.first > 0;
     final showTrailingGap =
         visiblePages.isNotEmpty && visiblePages.last < pageCount - 1;
+    final enabledColor = scheme.primary;
+    final disabledColor = scheme.onSurfaceVariant.withValues(alpha: 0.35);
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: scheme.outlineVariant),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Showing $first–$last of $itemCount $itemLabel',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              color: scheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 6,
-            runSpacing: 6,
+    // Compact `Back 1 2 3 4 5 Next` row. The count stays available to screen
+    // readers but no longer takes up space above the controls.
+    return Semantics(
+      container: true,
+      label: 'Showing $first–$last of $itemCount $itemLabel',
+      child: Center(
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (showLeadingGap) const _PageGap(),
-              for (final index in visiblePages)
+              _PageArrow(
+                label: 'Back',
+                enabled: safePage > 0,
+                color: safePage > 0 ? enabledColor : disabledColor,
+                onTap: safePage > 0 ? () => onPageChanged(safePage - 1) : null,
+              ),
+              const SizedBox(width: 8),
+              if (showLeadingGap) ...[
+                const _PageGap(),
+                const SizedBox(width: 2),
+              ],
+              for (final index in visiblePages) ...[
                 _PagePill(
                   pageNumber: index + 1,
                   selected: index == safePage,
                   onTap: () => onPageChanged(index),
                 ),
-              if (showTrailingGap) const _PageGap(),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed:
-                      safePage > 0 ? () => onPageChanged(safePage - 1) : null,
-                  icon: const Icon(Icons.chevron_left_rounded, size: 18),
-                  label: const Text('Previous'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: safePage < pageCount - 1
-                      ? () => onPageChanged(safePage + 1)
-                      : null,
-                  icon: const Icon(Icons.chevron_right_rounded, size: 18),
-                  label: const Text('Next'),
-                ),
+                const SizedBox(width: 2),
+              ],
+              if (showTrailingGap) ...[
+                const _PageGap(),
+                const SizedBox(width: 2),
+              ],
+              _PageArrow(
+                label: 'Next',
+                enabled: safePage < pageCount - 1,
+                color: safePage < pageCount - 1 ? enabledColor : disabledColor,
+                onTap: safePage < pageCount - 1
+                    ? () => onPageChanged(safePage + 1)
+                    : null,
               ),
             ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Plain text step control used for Back / Next in the compact pagination row.
+class _PageArrow extends StatelessWidget {
+  const _PageArrow({
+    required this.label,
+    required this.enabled,
+    required this.color,
+    this.onTap,
+  });
+
+  final String label;
+  final bool enabled;
+  final Color color;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -171,25 +200,20 @@ class _PagePill extends StatelessWidget {
       label: 'Page $pageNumber',
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
         child: Container(
-          width: 36,
-          height: 36,
+          width: 30,
+          height: 30,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: selected
-                ? scheme.primary
-                : scheme.surfaceContainerHighest.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: selected ? scheme.primary : scheme.outlineVariant,
-            ),
+            color: selected ? scheme.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             '$pageNumber',
             style: TextStyle(
               fontSize: 13,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
               color: selected ? scheme.onPrimary : scheme.onSurfaceVariant,
             ),
           ),
@@ -208,14 +232,17 @@ class _PageGap extends StatelessWidget {
   Widget build(BuildContext context) {
     return ExcludeSemantics(
       child: SizedBox(
-        width: 16,
-        height: 36,
+        width: 14,
+        height: 30,
         child: Center(
           child: Text(
             '…',
             style: TextStyle(
               fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurfaceVariant
+                  .withValues(alpha: 0.7),
             ),
           ),
         ),

@@ -244,32 +244,29 @@ class _ParcelsDashboardScreenState
                   _pageSize,
                 );
 
-                return Column(
-                  children: [
-                    Expanded(
-                      child: ListView.separated(
-                        controller: _listController,
-                        padding: EdgeInsets.fromLTRB(
-                          16.0,
-                          8.0,
-                          16.0,
-                          pageCount > 1 ? 16.0 : 84.0,
-                        ),
-                        itemCount: visibleParcels.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
-                        itemBuilder: (context, index) {
-                          return _buildParcelCard(
-                            context,
-                            visibleParcels[index],
-                          );
-                        },
-                      ),
-                    ),
-                    if (pageCount > 1)
-                      Padding(
-                        // Clear the floating chatbot button so the page
-                        // controls are always tappable.
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 84),
+                final hasPagination = pageCount > 1;
+
+                // The footer is the last row of the same scrollable list, so
+                // all ten parcel cards stay visible above it and the controls
+                // never pin over a card.
+                return ListView.separated(
+                  controller: _listController,
+                  padding: EdgeInsets.fromLTRB(
+                    16.0,
+                    8.0,
+                    16.0,
+                    hasPagination ? 8.0 : 84.0,
+                  ),
+                  itemCount: visibleParcels.length + (hasPagination ? 1 : 0),
+                  separatorBuilder: (_, index) => SizedBox(
+                    height: index == visibleParcels.length - 1 ? 24 : 10,
+                  ),
+                  itemBuilder: (context, index) {
+                    if (hasPagination && index == visibleParcels.length) {
+                      return Padding(
+                        // Extra bottom room keeps the row clear of the
+                        // floating chatbot button when scrolled to the end.
+                        padding: const EdgeInsets.only(bottom: 88),
                         child: PaginationBar(
                           page: page,
                           pageCount: pageCount,
@@ -278,8 +275,10 @@ class _ParcelsDashboardScreenState
                           itemLabel: 'parcels',
                           onPageChanged: _goToPage,
                         ),
-                      ),
-                  ],
+                      );
+                    }
+                    return _buildParcelCard(context, visibleParcels[index]);
+                  },
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),

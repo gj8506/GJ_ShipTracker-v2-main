@@ -437,15 +437,22 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
                   ),
                   const SizedBox(height: 12),
                 ],
-                if (pageCount > 1)
-                  PaginationBar(
-                    page: page,
-                    pageCount: pageCount,
-                    itemCount: staff.length,
-                    pageSize: StaffRegistrationPolicy.approvalsPageSize,
-                    itemLabel: 'pending registrations',
-                    onPageChanged: _goToPage,
+                if (pageCount > 1) ...[
+                  const SizedBox(height: 24),
+                  // Sits after the last staff card in the scroll view rather
+                  // than covering it, with room for the floating chatbot.
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 88),
+                    child: PaginationBar(
+                      page: page,
+                      pageCount: pageCount,
+                      itemCount: staff.length,
+                      pageSize: StaffRegistrationPolicy.approvalsPageSize,
+                      itemLabel: 'pending registrations',
+                      onPageChanged: _goToPage,
+                    ),
                   ),
+                ],
               ],
             ),
           );

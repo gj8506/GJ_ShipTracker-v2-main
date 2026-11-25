@@ -48,7 +48,7 @@ void main() {
   testWidgets('parcel dashboard shows ten parcels per page', (tester) async {
     await _pump(tester);
 
-    expect(find.text('Showing 1–10 of 12 parcels'), findsOneWidget);
+    expect(find.bySemanticsLabel('Showing 1–10 of 12 parcels'), findsOneWidget);
     expect(find.text('Customer 1'), findsOneWidget);
     expect(find.text('Customer 10'), findsOneWidget);
     expect(find.text('Customer 11'), findsNothing);
@@ -57,10 +57,48 @@ void main() {
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Showing 11–12 of 12 parcels'), findsOneWidget);
+    expect(
+        find.bySemanticsLabel('Showing 11–12 of 12 parcels'), findsOneWidget);
     expect(find.text('Customer 1'), findsNothing);
     expect(find.text('Customer 11'), findsOneWidget);
     expect(find.text('Customer 12'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('page controls sit below all ten cards on a narrow phone',
+      (tester) async {
+    tester.view.physicalSize = const Size(360, 780);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_app(List.generate(12, (i) => _parcel(i + 1))));
+    await tester.pumpAndSettle();
+
+    // The tenth card and the controls are only reachable by scrolling.
+    expect(find.text('Customer 1'), findsOneWidget);
+    expect(find.text('Back'), findsNothing);
+
+    final listScroll = find.byWidgetPredicate(
+      (widget) => widget is Scrollable && widget.axis == Axis.vertical,
+    );
+    await tester.scrollUntilVisible(
+      find.text('Customer 10'),
+      300,
+      scrollable: listScroll,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Customer 10'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Back'),
+      300,
+      scrollable: listScroll,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Back'), findsOneWidget);
+    expect(find.text('Next'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -69,7 +107,8 @@ void main() {
 
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
-    expect(find.text('Showing 11–12 of 12 parcels'), findsOneWidget);
+    expect(
+        find.bySemanticsLabel('Showing 11–12 of 12 parcels'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField).first, 'Customer 11');
     await tester.pumpAndSettle();

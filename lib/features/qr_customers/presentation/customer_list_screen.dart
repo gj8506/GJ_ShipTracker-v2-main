@@ -289,183 +289,26 @@ class _CustomerListScreenState extends ConsumerState<CustomerListScreen> {
                   _pageSize,
                 );
 
-                return Column(
-                  children: [
-                    Expanded(
-                      child: ListView.separated(
-                        controller: _listController,
-                        padding: EdgeInsets.fromLTRB(
-                          16,
-                          8,
-                          16,
-                          pageCount > 1 ? 16 : 80,
-                        ),
-                        itemCount: visibleCustomers.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
-                        itemBuilder: (context, index) {
-                          final customer = visibleCustomers[index];
-                          final isReseller =
-                              customer.type.toLowerCase() == 'reseller';
+                final hasPagination = pageCount > 1;
 
-                          return Card(
-                            elevation: 0,
-                            margin: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              side: BorderSide(color: AppColors.borderLight),
-                            ),
-                            child: ConstrainedBox(
-                              // Every row occupies the same height, whether or not it
-                              // has a contact number and address.
-                              constraints: const BoxConstraints(minHeight: 80),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(14, 10, 8, 10),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    // Avatar Icon
-                                    CircleAvatar(
-                                      radius: 22,
-                                      backgroundColor: isReseller
-                                          ? AppColors.tealContainer
-                                          : AppColors.borderLight,
-                                      child: Icon(
-                                        isReseller
-                                            ? Icons.storefront_rounded
-                                            : Icons.person_rounded,
-                                        color: isReseller
-                                            ? AppColors.tealDark
-                                            : AppColors.navyPrimary,
-                                        size: 22,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 14),
-
-                                    // Customer Details
-                                    Expanded(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  customer.name,
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                    fontSize: 15,
-                                                    height: 1.2,
-                                                    fontWeight: FontWeight.bold,
-                                                    color:
-                                                        AppColors.navyPrimary,
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              _TypeBadge(
-                                                type: customer.type,
-                                                background: _getBadgeColor(
-                                                    customer.type),
-                                                foreground: _getBadgeTextColor(
-                                                    customer.type),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 5),
-                                          Text(
-                                            customer.contactNumber.isNotEmpty
-                                                ? customer.contactNumber
-                                                : 'No contact provided',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                                fontSize: 13,
-                                                height: 1.2,
-                                                color: AppColors.navyMuted),
-                                          ),
-                                          const SizedBox(height: 3),
-                                          Text(
-                                            customer.address.isNotEmpty
-                                                ? customer.address
-                                                : 'No address on file',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                                fontSize: 12,
-                                                height: 1.2,
-                                                color: AppColors.textMutedAlt),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-
-                                    // Fixed-width action group so every row ends at
-                                    // the same right edge.
-                                    SizedBox(
-                                      width: 84,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          // QR Dialog Button
-                                          IconButton(
-                                            visualDensity:
-                                                VisualDensity.compact,
-                                            constraints:
-                                                const BoxConstraints.tightFor(
-                                                    width: 40, height: 40),
-                                            icon: Icon(Icons.qr_code_2_rounded,
-                                                color: AppColors.tealDark,
-                                                size: 24),
-                                            tooltip: 'View QR Code',
-                                            onPressed: () {
-                                              showDialog(
-                                                context: context,
-                                                builder: (ctx) =>
-                                                    CustomerQrDialog(
-                                                        customer: customer),
-                                              );
-                                            },
-                                          ),
-
-                                          // Edit Button
-                                          IconButton(
-                                            visualDensity:
-                                                VisualDensity.compact,
-                                            constraints:
-                                                const BoxConstraints.tightFor(
-                                                    width: 40, height: 40),
-                                            icon: Icon(Icons.edit_outlined,
-                                                color: AppColors.textSecondary,
-                                                size: 20),
-                                            tooltip: 'Edit Customer',
-                                            onPressed: () =>
-                                                _showAddEditCustomerDialog(
-                                                    context, customer),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    if (pageCount > 1)
-                      Padding(
-                        // Keep the page controls clear of the chatbot button.
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 84),
+                // Page controls belong to the scrollable list, right after the
+                // last customer row, instead of a fixed bar over the cards.
+                return ListView.separated(
+                  controller: _listController,
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    8,
+                    16,
+                    hasPagination ? 8 : 80,
+                  ),
+                  itemCount: visibleCustomers.length + (hasPagination ? 1 : 0),
+                  separatorBuilder: (_, index) => SizedBox(
+                    height: index == visibleCustomers.length - 1 ? 24 : 10,
+                  ),
+                  itemBuilder: (context, index) {
+                    if (hasPagination && index == visibleCustomers.length) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 88),
                         child: PaginationBar(
                           page: page,
                           pageCount: pageCount,
@@ -474,8 +317,156 @@ class _CustomerListScreenState extends ConsumerState<CustomerListScreen> {
                           itemLabel: 'customers',
                           onPageChanged: _goToPage,
                         ),
+                      );
+                    }
+                    final customer = visibleCustomers[index];
+                    final isReseller =
+                        customer.type.toLowerCase() == 'reseller';
+
+                    return Card(
+                      elevation: 0,
+                      margin: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        side: BorderSide(color: AppColors.borderLight),
                       ),
-                  ],
+                      child: ConstrainedBox(
+                        // Every row occupies the same height, whether or not it
+                        // has a contact number and address.
+                        constraints: const BoxConstraints(minHeight: 80),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Avatar Icon
+                              CircleAvatar(
+                                radius: 22,
+                                backgroundColor: isReseller
+                                    ? AppColors.tealContainer
+                                    : AppColors.borderLight,
+                                child: Icon(
+                                  isReseller
+                                      ? Icons.storefront_rounded
+                                      : Icons.person_rounded,
+                                  color: isReseller
+                                      ? AppColors.tealDark
+                                      : AppColors.navyPrimary,
+                                  size: 22,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+
+                              // Customer Details
+                              Expanded(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            customer.name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              height: 1.2,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.navyPrimary,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        _TypeBadge(
+                                          type: customer.type,
+                                          background:
+                                              _getBadgeColor(customer.type),
+                                          foreground:
+                                              _getBadgeTextColor(customer.type),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      customer.contactNumber.isNotEmpty
+                                          ? customer.contactNumber
+                                          : 'No contact provided',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontSize: 13,
+                                          height: 1.2,
+                                          color: AppColors.navyMuted),
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      customer.address.isNotEmpty
+                                          ? customer.address
+                                          : 'No address on file',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          height: 1.2,
+                                          color: AppColors.textMutedAlt),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+
+                              // Fixed-width action group so every row ends at
+                              // the same right edge.
+                              SizedBox(
+                                width: 84,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    // QR Dialog Button
+                                    IconButton(
+                                      visualDensity: VisualDensity.compact,
+                                      constraints:
+                                          const BoxConstraints.tightFor(
+                                              width: 40, height: 40),
+                                      icon: Icon(Icons.qr_code_2_rounded,
+                                          color: AppColors.tealDark, size: 24),
+                                      tooltip: 'View QR Code',
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (ctx) => CustomerQrDialog(
+                                              customer: customer),
+                                        );
+                                      },
+                                    ),
+
+                                    // Edit Button
+                                    IconButton(
+                                      visualDensity: VisualDensity.compact,
+                                      constraints:
+                                          const BoxConstraints.tightFor(
+                                              width: 40, height: 40),
+                                      icon: Icon(Icons.edit_outlined,
+                                          color: AppColors.textSecondary,
+                                          size: 20),
+                                      tooltip: 'Edit Customer',
+                                      onPressed: () =>
+                                          _showAddEditCustomerDialog(
+                                              context, customer),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),

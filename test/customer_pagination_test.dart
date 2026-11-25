@@ -45,7 +45,10 @@ void main() {
       (tester) async {
     await _pump(tester);
 
-    expect(find.text('Showing 1–8 of 10 customers'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Showing 1–8 of 10 customers'),
+      findsOneWidget,
+    );
     expect(find.byType(Card), findsNWidgets(8));
     expect(find.text('Customer 1'), findsOneWidget);
     expect(find.text('Customer 9'), findsNothing);
@@ -54,7 +57,10 @@ void main() {
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Showing 9–10 of 10 customers'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Showing 9–10 of 10 customers'),
+      findsOneWidget,
+    );
     expect(find.byType(Card), findsNWidgets(2));
     // QR preview and edit actions stay available on the next page.
     expect(find.byTooltip('View QR Code'), findsNWidgets(2));
@@ -67,7 +73,10 @@ void main() {
 
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
-    expect(find.text('Showing 9–10 of 10 customers'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Showing 9–10 of 10 customers'),
+      findsOneWidget,
+    );
 
     await tester.enterText(find.byType(TextField).first, 'Customer 10');
     await tester.pumpAndSettle();

@@ -48,7 +48,9 @@ void main() {
     expect(find.text('Staff 10'), findsOneWidget);
     expect(find.text('Staff 11'), findsNothing);
     expect(
-        find.text('Showing 1–10 of 12 pending registrations'), findsOneWidget);
+      find.bySemanticsLabel('Showing 1–10 of 12 pending registrations'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
@@ -58,9 +60,11 @@ void main() {
     expect(find.text('Staff 11'), findsOneWidget);
     expect(find.text('Staff 12'), findsOneWidget);
     expect(
-        find.text('Showing 11–12 of 12 pending registrations'), findsOneWidget);
+      find.bySemanticsLabel('Showing 11–12 of 12 pending registrations'),
+      findsOneWidget,
+    );
 
-    await tester.tap(find.text('Previous'));
+    await tester.tap(find.text('Back'));
     await tester.pumpAndSettle();
 
     expect(find.text('Staff 1'), findsOneWidget);
