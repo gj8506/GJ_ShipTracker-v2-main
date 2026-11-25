@@ -102,6 +102,40 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('69 parcels keep ten readable cards and a compact footer',
+      (tester) async {
+    tester.view.physicalSize = const Size(360, 780);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_app(List.generate(69, (i) => _parcel(i + 1))));
+    await tester.pumpAndSettle();
+
+    // The old stacked "Page 1 … Page 7" footer is gone.
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Previous'), findsNothing);
+
+    final listScroll = find.byWidgetPredicate(
+      (widget) => widget is Scrollable && widget.axis == Axis.vertical,
+    );
+    await tester.scrollUntilVisible(
+      find.text('Back'),
+      300,
+      scrollable: listScroll,
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.bySemanticsLabel('Showing 1–10 of 69 parcels'),
+      findsOneWidget,
+    );
+    expect(find.text('Customer 10'), findsOneWidget);
+    expect(find.text('Back'), findsOneWidget);
+    expect(find.text('Next'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('searching resets the parcel list to page one', (tester) async {
     await _pump(tester);
 
