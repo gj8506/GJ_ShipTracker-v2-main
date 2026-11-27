@@ -52,8 +52,8 @@ class _StaffApprovalScreenState extends ConsumerState<StaffApprovalScreen> {
       if (!mounted || rejected == 0) return;
       _showMessage(
         '$rejected stale staff application${rejected == 1 ? '' : 's'} '
-        'auto-rejected after ${StaffRegistrationPolicy.autoRejectAfter.inHours} '
-        'hours without review.',
+        'auto-rejected after ${StaffRegistrationPolicy.autoRejectDays} days '
+        'without review.',
         color: AppColors.warningOrange,
       );
       ref.invalidate(pendingStaffProvider);

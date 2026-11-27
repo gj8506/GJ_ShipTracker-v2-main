@@ -10,8 +10,10 @@ class StaffRegistrationPolicy {
   static const int maxApplicationsPerDay = 10;
 
   /// Pending staff applications older than this are automatically rejected so
-  /// stale sign-ups do not sit in the review queue forever.
-  static const Duration autoRejectAfter = Duration(hours: 72);
+  /// stale sign-ups do not sit in the review queue forever. Admins now have a
+  /// full week to review each application.
+  static const int autoRejectDays = 7;
+  static const Duration autoRejectAfter = Duration(days: autoRejectDays);
 
   /// Number of pending staff registrations shown on one approval page.
   static const int approvalsPageSize = 10;
@@ -42,12 +44,11 @@ class StaffRegistrationPolicy {
 
   /// Reason stored on automatically rejected staff profiles.
   static String get autoRejectReason =>
-      'Auto-rejected after ${autoRejectAfter.inHours} hours without review.';
+      'Auto-rejected after $autoRejectDays days without review.';
 
   /// Human-readable policy used in the approval banner.
   static String get autoRejectDescription =>
-      'Applications older than ${autoRejectAfter.inHours} hours are '
-      'auto-rejected.';
+      'Applications older than $autoRejectDays days are auto-rejected.';
 
   /// Number of approval pages needed for [itemCount] registrations.
   static int pageCount(int itemCount, {int pageSize = approvalsPageSize}) {

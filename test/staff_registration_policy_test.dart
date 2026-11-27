@@ -23,12 +23,24 @@ void main() {
   });
 
   group('StaffRegistrationPolicy auto-reject', () {
+    test('the review window is seven days', () {
+      expect(StaffRegistrationPolicy.autoRejectDays, 7);
+      expect(StaffRegistrationPolicy.autoRejectAfter, const Duration(days: 7));
+      expect(StaffRegistrationPolicy.autoRejectAfter.inHours, 168);
+    });
+
     test('keeps fresh applications and profiles without a date', () {
       final now = DateTime(2026, 11, 11, 12);
 
       expect(
         StaffRegistrationPolicy.isExpired(
             now.subtract(const Duration(hours: 1)),
+            now: now),
+        isFalse,
+      );
+      expect(
+        StaffRegistrationPolicy.isExpired(
+            now.subtract(const Duration(days: 6, hours: 23)),
             now: now),
         isFalse,
       );
@@ -47,7 +59,7 @@ void main() {
       );
       expect(
         StaffRegistrationPolicy.isExpired(
-          now.subtract(const Duration(hours: 73)),
+          now.subtract(const Duration(days: 7, hours: 1)),
           now: now,
         ),
         isTrue,
@@ -57,7 +69,11 @@ void main() {
     test('auto-reject reason mentions the configured window', () {
       expect(
         StaffRegistrationPolicy.autoRejectReason,
-        contains('${StaffRegistrationPolicy.autoRejectAfter.inHours} hours'),
+        contains('${StaffRegistrationPolicy.autoRejectDays} days'),
+      );
+      expect(
+        StaffRegistrationPolicy.autoRejectDescription,
+        contains('${StaffRegistrationPolicy.autoRejectDays} days'),
       );
     });
   });
